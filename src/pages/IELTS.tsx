@@ -1,0 +1,139 @@
+import { motion } from 'framer-motion'
+import { ArrowLeft, BookOpen, Headphones, Mic2, PenSquare } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+
+const sections = [
+  {
+    id: 'reading',
+    title: 'Reading',
+    description: 'Passage navigation, inference precision, and time management with AI support.',
+    icon: BookOpen,
+    chips: ['3 passages', 'timed drills', 'AI review'],
+  },
+  {
+    id: 'listening',
+    title: 'Listening',
+    description: 'Audio concentration, distractor control, and answer transfer accuracy workflows.',
+    icon: Headphones,
+    chips: ['4 sections', 'audio mode', 'mistake map'],
+  },
+  {
+    id: 'writing',
+    title: 'Writing',
+    description: 'Task 1 and Task 2 structured writing studio with premium draft analytics.',
+    icon: PenSquare,
+    chips: ['task studio', 'band hints', 'timed mode'],
+  },
+  {
+    id: 'speaking',
+    title: 'Speaking',
+    description: 'Part-by-part speaking flow with recording, replay, and fluency analysis.',
+    icon: Mic2,
+    chips: ['3 parts', 'voice mode', 'AI feedback'],
+  },
+] as const
+
+export default function IELTS() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { allowHoverMotion } = useMotionPreferences()
+  const navigationState = (location.state as { entry?: string; from?: string } | null)
+  const fromMock = navigationState?.entry === 'mock-ielts'
+  const mockFrom = navigationState?.from ?? 'tests'
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#fde8e8] via-[#fceaea] to-[#f9dede] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="ambient-mesh" />
+        <div className="ambient-grid" />
+        <div className="ambient-noise" />
+        <div className="absolute -left-16 top-10 h-72 w-72 rounded-full bg-red-200/45 blur-3xl" />
+        <div className="absolute bottom-[-8rem] right-0 h-96 w-96 rounded-full bg-rose-200/35 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto w-full max-w-6xl space-y-6">
+        <section className="premium-hero p-6 sm:p-10">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="premium-top-controls">
+                <button
+                  onClick={() =>
+                    fromMock
+                      ? navigate('/mock/ielts', { state: { from: mockFrom } })
+                      : navigate('/tests')
+                  }
+                  className="premium-back-btn"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  {fromMock ? 'Back to Mock IELTS' : 'Back'}
+                </button>
+                <span className="premium-top-chip">IELTS Master Track</span>
+              </div>
+              <h1 className="premium-section-title mt-4">
+                Choose your <span className="arena-title-accent-red">IELTS Arena</span>
+              </h1>
+              <p className="premium-section-subtitle">
+                Reading, Listening, Writing, and Speaking now open as independent premium sections with their own pages.
+              </p>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-3 xl:w-[31rem]">
+              <div className="hero-metric-card interactive-lift">
+                <p className="hero-metric-label">IELTS Sections</p>
+                <p className="hero-metric-value-sm">4</p>
+                <p className="hero-metric-note">Independent premium pages</p>
+              </div>
+              <div className="hero-metric-card interactive-lift">
+                <p className="hero-metric-label">Workflow</p>
+                <p className="hero-metric-value-sm hero-metric-value-compact">Exam</p>
+                <p className="hero-metric-note">Reading to Speaking flow</p>
+              </div>
+              <div className="hero-metric-card interactive-lift">
+                <p className="hero-metric-label">Coaching</p>
+                <p className="hero-metric-value-sm hero-metric-value-compact">AI</p>
+                <p className="hero-metric-note">Per-section analysis</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="grid gap-5 md:grid-cols-2">
+          {sections.map((section) => {
+            const Icon = section.icon
+            return (
+              <motion.button
+                key={section.id}
+                onClick={() =>
+                  navigate(`/ielts/${section.id}`, {
+                    state: fromMock
+                      ? { entry: 'mock-ielts', from: mockFrom }
+                      : { entry: 'ielts-hub' },
+                  })
+                }
+                whileHover={allowHoverMotion ? { y: -5, scale: 1.012 } : undefined}
+                whileTap={allowHoverMotion ? { scale: 0.996 } : undefined}
+                className="interactive-lift group rounded-[1.8rem] border border-red-200 bg-gradient-to-br from-white via-rose-50 to-red-100/70 p-6 text-left shadow-[0_18px_36px_rgba(244,63,94,0.16)]"
+              >
+                <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700">
+                  <Icon className="h-3.5 w-3.5" />
+                  IELTS Section
+                </div>
+                <h2 className="mt-4 text-3xl font-black text-slate-900">{section.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{section.description}</p>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                  {section.chips.map((chip) => (
+                    <span key={chip} className="rounded-full bg-white px-3 py-1 text-slate-700">
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-6 text-sm font-semibold text-red-700 transition group-hover:translate-x-1">Open {section.title} -&gt;</p>
+              </motion.button>
+            )
+          })}
+        </section>
+      </div>
+    </div>
+  )
+}

@@ -16,6 +16,9 @@
     "start": "npm --prefix backend run start"
   },
   "dependencies": {
+    "typescript": "...",
+"vite": "...",
+"@vitejs/plugin-react": "...",
     "@heroicons/react": "^2.1.5",
     "@hookform/resolvers": "^3.10.0",
     "chart.js": "^4.4.6",

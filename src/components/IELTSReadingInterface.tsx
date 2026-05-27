@@ -50,6 +50,34 @@ interface IELTSReadingInterfaceProps {
   }
 }
 
+// Paragraph labels (A, B, C...) are only shown when the passage has questions
+// that explicitly ask students to identify paragraphs by letter (matching-headings
+// or matching-information where the options are single uppercase letters).
+const sectionIdsWithoutParagraphLabels = new Set([
+  'day1-curie-p1',
+  'day6-neuroscientist-p3',
+  'day7-london-underground-p1',
+  'day11-mary-rose-p1',
+  'day13-neuroaesthetics-p3',
+  'day14-pagodas-p1',
+  'day17-story-of-silk-p1',
+  'day18-great-migrations-p2',
+  'day21-polar-bears-p1',
+  'day23-future-work-p3',
+])
+
+function sectionHasLabeledParagraphs(section: Section | undefined): boolean {
+  if (!section) return false
+  if (sectionIdsWithoutParagraphLabels.has(section.id)) return false
+  return section.questions.some(
+    (q) =>
+      q.type === 'matching-headings' ||
+      (q.type === 'matching-information' &&
+        Array.isArray(q.options) &&
+        q.options.some((opt) => /^[A-Z]$/.test(opt))),
+  )
+}
+
 function sanitizeSelectedParts(value: number[] | undefined, sectionCount: number): number[] {
   if (sectionCount <= 0) return []
   const fallback = [0]
@@ -375,9 +403,13 @@ export default function IELTSReadingInterface({
     return activeSections.map(s => {
       const start = currentIndex;
       const questionIds: string[] = [];
+      const questionNumbers: number[] = [];
       s.questions.forEach(q => {
         const slotCount = getQuestionSlotCount(q)
-        for (let i = 0; i < slotCount; i++) questionIds.push(q.id)
+        for (let i = 0; i < slotCount; i++) {
+          questionIds.push(q.id)
+          questionNumbers.push(q.number + i)
+        }
         currentIndex += slotCount
       });
       const questionCount = questionIds.length;
@@ -386,7 +418,8 @@ export default function IELTSReadingInterface({
         title: s.title,
         startIndex: start,
         questionCount,
-        questionIds
+        questionIds,
+        questionNumbers,
       }
     })
   }, [activeSections]);
@@ -1810,10 +1843,10 @@ export default function IELTSReadingInterface({
 
   const renderSentenceCompletionGroup = (questions: Question[], title: string, instruction: string) => {
     return (
-      <section className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
+      <section className="rounded-2xl border border-red-100 bg-white p-2.5 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
         <h4 className="text-xl font-black text-slate-900">{title}</h4>
-        <p className="mt-1 text-sm text-slate-700">{instruction}</p>
-        <div className="mt-2 rounded-xl border border-red-100 bg-white px-3 py-3">
+        <p className="mt-0.5 text-sm text-slate-700">{instruction}</p>
+        <div className="mt-2 rounded-xl border border-red-100 bg-white px-2.5 py-2">
           {questions.map((question) => {
             const globalIdx = getCurrentSectionGlobalIndex(question.id)
             const isFlagged = flaggedQuestions.includes(globalIdx)
@@ -1821,8 +1854,8 @@ export default function IELTSReadingInterface({
             const isCorrect = meta?.status === 'correct'
             const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
             return (
-              <div key={question.id} id={`question-card-${question.id}`} className="py-1.5">
-                <div className="flex items-start gap-2.5">
+              <div key={question.id} id={`question-card-${question.id}`} className="py-1">
+                <div className="flex items-start gap-2">
                   <button
                     type="button"
                     onClick={() => handleFlagQuestion(globalIdx)}
@@ -1840,7 +1873,7 @@ export default function IELTSReadingInterface({
                           value={(answers[question.id] as string) || ''}
                           onChange={(event) => handleAnswerChange(question.id, event.target.value)}
                           disabled={isReviewMode}
-                          className={`mx-1 inline-flex h-9 min-w-[110px] max-w-[190px] rounded-lg border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                          className={`mx-1 inline-flex h-8 min-w-[96px] max-w-[168px] rounded-md border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
                             isReviewMode && reviewShowCorrectAnswers
                               ? isWrong
                                 ? 'border-red-300 bg-red-50/70 text-red-700'
@@ -1857,10 +1890,120 @@ export default function IELTSReadingInterface({
                     )}
                   </p>
                 </div>
-                {reviewHint(question, 'ml-8 mt-1')}
+                {reviewHint(question, 'ml-7 mt-0.5')}
               </div>
             )
           })}
+        </div>
+      </section>
+    )
+  }
+
+  const renderDay1CurieNotesGroup = (questions: Question[]) => {
+    const questionByNumber = new Map<number, Question>(questions.map((question) => [question.number, question]))
+
+    const renderLine = (questionNumber: number, prefix: string, suffix = '') => {
+      const question = questionByNumber.get(questionNumber)
+      if (!question) return null
+
+      const globalIdx = getCurrentSectionGlobalIndex(question.id)
+      const isFlagged = flaggedQuestions.includes(globalIdx)
+      const meta = getQuestionReviewMeta(question)
+      const isCorrect = meta?.status === 'correct'
+      const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
+
+      return (
+        <div key={question.id} id={`question-card-${question.id}`} className="py-1.5">
+          <div className="flex items-start gap-2.5">
+            <button
+              type="button"
+              onClick={() => handleFlagQuestion(globalIdx)}
+              className={`mt-0.5 rounded-md p-1 transition ${isFlagged ? 'bg-red-100 text-red-700' : 'text-slate-400 hover:bg-red-50 hover:text-red-600'}`}
+              title={`Flag question ${question.number}`}
+            >
+              <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
+            </button>
+            <span className="pt-0.5 select-none text-slate-600">•</span>
+            <p className="flex-1 text-[15px] leading-relaxed text-slate-900">
+              {prefix}
+              <span className="mx-1 inline-flex h-6 min-w-6 items-center justify-center rounded bg-slate-100 px-1 text-xs font-black text-slate-700">
+                {question.number}
+              </span>
+              <input
+                type="text"
+                value={(answers[question.id] as string) || ''}
+                onChange={(event) => handleAnswerChange(question.id, event.target.value)}
+                disabled={isReviewMode}
+                className={`mx-1 inline-flex h-9 min-w-[110px] max-w-[180px] rounded-lg border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                  isReviewMode && reviewShowCorrectAnswers
+                    ? isWrong
+                      ? 'border-red-300 bg-red-50/70 text-red-700'
+                      : isCorrect
+                        ? 'border-emerald-300 bg-emerald-50/80 text-emerald-700'
+                        : 'border-red-200'
+                    : 'border-red-200 bg-rose-50/45'
+                }`}
+                placeholder={String(question.number)}
+              />
+              {suffix}
+            </p>
+          </div>
+          {reviewHint(question, 'ml-8 mt-1')}
+        </div>
+      )
+    }
+
+    return (
+      <section className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
+        <h4 className="text-xl font-black text-slate-900">Questions 7-13</h4>
+        <p className="mt-1 text-sm text-slate-700">Complete the notes below.</p>
+        <p className="text-sm text-slate-700">
+          Choose <span className="font-black text-slate-900">ONE WORD</span> from the passage for each answer.
+        </p>
+        <p className="text-sm text-slate-600">Write your answers in boxes 7-13 on your answer sheet.</p>
+
+        <div className="mt-2 rounded-xl border border-slate-300 bg-[#fffefe] px-3 py-3">
+          <p className="text-2xl font-black tracking-tight text-slate-900">
+            Marie Curie&apos;s research on radioactivity
+          </p>
+
+          <div className="mt-2.5 space-y-0.5">
+            {renderLine(
+              7,
+              'When uranium was discovered to be radioactive, Marie Curie found that the element called',
+              'had the same property.',
+            )}
+            {renderLine(
+              8,
+              "Marie and Pierre Curie's research into the radioactivity of the mineral known as",
+              'led to the discovery of two new elements.',
+            )}
+            {renderLine(
+              9,
+              'In 1911, Marie Curie received recognition for her work on the element',
+              '',
+            )}
+            {renderLine(
+              10,
+              'Marie and Irene Curie developed X-radiography which was used as a medical technique for',
+              '',
+            )}
+            {renderLine(
+              11,
+              'Marie Curie saw the importance of collecting radioactive material both for research and for cases of',
+              '',
+            )}
+            {renderLine(
+              12,
+              'The radioactive material stocked in Paris contributed to the discoveries in the 1930s of the',
+              'and of what was known as artificial radioactivity.',
+            )}
+            {renderLine(
+              13,
+              'During her research, Marie Curie was exposed to radiation and as a result she suffered from',
+              '',
+            )}
+          </div>
         </div>
       </section>
     )
@@ -1974,7 +2117,7 @@ export default function IELTSReadingInterface({
             if (isReviewMode) return
             if (isFilled) clearDragDropSlot(question.id, slotIndex, slotCount)
           }}
-          className={`inline-flex h-9 min-w-[118px] max-w-[190px] items-center justify-center rounded-lg border border-dashed px-2.5 text-xs font-semibold align-middle transition ${
+          className={`inline-flex h-8 min-w-[96px] max-w-full items-center justify-center rounded-lg border border-dashed px-2.5 py-1 text-xs font-semibold align-middle transition ${
             isFilled
               ? 'cursor-pointer border-red-300 bg-red-50 text-red-700 shadow-[0_8px_16px_rgba(220,38,38,0.12)]'
               : isActiveSlot
@@ -1982,7 +2125,7 @@ export default function IELTSReadingInterface({
                 : 'cursor-pointer border-red-200 bg-white text-slate-500 hover:border-red-300'
           }`}
         >
-          <span className="truncate">{isFilled ? slotValue : `Drop answer ${slotNumber}`}</span>
+          <span className="text-center leading-tight">{isFilled ? slotValue : `Drop ${slotNumber}`}</span>
         </span>
       )
     }
@@ -1991,7 +2134,7 @@ export default function IELTSReadingInterface({
       const hasBlank = blankPattern.test(line)
       if (!hasBlank) {
         return (
-          <span className="inline-flex items-center gap-2 whitespace-nowrap text-[15px] leading-relaxed text-slate-900">
+          <span className="inline-flex flex-wrap items-center gap-1.5 text-[15px] leading-relaxed text-slate-900">
             <span>{line}</span>
             {renderInlineDropSlot(lineIndex)}
           </span>
@@ -2002,7 +2145,7 @@ export default function IELTSReadingInterface({
       let inserted = false
 
       return (
-        <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[15px] leading-relaxed text-slate-900">
+        <span className="inline-flex flex-wrap items-center gap-1.5 text-[15px] leading-relaxed text-slate-900">
           {parts.map((part, partIndex) => {
             if (!part) return null
             if (/^_{3,}$/.test(part)) {
@@ -2017,24 +2160,28 @@ export default function IELTSReadingInterface({
     }
 
     return (
-      <section id={`question-card-${question.id}`} className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
+      <section id={`question-card-${question.id}`} className="rounded-2xl border border-red-100 bg-white p-2.5 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
         <h4 className="text-xl font-black text-slate-900">{question.groupTitle || 'Questions 23-26'}</h4>
-        <p className="mt-1 text-sm text-slate-700">{question.instruction || 'Complete the summary by dragging the correct words into the gaps.'}</p>
+        <p className="mt-0.5 text-sm text-slate-700">{question.instruction || 'Complete the summary by dragging the correct words into the gaps.'}</p>
 
-        <div className="mt-2 rounded-xl border border-red-100 bg-[#fffdfd] p-2.5">
-          <div className="space-y-2.5">
+        <div className="mt-2 rounded-xl border border-red-100 bg-[#fffdfd] p-2">
+          <div className="space-y-1.5">
             {lines.map((line, lineIndex) => {
+              const slotNumber = question.number + lineIndex
               return (
-                <div key={`${question.id}-line-${lineIndex}`} className="rounded-lg border border-red-100 bg-white p-2.5 overflow-x-auto">
-                  {renderLineWithInlineDrop(line, lineIndex)}
+                <div key={`${question.id}-line-${lineIndex}`} className="rounded-lg bg-white p-1.5">
+                  <p className="flex flex-wrap items-center gap-1.5 text-[15px] leading-relaxed text-slate-900">
+                    <span className="font-black text-red-600">{slotNumber}.</span>
+                    {renderLineWithInlineDrop(line, lineIndex)}
+                  </p>
                 </div>
               )
             })}
           </div>
 
-          <div className="mt-3 rounded-lg border border-red-100 bg-red-50/40 p-2.5">
+          <div className="mt-2 rounded-lg border border-red-100 bg-red-50/40 p-2">
             <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-red-700">Drag these options</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
               {(question.options || []).map((option) => {
                 const isAssigned = slots.some((entry) => entry.toLowerCase() === option.toLowerCase())
                 const isQueued = queuedOption.toLowerCase() === option.toLowerCase()
@@ -2077,7 +2224,7 @@ export default function IELTSReadingInterface({
                 )
               })}
             </div>
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
+            <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500">
               {queuedOption ? `Selected option: ${queuedOption}` : 'Tip: press and drag an option to a blank, or click to auto-place.'}
             </p>
           </div>
@@ -2388,23 +2535,34 @@ export default function IELTSReadingInterface({
           <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-red-600 sm:text-sm">PART {currentSectionIndex + 1}</p>
           <h2 className="mb-1.5 text-lg font-bold font-sans text-slate-900 sm:text-xl">READING PASSAGE {currentSectionIndex + 1}</h2>
           <p className="text-xs italic text-slate-600 sm:text-sm">
-            You should spend about 20 minutes on <strong>Questions {sectionMeta[currentSectionIndex]?.startIndex + 1}-{sectionMeta[currentSectionIndex]?.startIndex + sectionMeta[currentSectionIndex]?.questionCount}</strong>, which are based on Reading Passage {currentSectionIndex + 1} below.
+            You should spend about 20 minutes on <strong>Questions {sectionMeta[currentSectionIndex]?.questionNumbers[0]}-{sectionMeta[currentSectionIndex]?.questionNumbers[sectionMeta[currentSectionIndex]?.questionNumbers.length - 1]}</strong>, which are based on Reading Passage {currentSectionIndex + 1} below.
           </p>
         </div>
         <div className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-4 py-2.5 text-white shadow-[0_14px_30px_rgba(220,38,38,0.24)]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] opacity-90">Reading Passage {currentSectionIndex + 1}</p>
           <p className="text-base font-bold sm:text-lg">{currentSection?.title?.replace(/^Reading Passage \d+:?\s*/i, '').trim() || currentSection?.title}</p>
         </div>
-        <div className="space-y-4">
-          {currentSection?.paragraphs?.map((para) => (
-            <div key={`${currentSection?.id}-${para.label}`} className="relative">
-              <p className="text-justify">{para.content}</p>
-            </div>
-          ))}
-          {!currentSection?.paragraphs && currentSection?.content && (
-            <div className="whitespace-pre-wrap text-justify">{currentSection.content}</div>
-          )}
-        </div>
+        {currentSection?.paragraphs ? (
+          (() => {
+            const showLabels = sectionHasLabeledParagraphs(currentSection)
+            return (
+              <div className={showLabels ? 'space-y-5' : 'space-y-3'}>
+                {currentSection.paragraphs.map((para, paraIndex) => (
+                  <div key={`${currentSection.id}-${para.label || paraIndex}`} className="relative">
+                    <p className="text-justify leading-relaxed text-slate-800">
+                      {para.label && /^[A-Z]$/.test(para.label) && showLabels && (
+                        <span className="mr-2 inline-block font-black text-slate-900">{para.label}</span>
+                      )}
+                      {para.content}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )
+          })()
+        ) : currentSection?.content ? (
+          <div className="whitespace-pre-wrap text-justify text-slate-800 leading-relaxed">{currentSection.content}</div>
+        ) : null}
       </div>
     </div>
   )
@@ -2422,7 +2580,7 @@ export default function IELTSReadingInterface({
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-500">Answer panel</p>
         </div>
         <span className="text-xs font-semibold text-red-700 bg-red-50 px-3 py-1.5 rounded-xl border border-red-200">
-          {sectionMeta[currentSectionIndex]?.startIndex + 1}-{sectionMeta[currentSectionIndex]?.startIndex + sectionMeta[currentSectionIndex]?.questionCount} of {sectionMeta[sectionMeta.length - 1]?.startIndex + sectionMeta[sectionMeta.length - 1]?.questionCount}
+          {sectionMeta[currentSectionIndex]?.questionNumbers[0]}-{sectionMeta[currentSectionIndex]?.questionNumbers[sectionMeta[currentSectionIndex]?.questionNumbers.length - 1]} of {sectionMeta.reduce((acc, s) => acc + s.questionCount, 0)}
         </span>
       </div>
       <div className="space-y-8 pb-20">
@@ -2554,10 +2712,8 @@ export default function IELTSReadingInterface({
             if (q.number === 7) {
               return (
                 <div key="day1-curie-summary-group">
-                  {renderSentenceCompletionGroup(
+                  {renderDay1CurieNotesGroup(
                     currentSection.questions.filter((entry) => entry.number >= 7 && entry.number <= 13),
-                    'Questions 7-13',
-                    'Complete the notes below. Choose ONE WORD from the passage for each answer.',
                   )}
                 </div>
               )
@@ -4864,8 +5020,3 @@ export default function IELTSReadingInterface({
     </div>
   )
 }
-
-
-
-
-

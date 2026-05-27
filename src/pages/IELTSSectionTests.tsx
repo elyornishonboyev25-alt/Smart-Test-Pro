@@ -37,6 +37,7 @@ type CatalogRow = {
   title: string
   subtitle: string
   badge: 'passage' | 'full-test'
+  passageNumber: number | null
   level: 'EASY' | 'MEDIUM' | 'HARD'
   durationMinutes: number
   questionCount: number
@@ -370,18 +371,23 @@ export default function IELTSSectionTests() {
     () =>
       passages.map((entry, index) => {
         const availableNow = isAvailableIeltsTrackTest(track, entry.testId)
-        const questionCount =
-          track === 'reading' && (entry.day - 1) % 3 === 2
-            ? 14
-            : 13
+        const isMockDay = entry.passageNumber === null
+        const passageNumber = entry.passageNumber
+        const badge: CatalogRow['badge'] = isMockDay ? 'full-test' : 'passage'
+        const questionCount = isMockDay ? 40 : passageNumber === 3 ? 14 : 13
+        const durationMinutes = isMockDay ? 60 : 20
+        const subtitle = isMockDay
+          ? `${trackTitle} mock full test · 3 passages · 40 questions`
+          : `${trackTitle} passage ${passageNumber} of 3 · single passage practice`
         return {
           id: entry.id,
           testId: entry.testId,
           title: entry.title,
-          subtitle: `${trackTitle} single passage practice`,
-          badge: 'passage',
+          subtitle,
+          badge,
+          passageNumber,
           level: resolveLevel(index),
-          durationMinutes: 20,
+          durationMinutes,
           questionCount,
           availableNow,
           comingSoon: !availableNow,
@@ -403,6 +409,7 @@ export default function IELTSSectionTests() {
               ? '3 passages | 40 questions | Computer-delivered simulation'
               : '4 parts | 40 questions | CD-style listening simulation',
           badge: 'full-test',
+          passageNumber: null,
           level: 'HARD' as const,
           durationMinutes: track === 'reading' ? 60 : 30,
           questionCount: 40,
@@ -863,7 +870,7 @@ export default function IELTSSectionTests() {
             </AnimatePresence>
           </label>
 
-          <div className="mt-3 max-h-[68vh] divide-y divide-slate-200/80 overflow-y-auto rounded-2xl border border-slate-200/80 bg-white">
+          <div className="mt-3 max-h-[68vh] divide-y divide-slate-200/70 overflow-y-auto rounded-2xl border border-slate-200/80 bg-white">
             {roadmapBooting ? (
               <RoadmapSkeleton theme={theme} />
             ) : visibleRows.length === 0 ? (
@@ -891,25 +898,25 @@ export default function IELTSSectionTests() {
                       whileHover={allowHoverMotion ? { scale: 1.01 } : undefined}
                       whileTap={minimalMotion ? undefined : { scale: 0.998 }}
                       transition={minimalMotion ? { duration: 0.12 } : { duration: 0.24, ease: CARD_EASE }}
-                      className={`relative px-3 py-3 sm:px-4 ${theme.rowHover} ${isCompleted ? 'bg-emerald-50/30' : ''}`}
+                      className={`relative px-3 py-2 sm:px-4 ${theme.rowHover} ${isCompleted ? 'bg-emerald-50/30' : ''}`}
                     >
                       <div className="absolute left-3 top-0 bottom-0 w-px">
                         <span className={`block h-full w-px ${theme.timelineRail}`} />
                       </div>
                       <span
-                        className={`absolute left-[6px] top-5 inline-flex h-5 w-5 items-center justify-center rounded-full border ${
+                        className={`absolute left-[6px] top-4 inline-flex h-5 w-5 items-center justify-center rounded-full border ${
                           isCompleted ? theme.timelineNodeDone : theme.timelineNode
                         }`}
                       >
                         {isCompleted ? <CheckCircle2 className="h-3.5 w-3.5" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
                       </span>
 
-                      <div className="flex flex-wrap items-center justify-between gap-3 pl-8">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pl-8">
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="truncate text-base font-bold text-slate-900">{row.title}</h3>
                             <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${theme.neutralBadge}`}>
-                              {row.badge === 'passage' ? 'Passage' : 'Full test'}
+                              {row.badge === 'passage' ? `Passage ${row.passageNumber}` : 'Full test'}
                             </span>
                             {row.availableNow ? (
                               <span className="rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-emerald-700">
@@ -933,7 +940,7 @@ export default function IELTSSectionTests() {
                             ) : null}
                           </div>
 
-                          <div className="mt-1 flex items-center gap-1">
+                          <div className="mt-0.5 flex items-center gap-1">
                             <p className="text-sm text-slate-500">{row.subtitle}</p>
                             <AnimatePresence>
                               {celebrationRowId === row.id ? (
@@ -950,7 +957,7 @@ export default function IELTSSectionTests() {
                             </AnimatePresence>
                           </div>
 
-                          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                          <div className="mt-1.5 flex flex-wrap items-center gap-2.5 text-xs text-slate-600">
                             <span className={`rounded-full border px-2 py-0.5 font-semibold ${levelTone(row.level, track)}`}>
                               {row.level}
                             </span>

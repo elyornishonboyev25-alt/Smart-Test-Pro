@@ -10,6 +10,7 @@ import { readingVocabularyByTest8 } from './ieltsReadingVocabularyTest8'
 import { readingVocabularyByTest9 } from './ieltsReadingVocabularyTest9'
 import { readingVocabularyByTest10 } from './ieltsReadingVocabularyTest10'
 import { readingDayVocabularySeeds } from './readingDayVocabularySeeds'
+import { isAvailableIeltsTrackTest } from '../utils/ieltsTrackCatalog'
 
 export type VocabularyTrack = 'IELTS' | 'SAT'
 
@@ -106,6 +107,26 @@ const flattenedLiveSeeds: ReadingVocabularySeed[] = realFullSeeds.flatMap((test)
   test.passages.flatMap((passage) => passage.seeds),
 )
 
+function buildComingSoonSection(sectionId: string, title: string, fallbackIndex: number): VocabularySection {
+  const fallback = flattenedLiveSeeds[fallbackIndex % Math.max(1, flattenedLiveSeeds.length)]
+
+  return {
+    id: sectionId,
+    title,
+    entries: [
+      toEntry(
+        fallback ?? {
+          term: 'Coming soon',
+          definition: 'This vocabulary set will unlock in the next update.',
+          synonyms: 'upcoming',
+          example: 'New IELTS reading vocabulary will be published here soon.',
+        },
+        `${sectionId}_preview`,
+      ),
+    ],
+  }
+}
+
 function buildDayTrackTests(): IeltsTest[] {
   return Array.from({ length: DAY_TRACK_COUNT }, (_, dayIndex) => {
     const day = dayIndex + 1
@@ -128,46 +149,31 @@ function buildDayTrackTests(): IeltsTest[] {
     const entries = seeds.map((seed, entryIndex) =>
       toEntry(seed, `reading_day_${day}_entry_${entryIndex + 1}`),
     )
+    const isAvailable = isAvailableIeltsTrackTest('reading', `reading-day-${day}`)
+    const sectionId = `reading_day_${day}_passage_${passageNumber}`
+    const sectionTitle = `Passage ${passageNumber}`
 
     return {
       id: `reading_day_${day}`,
       title: MOCK_READING_DAYS.has(day) ? `Day ${day} (Mock)` : `Day ${day}`,
-      available: true,
-      sections: [
-        {
-          id: `reading_day_${day}_passage_${passageNumber}`,
-          title: `Passage ${passageNumber}`,
-          entries,
-        },
-      ],
+      available: isAvailable,
+      sections: isAvailable
+        ? [
+            {
+              id: sectionId,
+              title: sectionTitle,
+              entries,
+            },
+          ]
+        : [buildComingSoonSection(sectionId, sectionTitle, dayIndex)],
     }
   })
-}
-
-function buildComingSoonPassage(testIndex: number, passageNumber: number): VocabularySection {
-  const fallback = flattenedLiveSeeds[(testIndex + passageNumber) % Math.max(1, flattenedLiveSeeds.length)]
-
-  return {
-    id: `reading_full_test_${testIndex}_passage_${passageNumber}`,
-    title: `Passage ${passageNumber}`,
-    entries: [
-      toEntry(
-        fallback ?? {
-          term: 'Coming soon',
-          definition: 'This vocabulary set will unlock in the next update.',
-          synonyms: 'upcoming',
-          example: 'New IELTS reading vocabulary will be published here soon.',
-        },
-        `reading_full_test_${testIndex}_passage_${passageNumber}_preview`,
-      ),
-    ],
-  }
 }
 
 function buildFullTrackTests(): IeltsTest[] {
   return Array.from({ length: FULL_TRACK_COUNT }, (_, index) => {
     const testIndex = index + 1
-    const isAvailable = testIndex <= LIVE_FULL_TEST_COUNT
+    const isAvailable = isAvailableIeltsTrackTest('reading', `ielts-reading-full-vol${testIndex}`)
 
     if (isAvailable) {
       const sections = Array.from({ length: PASSAGES_PER_FULL_TEST }, (_, passageOffset) => {
@@ -198,9 +204,9 @@ function buildFullTrackTests(): IeltsTest[] {
       title: `Full Test ${testIndex}`,
       available: false,
       sections: [
-        buildComingSoonPassage(testIndex, 1),
-        buildComingSoonPassage(testIndex, 2),
-        buildComingSoonPassage(testIndex, 3),
+        buildComingSoonSection(`reading_full_test_${testIndex}_passage_1`, 'Passage 1', testIndex + 1),
+        buildComingSoonSection(`reading_full_test_${testIndex}_passage_2`, 'Passage 2', testIndex + 2),
+        buildComingSoonSection(`reading_full_test_${testIndex}_passage_3`, 'Passage 3', testIndex + 3),
       ],
     }
   })

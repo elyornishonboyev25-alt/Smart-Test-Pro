@@ -853,12 +853,12 @@ const day1Section: Section = {
     {
       label: 'E',
       content:
-        'Turning her attention to minerals, she found her interest drawn to pitchblende, a mineral whose radioactivity, superior to that of pure uranium, could be explained only by the presence in the ore of small quantities of an unknown substance of very high activity. Pierre Curie joined her in the work that she had undertaken to resolve this problem, and that led to the discovery of the new elements, polonium and radium. While Pierre Curie devoted himself chiefly to the physical study of the new radiations, Marie Curie struggled to obtain pure radium in the metallic state.',
+        "Turning her attention to minerals, she found her interest drawn to pitchblende, a mineral whose radioactivity, superior to that of pure uranium, could be explained only by the presence in the ore of small quantities of an unknown substance of very high activity. Pierre Curie joined her in the work that she had undertaken to resolve this problem, and that led to the discovery of the new elements, polonium and radium. While Pierre Curie devoted himself chiefly to the physical study of the new radiations, Marie Curie struggled to obtain pure radium in the metallic state. This was achieved with the help of the chemist Andre-Louis Debierne, one of Pierre Curie's pupils. Based on the results of this research, Marie Curie received her Doctorate of Science, and in 1903 Marie and Pierre shared with Becquerel the Nobel Prize for Physics for the discovery of radioactivity.",
     },
     {
       label: 'F',
       content:
-        "This was achieved with the help of the chemist Andre-Louis Debierne, one of Pierre Curie's pupils. Based on the results of this research, Marie Curie received her Doctorate of Science, and in 1903 Marie and Pierre shared with Becquerel the Nobel Prize for Physics for the discovery of radioactivity. The births of Marie's two daughters, Irene and Eve, in 1897 and 1904 failed to interrupt her scientific work.",
+        "The births of Marie's two daughters, Irene and Eve, in 1897 and 1904 failed to interrupt her scientific work. She was appointed lecturer in physics at the Ecole Normale Superieure for girls in Sevres, France (1900), and introduced a method of teaching based on experimental demonstrations. In December 1904 she was appointed chief assistant in the laboratory directed by Pierre Curie.",
     },
     {
       label: 'G',
@@ -868,12 +868,12 @@ const day1Section: Section = {
     {
       label: 'H',
       content:
-        "During World War I, Marie Curie, with the help of her daughter Irene, devoted herself to the development of the use of X-radiography, including mobile units known as 'little curies', used for the treatment of wounded soldiers.",
+        "During World War I, Marie Curie, with the help of her daughter Irene, devoted herself to the development of the use of X-radiography, including the mobile units which came to be known as 'Little Curies', used for the treatment of wounded soldiers. In 1918 the Radium Institute, whose staff Irene had joined, began to operate in earnest, and became a centre for nuclear physics and chemistry. Marie Curie, now at the highest point of her fame and, from 1922, a member of the Academy of Medicine, researched the chemistry of radioactive substances and their medical applications.",
     },
     {
       label: 'I',
       content:
-        'In 1918 the Radium Institute began to operate in earnest and became a center for nuclear physics and chemistry. Marie Curie, now at the highest point of her fame and, from 1922, a member of the Academy of Medicine, researched the chemistry of radioactive substances and their medical applications.',
+        'In 1921, accompanied by her two daughters, Marie Curie made a triumphant journey to the United States to raise funds for research on radium. Women there presented her with a gram of radium for her campaign. Marie also gave lectures in Belgium, Brazil, Spain and Czechoslovakia and, in addition, had the satisfaction of seeing the development of the Curie Foundation in Paris, and the inauguration in 1932 in Warsaw of the Radium Institute, where her sister Bronia became director.',
     },
     {
       label: 'J',
@@ -883,7 +883,7 @@ const day1Section: Section = {
     {
       label: 'K',
       content:
-        "The stock of radium in Paris made a decisive contribution to experiments around 1930. This work prepared the way for the discovery of the neutron by Sir James Chadwick and, above all, for the discovery in 1934 by Irene and Frederic Joliot-Curie of artificial radioactivity. A few months after this discovery, Marie Curie died as a result of leukaemia caused by exposure to radiation.",
+        'The existence in Paris at the Radium Institute of a stock of 1.5 grams of radium made a decisive contribution to the success of the experiments undertaken in the years around 1930. This work prepared the way for the discovery of the neutron by Sir James Chadwick and, above all, for the discovery in 1934 by Irene and Frederic Joliot-Curie of artificial radioactivity. A few months after this discovery, Marie Curie died as a result of leukaemia caused by exposure to radiation. She had often carried test tubes containing radioactive isotopes in her pocket, remarking on the pretty blue-green light they gave off.',
     },
     {
       label: 'L',
@@ -949,32 +949,32 @@ const day3Section: Section = {
     {
       label: 'A',
       content:
-        "The conviction that historical relics provide infallible testimony about the past is rooted in the nineteenth and early twentieth centuries, when science was regarded as objective and value free. Although it is now evident that artefacts can be altered as easily as chronicles, public faith in their veracity endures. Museums used to look much like storage rooms of objects packed together in showcases, good for scholars but not for ordinary visitors. The information accompanying the objects often made little sense to the lay visitor.",
+        "The conviction that historical relics provide infallible testimony about the past is rooted in the nineteenth and early twentieth centuries, when science was regarded as objective and value free. As one writer observes: 'Although it is now evident that artefacts are as easily altered as chronicles, public faith in their veracity endures: a tangible relic seems ipso facto real.' Such conviction was, until recently, reflected in museum displays. Museums used to look - and some still do - much like storage rooms of objects packed together in showcases: good for scholars who wanted to study the subtle differences in design, but not for the ordinary visitor, to whom it all looked alike. Similarly, the information accompanying the objects often made little sense to the lay visitor. The content and format of explanations dated back to a time when the museum was the exclusive domain of the scientific researcher.",
     },
     {
       label: 'B',
       content:
-        "Recently, attitudes towards history and how it should be presented have altered. The key word in heritage display is now 'experience'. Good examples in the UK are the Jorvik Center in York, the National Museum of Photography, Film and Television in Bradford, and the Imperial War Museum in London. Re-enactment of historical events is increasingly popular, and computers will soon provide virtual reality experiences. Such developments have been criticized as vulgarization, but their success suggests most of the public does not share that opinion.",
+        "Recently, however, attitudes towards history and the way it should be presented have altered. The key word in heritage display is now 'experience', the more exciting the better and, if possible, involving all the senses. Good examples of this approach in the UK are the Jorvik Centre in York; the National Museum of Photography, Film and Television in Bradford; and the Imperial War Museum in London. In the US the trend emerged much earlier: Williamsburg has been a prototype for many heritage developments in other parts of the world. No one can predict where the process will end. On so-called heritage sites the re-enactment of historical events is increasingly popular, and computers will soon provide virtual reality experiences, which will present visitors with a vivid image of the period of their choice, in which they themselves can act as if part of the historical environment. Such developments have been criticised as an intolerable vulgarisation, but the success of many historical theme parks and similar locations suggests that the majority of the public does not share this opinion.",
     },
     {
       label: 'C',
       content:
-        'In a related development, the distinction between museum and heritage sites on one hand, and theme parks on the other, is gradually evaporating. They borrow ideas and concepts from one another. Museums have adopted story lines, sites have accepted theming, and theme parks are moving towards more authenticity and research-based presentations.',
+        "In a related development, the sharp distinction between museum and heritage sites on the one hand, and theme parks on the other, is gradually evaporating. They already borrow ideas and concepts from one another. For example, museums have adopted story lines for exhibitions, sites have accepted 'theming' as a relevant tool, and theme parks are moving towards more authenticity and research-based presentations. In zoos, animals are no longer kept in cages, but in great spaces, either in the open air or in enormous greenhouses, such as the jungle and desert environments in Burgers' Zoo in Holland. This particular trend is regarded as one of the major developments in the presentation of natural history in the twentieth century.",
     },
     {
       label: 'D',
       content:
-        "Theme parks are undergoing changes too, trying to present more serious social and cultural issues. This is a response to market forces and the competitive environment where visitors choose how and where to spend free time. Heritage and museum experts do not need to invent stories, since their assets already exist, but professionals who interpret history are in a difficult position. They must steer a narrow course between evidence and attractiveness, especially with the growing need for income-generating activities.",
+        "Theme parks are undergoing other changes, too, as they try to present more serious social and cultural issues, and move away from fantasy. This development is a response to market forces and, although museums and heritage sites have a special, rather distinct, role to fulfil, they are also operating in a very competitive environment, where visitors make choices on how and where to spend their free time. Heritage and museum experts do not have to invent stories and recreate historical environments to attract their visitors: their assets are already in place. However, exhibits must be both based on artefacts and facts as we know them, and attractively presented. Those who are professionally engaged in the art of interpreting history are thus in a difficult position, as they must steer a narrow course between the demands of 'evidence' and 'attractiveness', especially given the increasing need in the heritage industry for income-generating activities.",
     },
     {
       label: 'E',
       content:
-        "It could be claimed that to make everything in heritage more real, historical accuracy must be altered. For example, Pithecanthropus erectus is depicted in Indonesian museum pictures because this corresponds to public perceptions. In Washington, Neanderthal man is shown making a dominant gesture to his wife. These presentations may tell us more about contemporary perceptions than about our ancestors. There is compensation, however, because visitors would otherwise provide their own interpretations based on misconceptions and prejudices.",
+        "It could be claimed that in order to make everything in heritage more 'real', historical accuracy must be increasingly altered. For example, Pithecanthropus erectus is depicted in an Indonesian museum with Malay facial features, because this corresponds to public perceptions. Similarly, in the Museum of Natural History in Washington, Neanderthal man is shown making a dominant gesture to his wife. Such presentations tell us more about contemporary perceptions of the world than about our ancestors. There is one compensation, however, for the professionals who make these interpretations: if they did not provide the interpretation, visitors would do it for themselves, based on their own ideas, misconceptions and prejudices. And no matter how exciting the result, it would contain a lot more bias than the presentations provided by experts.",
     },
     {
       label: 'F',
       content:
-        'Human bias is inevitable, but another source of bias has to do with the transitory nature of materials. Not everything from history survives equally. Castles, palaces and cathedrals have longer lifespans than dwellings of ordinary people. As a result, many exhibitions are filled with nostalgia and can imply that life in the past was much better than it really was.',
+        "Human bias is inevitable, but another source of bias in the representation of history has to do with the transitory nature of the materials themselves. The simple fact is that not everything from history survives the historical process. Castles, palaces and cathedrals have a longer lifespan than the dwellings of ordinary people. The same applies to the furnishings and other contents of the premises. In a town like Leyden in Holland, which in the seventeenth century was occupied by approximately the same number of inhabitants as today, people lived within the walled town, an area more than five times smaller than modern Leyden. In most of the houses several families lived together in circumstances beyond our imagination. Yet in museums, fine period rooms give only an image of the lifestyle of the upper class of that era. No wonder that people who stroll around exhibitions are filled with nostalgia; the evidence in museums indicates that life was so much better in the past. This notion is induced by the bias in its representation in museums and heritage centres.",
     },
   ],
   questions: day3Questions,

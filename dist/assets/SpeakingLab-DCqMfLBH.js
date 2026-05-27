@@ -1,1 +1,0 @@
-import{j as t}from"./index-72T71xoh.js";import{I as i}from"./IeltsSectionView-Cl7IUM9T.js";import"./arrow-left-JU_9H7iW.js";import"./sparkles-D7lk7cLY.js";import"./headphones-Cp2HEZtm.js";import"./audio-lines-CRNHVypg.js";import"./square-pen-I8eSNeFC.js";function n(){return t.jsx(i,{section:"speaking",backPath:"/tests"})}export{n as default};

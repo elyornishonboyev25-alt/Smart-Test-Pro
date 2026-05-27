@@ -9,6 +9,7 @@ export type IeltsPassageEntry = {
   difficulty: PassageDifficulty
   premiumOnly: boolean
   testId: string
+  passageNumber: number | null
 }
 
 export type IeltsFullTestEntry = {
@@ -81,9 +82,17 @@ function resolvePassageDifficulty(day: number): PassageDifficulty {
   return rotation[(Math.max(1, day) - 1) % rotation.length]
 }
 
+// Mock days (10, 20, 30) are full tests; non-mock days cycle Passage 1 → 2 → 3.
+// Formula: skip 1 mock day per 10 days, then mod-3.
+function resolvePassageNumber(day: number): number | null {
+  if (MOCK_READING_DAYS.has(day)) return null
+  const nonMockDaysBefore = (day - 1) - Math.floor((day - 1) / 10)
+  return (nonMockDaysBefore % 3) + 1
+}
+
 function createPassageEntry(track: IeltsTrackType, day: number): IeltsPassageEntry {
-  const title =
-    track === 'reading' && MOCK_READING_DAYS.has(day) ? `Day ${day} (Mock)` : `Day ${day}`
+  const isMock = track === 'reading' && MOCK_READING_DAYS.has(day)
+  const title = isMock ? `Day ${day} (Mock)` : `Day ${day}`
 
   return {
     id: `${track}-day-${day}`,
@@ -92,6 +101,7 @@ function createPassageEntry(track: IeltsTrackType, day: number): IeltsPassageEnt
     difficulty: resolvePassageDifficulty(day),
     premiumOnly: false,
     testId: `${track}-day-${day}`,
+    passageNumber: track === 'reading' ? resolvePassageNumber(day) : null,
   }
 }
 

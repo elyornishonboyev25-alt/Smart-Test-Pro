@@ -7,6 +7,7 @@ export interface SectionMeta {
     startIndex: number
     questionCount: number
     questionIds: string[]
+    questionNumbers: number[]
 }
 
 interface QuestionNavigationProps {
@@ -115,7 +116,7 @@ const QuestionNavigation = memo(function QuestionNavigation({
                                             const isAnswered = slotPosition <= answeredSlots
                                             const isCurrent = currentQuestionIndex === globalIndex
                                             const isFlagged = flagged.includes(globalIndex)
-                                            const questionNumber = globalIndex + 1
+                                            const questionNumber = section.questionNumbers[localIndex] ?? (globalIndex + 1)
 
                                             return (
                                                 <button type="button"

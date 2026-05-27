@@ -120,6 +120,7 @@ export default function IELTSListeningInterface({
     return activeSections.map((section) => {
       const startIndex = globalIndex
       const questionIds = section.questions.map((question) => question.id)
+      const questionNumbers = section.questions.map((question) => question.number)
       globalIndex += questionIds.length
       return {
         id: section.id,
@@ -127,6 +128,7 @@ export default function IELTSListeningInterface({
         startIndex,
         questionCount: questionIds.length,
         questionIds,
+        questionNumbers,
       }
     })
   }, [activeSections])

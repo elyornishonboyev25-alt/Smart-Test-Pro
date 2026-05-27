@@ -952,64 +952,64 @@ const day22Questions: Question[] = [
     type: 'matching-headings',
     groupTitle: 'Questions 14-20',
     instruction: 'Reading Passage 2 has seven paragraphs. Choose the correct heading for each paragraph from the list of headings below.',
-    text: 'Paragraph 1',
+    text: 'Paragraph A',
     options: day22HeadingOptions,
     correctAnswer: 'D',
-    location: 'Paragraph 1',
+    location: 'Paragraph A',
   },
   {
     id: 'day22-q15',
     number: 15,
     type: 'matching-headings',
-    text: 'Paragraph 2',
+    text: 'Paragraph B',
     options: day22HeadingOptions,
     correctAnswer: 'G',
-    location: 'Paragraph 2',
+    location: 'Paragraph B',
   },
   {
     id: 'day22-q16',
     number: 16,
     type: 'matching-headings',
-    text: 'Paragraph 3',
+    text: 'Paragraph C',
     options: day22HeadingOptions,
     correctAnswer: 'B',
-    location: 'Paragraph 3',
+    location: 'Paragraph C',
   },
   {
     id: 'day22-q17',
     number: 17,
     type: 'matching-headings',
-    text: 'Paragraph 4',
+    text: 'Paragraph D',
     options: day22HeadingOptions,
     correctAnswer: 'E',
-    location: 'Paragraph 4',
+    location: 'Paragraph D',
   },
   {
     id: 'day22-q18',
     number: 18,
     type: 'matching-headings',
-    text: 'Paragraph 5',
+    text: 'Paragraph E',
     options: day22HeadingOptions,
     correctAnswer: 'A',
-    location: 'Paragraph 5',
+    location: 'Paragraph E',
   },
   {
     id: 'day22-q19',
     number: 19,
     type: 'matching-headings',
-    text: 'Paragraph 6',
+    text: 'Paragraph F',
     options: day22HeadingOptions,
     correctAnswer: 'H',
-    location: 'Paragraph 6',
+    location: 'Paragraph F',
   },
   {
     id: 'day22-q20',
     number: 20,
     type: 'matching-headings',
-    text: 'Paragraph 7',
+    text: 'Paragraph G',
     options: day22HeadingOptions,
     correctAnswer: 'F',
-    location: 'Paragraph 7',
+    location: 'Paragraph G',
   },
   {
     id: 'day22-q21',
@@ -1019,7 +1019,7 @@ const day22Questions: Question[] = [
     instruction: 'Complete the notes below. Choose ONE WORD ONLY from the passage for each answer.',
     text: 'The complex that included the Step Pyramid and its surroundings is considered to be as big as an Egyptian ______ of the past.',
     correctAnswer: 'city',
-    location: 'Paragraph 4',
+    location: 'Paragraph D',
   },
   {
     id: 'day22-q22',
@@ -1027,7 +1027,7 @@ const day22Questions: Question[] = [
     type: 'summary-completion',
     text: 'The area outside the pyramid included accommodation occupied by ______.',
     correctAnswer: 'priests',
-    location: 'Paragraph 4',
+    location: 'Paragraph D',
   },
   {
     id: 'day22-q23',
@@ -1035,7 +1035,7 @@ const day22Questions: Question[] = [
     type: 'summary-completion',
     text: 'A long ______ encircled the wall.',
     correctAnswer: 'trench',
-    location: 'Paragraph 4',
+    location: 'Paragraph D',
   },
   {
     id: 'day22-q24',
@@ -1043,7 +1043,7 @@ const day22Questions: Question[] = [
     type: 'summary-completion',
     text: 'Visitors could only enter the pyramid grounds if they knew the ______ of the real entrance.',
     correctAnswer: 'location',
-    location: 'Paragraph 4',
+    location: 'Paragraph D',
   },
   {
     id: 'day22-q25',
@@ -1054,7 +1054,7 @@ const day22Questions: Question[] = [
     text: 'Which TWO of the following points does the writer make about King Djoser?',
     options: day22KingOptions,
     correctAnswer: ['B', 'D'],
-    location: 'Paragraphs 2 and 6',
+    location: 'Paragraphs B and F',
   },
 ]
 
@@ -1105,7 +1105,7 @@ const day23Questions: Question[] = [
       'staff allowing AI to carry out tasks they ought to do themselves',
     ],
     correctAnswer: 'C',
-    location: 'Paragraph F',
+    location: 'Paragraph G',
   },
   {
     id: 'day23-q30',
@@ -1121,7 +1121,7 @@ const day23Questions: Question[] = [
       'illustrates how changes in the job market can be successfully handled.',
     ],
     correctAnswer: 'D',
-    location: 'Paragraphs J-K',
+    location: 'Paragraph L',
   },
   {
     id: 'day23-q31',
@@ -1147,7 +1147,7 @@ const day23Questions: Question[] = [
     text: 'Greater levels of automation will not result in lower employment.',
     options: day23PeopleOptions,
     correctAnswer: 'B',
-    location: 'Paragraph I',
+    location: 'Paragraph J',
   },
   {
     id: 'day23-q36',
@@ -1165,7 +1165,7 @@ const day23Questions: Question[] = [
     text: "AI's potential to transform people's lives has parallels with major cultural shifts which occurred in previous eras.",
     options: day23PeopleOptions,
     correctAnswer: 'C',
-    location: 'Paragraph L',
+    location: 'Paragraph N',
   },
   {
     id: 'day23-q38',
@@ -1192,7 +1192,7 @@ const day23Questions: Question[] = [
     text: 'Authorities should take measures to ensure that there will be adequately paid work for everyone.',
     options: day23PeopleOptions,
     correctAnswer: 'C',
-    location: 'Paragraph K',
+    location: 'Paragraph M',
   },
 ]
 
@@ -1203,7 +1203,7 @@ const day14Section: Section = {
     {
       label: 'A',
       content:
-        "In a land swept by typhoons and shaken by earthquakes, how has Japan's tallest and seemingly flimsiest old buildings - 500 or so wooden pagodas - remained standing for centuries? Records show that only two have collapsed during the past 1400 years. Those that have disappeared were destroyed by fire as a result of lightning or civil war. The disastrous Hanshin earthquake in 1995 killed 6,400 people, toppled elevated highways, flattened office blocks and devastated the port area of Kobe. Yet it left the magnificent five-storey pagoda at the Toji temple in nearby Kyoto unscathed, though it levelled a number of buildings in the neighbourhood.",
+        "In a land swept by typhoons and shaken by earthquakes, how have Japan's tallest and seemingly flimsiest old buildings - 500 or so wooden pagodas - remained standing for centuries? Records show that only two have collapsed during the past 1400 years. Those that have disappeared were destroyed by fire as a result of lightning or civil war. The disastrous Hanshin earthquake in 1995 killed 6,400 people, toppled elevated highways, flattened office blocks and devastated the port area of Kobe. Yet it left the magnificent five-storey pagoda at the Toji temple in nearby Kyoto unscathed, though it levelled a number of buildings in the neighbourhood.",
     },
     {
       label: 'B',
@@ -1246,37 +1246,37 @@ const day15Section: Section = {
     {
       label: 'A',
       content:
-        'For more than forty years, concern over the cost of food has intensified. Although food may appear cheaper to buy in many developed countries than in 1960, the real cost includes hidden damage linked to industrial agriculture.',
+        'For more than forty years the cost of food has been rising. It has now reached a point where a growing number of people believe that it is far too high, and that bringing it down will be one of the great challenges of the twenty first century. That cost, however, is not in immediate cash. In the West at least, most food is now far cheaper to buy in relative terms than it was in 1960. The cost is in the collateral damage of the very methods of food production that have made the food cheaper: in the pollution of water, the enervation of soil, the destruction of wildlife, the harm to animal welfare and the threat to human health caused by modern industrial agriculture.',
     },
     {
       label: 'B',
       content:
-        'Over recent decades, farming progressed through mechanisation, heavy fertiliser and pesticide use, monocultures, intensive livestock systems, and genetic engineering. While yields rose, major ecological damage followed: declines in birds, flowers and insects, disappearance of hedgerows and ponds, and worsening water quality due to agricultural runoff.',
+        'First mechanisation, then mass use of chemical fertilisers and pesticides, then monocultures, then battery rearing of livestock, and now genetic engineering - the onward march of intensive farming has seemed unstoppable in the last half-century, as the yields of produce have soared. But the damage it has caused has been colossal. In Britain, for example, many of our best-loved farmland birds, such as the skylark, the grey partridge, the lapwing and the corn bunting, have vanished from huge stretches of countryside, as have even more wild-flowers and insects. This is a direct result of the way we have produced our food in the last four decades. Thousands of miles of hedgerows, thousands of ponds have disappeared from the landscape. The faecal filth of salmon farming has driven wild salmon from many of the sea lochs and rivers of Scotland. Natural soil fertility is dropping in many areas because of continuous industrial fertiliser and pesticide use, while the growth of algae is increasing in lakes because of the fertiliser run-off.',
     },
     {
       label: 'C',
       content:
-        "Consumers often fail to connect these effects to what they buy because many costs are 'externalities' - hidden costs outside normal market transactions, borne by society rather than directly by buyers or producers.",
+        "Put it all together and it looks like a battlefield, but consumers rarely make the connection at the dinner table. That is mainly because the costs of all this damage are what economists refer to as externalities: they are outside the main transaction, which is for example producing and selling a field of wheat, and are borne directly by neither producers nor consumers. To many, the costs may not even appear to be financial at all, but merely aesthetic - a terrible shame, but nothing to do with money. And anyway they, as consumers of food, certainly aren't paying for it, are they?",
     },
     {
       label: 'D',
       content:
-        'Professor Jules Pretty and colleagues at the University of Essex quantified these externalities for British agriculture and found that total annual costs were extremely high, even on conservative estimates.',
+        "But the costs to society can actually be quantified and, when added up, can amount to staggering sums. A remarkable exercise in doing this has been carried out by one of the world's leading thinkers on the future of agriculture, Professor Jules Pretty, Director of the Centre for Environment and Society at the University of Essex. Professor Pretty and his colleagues calculated the externalities of British agriculture for one particular year. They added up the costs of repairing the damage it caused, and came up with a total figure of £2,343m. This is equivalent to £208 for every hectare of arable land and permanent pasture, almost as much again as the total government and EU spend on British farming in that year. And according to Professor Pretty, it was a conservative estimate.",
     },
     {
       label: 'E',
       content:
-        'The estimated costs included water purification, habitat damage, greenhouse gas emissions, soil erosion, food poisoning, and livestock disease. Pretty concluded that people pay three times: at the shop, through taxes supporting intensive farming, and through funding cleanup and repair of environmental damage.',
+        'The costs included: £120m for removal of pesticides; £16m for removal of nitrates; £55m for removal of phosphates and soil; £23m for the removal of the bug Cryptosporidium from drinking water by water companies; £125m for damage to wildlife habitats, hedgerows and dry stone walls; £1,113m from emissions of gases likely to contribute to climate change; £106m from soil erosion and organic carbon losses; £169m from food poisoning; and £607m from cattle disease. Professor Pretty draws a simple but memorable conclusion from all this: our food bills are actually threefold. We are paying for our supposedly cheaper food in three separate ways: once over the counter, secondly through our taxes, which provide the enormous subsidies propping up modern intensive farming, and thirdly to clean up the mess that modern farming leaves behind.',
     },
     {
       label: 'F',
       content:
-        'In Britain, moving away from industrial agriculture may be feasible because immediate food scarcity pressures are lower and long-term environmental harms are clearer.',
+        'So can the true cost of food be brought down? Breaking away from industrial agriculture as the solution to hunger may be very hard for some countries, but in Britain, where the immediate need to supply food is less urgent, and the costs and the damage of intensive farming have been clearly seen, it may be more feasible. The government needs to create sustainable, competitive and diverse farming and food sectors, which will contribute to a thriving and sustainable rural economy, and advance environmental, economic, health, and animal welfare goals.',
     },
     {
       label: 'G',
       content:
-        "Pretty proposes a pragmatic middle path rather than an immediate universal shift to full organic farming: a 'Greener Food Standard' to improve agrochemical use, soil and water management, energy efficiency, food safety, and animal health while remaining accessible to consumers.",
+        "But if industrial agriculture is to be replaced, what is a viable alternative? Professor Pretty feels that organic farming would be too big a jump in thinking and in practices for many farmers. Furthermore, the price premium would put the produce out of reach of many poorer consumers. He is recommending the immediate introduction of a 'Greener Food Standard', which would push the market towards more sustainable environmental practices than the current norm, while not requiring the full commitment to organic production. Such a standard would comprise agreed practices for different kinds of farming, covering agrochemical use, soil health, land management, water and energy use, food safety and animal health. It could go a long way, he says, to shifting consumers as well as farmers towards a more sustainable system of agriculture.",
     },
   ],
   questions: day15Questions,
@@ -1289,32 +1289,32 @@ const day16Section: Section = {
     {
       label: 'A',
       content:
-        'Poor outcomes from conventional African road projects led to a new strategy in the 1980s. In remote Makete District, Tanzania, planners adopted an integrated rural transport model aimed at reducing time and effort needed to access goods and services. MIRTP began in 1985 with support from the Swiss Development Corporation and the Tanzanian government.',
+        "The disappointing results of many conventional road transport projects in Africa led some experts to rethink the strategy by which rural transport problems were to be tackled at the beginning of the 1980s. A request for help in improving the availability of transport within the remote Makete District of southwestern Tanzania presented the opportunity to try a new approach. The concept of 'integrated rural transport' was adopted in the task of examining the transport needs of the rural households in the district. The objective was to reduce the time and effort needed to obtain access to essential goods and services through an improved rural transport system. The underlying assumption was that the time saved would be used instead for activities that would improve the social and economic development of the communities. The Makete Integrated Rural Transport Project (MIRTP) started in 1985 with financial support from the Swiss Development Corporation and was co-ordinated with the help of the Tanzanian government.",
     },
     {
       label: 'B',
       content:
-        'At the start, Makete was nearly cut off during rainy months. A Phase I survey of over 400 households showed very high daily transport burdens: most travel was on foot, most movement remained local, and much effort went into collecting water and firewood and reaching grinding mills.',
+        'When the project began, Makete District was virtually totally isolated during the rainy season. The regional road was in such bad shape that access to the main towns was impossible for about three months of the year. Road traffic was extremely rare within the district, and alternative means of transport were restricted to donkeys in the north of the district. People relied primarily on the paths, which were slippery and dangerous during the rains. Before solutions could be proposed, the problems had to be understood. Little was known about the transport demands of the rural households, so Phase I, between December 1985 and December 1987, focused on research. The socio-economic survey of more than 400 households in the district indicated that a household in Makete spent, on average, seven hours a day on transporting themselves and their goods, a figure which seemed extreme but which has also been obtained in surveys in other rural areas in Africa. Interesting facts regarding transport were found: 95% was on foot; 80% was within the locality; and 70% was related to the collection of water and firewood and travelling to grinding mills.',
     },
     {
       label: 'C',
       content:
-        'During Phase II, solutions were implemented: roads were improved through labour-intensive methods, training was provided for workshops and transport services, paths were upgraded with steps, handrails and footbridges, and lower-cost local transport options were explored, including donkeys and locally manufacturable wheelbarrows.',
+        'Having determined the main transport needs, possible solutions were identified which might reduce the time and burden. During Phase II, from January to February 1991, a number of approaches were implemented in an effort to improve mobility and access to transport. An improvement of the road network was considered necessary to ensure the import and export of goods to the district. These improvements were carried out using methods that were heavily dependent on labour. In addition to the improvement of roads, these methods provided training in the operation of a mechanical workshop and bus and truck services. However, the difference from the conventional approach was that this time consideration was given to local transport needs outside the road network. Most goods were transported along the paths that provide short-cuts up and down the hillsides, but the paths were a real safety risk and made the journey on foot even more arduous. It made sense to improve the paths by building steps, handrails and footbridges. It was uncommon to find means of transport that were more efficient than walking but less technologically advanced than motor vehicles. The use of bicycles was constrained by their high cost and the lack of available spare parts. Oxen were not used at all but donkeys were used by a few households in the northern part of the district. MIRTP focused on what would be most appropriate for the inhabitants of Makete in terms of what was available, how much they could afford and what they were willing to accept. After careful consideration, the project chose the promotion of donkeys - a donkey costs less than a bicycle - and the introduction of a locally manufacturable wheelbarrow.',
     },
     {
       label: 'D',
       content:
-        'Phase III focused on refinement and institutionalisation. Road access improved year-round and market supplies became more stable. Community-requested path upgrades were popular. However, motorised services remained unreliable due to frequent vehicle breakdowns and limited repair resources. Even low-cost transport options remained expensive for many households.',
+        "At the end of Phase II, it was clear that the selected approaches to Makete's transport problems had had different degrees of success. Phase III, from March 1991 to March 1993, focused on the refinement and institutionalisation of these activities. The road improvements and accompanying maintenance system had helped make the district centre accessible throughout the year. Essential goods from outside the district had become more readily available at the market, and prices did not fluctuate as much as they had done before. Paths and secondary roads were improved only at the request of communities who were willing to participate in construction and maintenance. However, the improved paths impressed the inhabitants, and requests for assistance greatly increased soon after only a few improvements had been completed. The efforts to improve the efficiency of the existing transport services were not very successful because most of the motorised vehicles in the district broke down and there were no resources to repair them. Even the introduction of low-cost means of transport was difficult because of the general poverty of the district. The locally manufactured wheelbarrows were still too expensive for all but a few of the households. Modifications to the original design by local carpenters cut production time and costs. Other local carpenters have been trained in the new design so that they can respond to requests. Nevertheless, a locally produced wooden wheelbarrow which costs around 5000 Tanzanian shillings (less than US$20) in Makete, and is about one quarter the cost of a metal wheelbarrow, is still too expensive for most people. Donkeys, which were imported to the district, have become more common and contribute, in particular, to the transportation of crops and goods to market. Those who have bought donkeys are mainly from richer households but, with an increased supply through local breeding, donkeys should become more affordable. Meanwhile, local initiatives are promoting the renting out of the existing donkeys. It should be noted, however, that a donkey, which at 20,000 Tanzanian shillings costs less than a bicycle, is still an investment equal to an average household's income over half a year. This clearly illustrates the need for supplementary measures if one wants to assist the rural poor.",
     },
     {
       label: 'E',
       content:
-        "The project's early top-down style could be criticised, but district-level governmental support was necessary to respond to rural needs and sustain implementation.",
+        "It would have been easy to criticise the MIRTP for using in the early phases a 'top-down' approach, in which decisions were made by experts and officials before being handed down to communities, but it was necessary to start the process from the level of the governmental authorities of the district. It would have been difficult to respond to the requests of villagers and other rural inhabitants without the support and understanding of district authorities.",
     },
     {
       label: 'F',
       content:
-        'After sustained community development work, awareness of improved paths and affordable transport increased. The integrated rural transport concept became established in Tanzania, and Makete was seen as a reference model for broader national initiatives.',
+        'Today, nobody in the district argues about the importance of improved paths and inexpensive means of transport. But this is the result of dedicated work over a long period, particularly from the officers in charge of community development. They played an essential role in raising awareness and interest among the rural communities. The concept of integrated rural transport is now well established in Tanzania, where a major program of rural transport is just about to start. The experiences from Makete will help in this initiative, and Makete District will act as a reference for future work.',
     },
   ],
   questions: day16Questions,
@@ -1327,32 +1327,32 @@ const day17Section: Section = {
     {
       label: 'A',
       content:
-        "Silk, one of the world's most luxurious fabrics, was first produced from silkworm cocoons in China. According to legend, around 3000 BC Lei Tzu discovered silk when a cocoon dropped into her hot tea and unravelled into a fine thread. She later developed a reel to draw out strong fibres for weaving.",
+        "Silk is a fine, smooth material produced from the cocoons - soft protective shells - that are made by mulberry silkworms (insect larvae). Legend has it that it was Lei Tzu, wife of the Yellow Emperor, ruler of China in about 3000 BC, who discovered silkworms. One account of the story goes that as she was taking a walk in her husband's gardens, she discovered that silkworms were responsible for the destruction of several mulberry trees. She collected a number of cocoons and sat down to have a rest. It just so happened that while she was sipping some tea, one of the cocoons that she had collected landed in the hot tea and started to unravel into a fine thread. Lei Tzu found that she could wind this thread around her fingers. Subsequently, she persuaded her husband to allow her to rear silkworms on a grove of mulberry trees. She also devised a special reel to draw the fibres from the cocoon into a single thread so that they would be strong enough to be woven into fabric. While it is unknown just how much of this is true, it is certainly known that silk cultivation has existed in China for several millennia.",
     },
     {
       label: 'B',
       content:
-        'Originally, silk production was mainly a female activity and silk use was restricted to royalty. Over time restrictions loosened. During the Han Dynasty, silk functioned not only as a textile but also as currency, tax payment, and diplomatic gift. Early silk paper dates to around 168 AD.',
+        'Originally, silkworm farming was solely restricted to women, and it was they who were responsible for the growing, harvesting and weaving. Silk quickly grew into a symbol of status, and originally, only royalty were entitled to have clothes made of silk. The rules were gradually relaxed over the years until finally during the Qing Dynasty (1644-1911 AD), even peasants, the lowest caste, were also entitled to wear silk. Sometime during the Han Dynasty (206 BC-220 AD), silk was so prized that it was also used as a unit of currency. Government officials were paid their salary in silk, and farmers paid their taxes in grain and silk. Silk was also used as diplomatic gifts by the emperor. Fishing lines, bowstrings, musical instruments and paper were all made using silk. The earliest indication of silk paper being used was discovered in the tomb of a noble who is estimated to have died around 168 AD.',
     },
     {
       label: 'C',
       content:
-        'Demand for silk drove the Silk Road, a lucrative route stretching from eastern China to the Mediterranean. Silk moved westward while wool, gold and silver moved eastward. Few merchants travelled the full route; goods often changed hands through middlemen.',
+        'Demand for this exotic fabric eventually created the lucrative trade route now known as the Silk Road, taking silk westward and bringing gold, silver and wool to the East. It was named the Silk Road after its most precious commodity, which was considered to be worth more than gold. The Silk Road stretched over 6,000 kilometres from Eastern China to the Mediterranean Sea, following the Great Wall of China, climbing the Pamir mountain range, crossing modern-day Afghanistan and going on to the Middle East, with a major trading market in Damascus. From there, the merchandise was shipped across the Mediterranean Sea. Few merchants travelled the entire route; goods were handled mostly by a series of middlemen.',
     },
     {
       label: 'D',
       content:
-        'China held a long monopoly, but eventually silk production knowledge spread. One account says Byzantine monks smuggled silkworm eggs to Constantinople in hollow canes around 550 AD. Production later spread through regions linked to Arab expansion and then further into Europe.',
+        "With the mulberry silkworm being native to China, the country was the world's sole producer of silk for many hundreds of years. The secret of silk-making eventually reached the rest of the world via the Byzantine Empire, which ruled over the Mediterranean region of southern Europe, North Africa and the Middle East during the period 330-1453 AD. According to another legend, monks working for the Byzantine emperor Justinian smuggled silkworm eggs to Constantinople (Istanbul in modern-day Turkey) in 550 AD, concealed inside hollow bamboo walking canes. The Byzantines were as secretive as the Chinese, however, and for many centuries the weaving and trading of silk fabric was a strict imperial monopoly. Then in the seventh century, the Arabs conquered Persia, capturing their magnificent silks in the process. Silk production thus spread through Africa, Sicily and Spain as the Arabs swept through these lands. Andalusia in southern Spain was Europe's main silk-producing centre in the tenth century. By the thirteenth century, however, Italy had become Europe's leader in silk production and export. Venetian merchants traded extensively in silk and encouraged silk growers to settle in Italy. Even now, silk processed in the province of Como in northern Italy enjoys an esteemed reputation.",
     },
     {
       label: 'E',
       content:
-        'By the medieval period, areas such as Italy developed significant silk industries and reputations for high-quality silk processing.',
+        "The nineteenth century and industrialisation saw the downfall of the European silk industry. Cheaper Japanese silk, trade in which was greatly facilitated by the opening of the Suez Canal, was one of the many factors driving the trend. Then in the twentieth century, new manmade fibres, such as nylon, started to be used in what had traditionally been silk products, such as stockings and parachutes. The two world wars, which interrupted the supply of raw material from Japan, also stifled the European silk industry. After the Second World War, Japan's silk production was restored, with improved production and quality of raw silk. Japan was to remain the world's biggest producer of raw silk, and practically the only major exporter of raw silk, until the 1970s.",
     },
     {
       label: 'F',
       content:
-        'In modern times, industrialisation, world wars and manmade fibres such as nylon disrupted traditional silk production patterns. China later re-established itself as the leading producer and exporter of raw silk and silk yarn.',
+        "However, in more recent decades, China has gradually recaptured its position as the world's biggest producer and exporter of raw silk and silk yarn. Today, around 125,000 metric tons of silk are produced in the world, and almost two thirds of that production takes place in China.",
     },
   ],
   questions: day17Questions,
@@ -1365,42 +1365,42 @@ const day18Section: Section = {
     {
       label: 'A',
       content:
-        'Animal migration is more than simple movement. It often follows regular cycles, involves prolonged and purposeful travel, demands special energy allocation, and is maintained despite distractions or challenges.',
+        'Animal migration, however it is defined, is far more than just the movement of animals. It can loosely be described as travel that takes place at regular intervals - often in an annual cycle - that may involve many members of a species, and is rewarded only after a long journey. It suggests inherited instinct. The biologist Hugh Dingle has identified five characteristics that apply, in varying degrees and combinations, to all migrations. They are prolonged movements that carry animals outside familiar habitats; they tend to be linear, not zigzaggy; they involve special behaviours concerning preparation (such as overfeeding) and arrival; they demand special allocations of energy. And one more: migrating animals maintain an intense attentiveness to the greater mission, which keeps them undistracted by temptations and undeterred by challenges that would turn other animals aside.',
     },
     {
       label: 'B',
       content:
-        'An arctic tern may fly around 20,000 km from South America to the Arctic while ignoring easy feeding opportunities that local gulls seize. The tern remains focused on arrival and breeding goals.',
+        "An arctic tern, on its 20,000 km flight from the extreme south of South America to the Arctic circle, will take no notice of a nice smelly herring offered from a bird-watcher's boat along the way. While local gulls will dive voraciously for such handouts, the tern flies on. Why? The arctic tern resists distraction because it is driven at that moment by an instinctive sense of something we humans find admirable: larger purpose. In other words, it is determined to reach its destination. The bird senses that it can eat, rest and mate later. Right now it is totally focused on the journey; its undivided intent is arrival.",
     },
     {
       label: 'C',
       content:
-        'Arrival at Arctic breeding grounds serves an evolutionary purpose: finding suitable conditions to hatch and rear offspring.',
+        'Reaching some gravelly coastline in the Arctic, upon which other arctic terns have converged, will serve its larger purpose as shaped by evolution: finding a place, a time, and a set of circumstances in which it can successfully hatch and rear offspring.',
     },
     {
       label: 'D',
       content:
-        'Definitions of migration vary among biologists. Joel Berger, studying terrestrial mammals like pronghorn, defines migration as seasonal round trips between separate home areas for resources.',
+        "But migration is a complex issue, and biologists define it differently, depending in part on what sorts of animals they study. Joel Berger, of the University of Montana, who works on the American pronghorn and other large terrestrial mammals, prefers what he calls a simple, practical definition suited to his beasts: movements from a seasonal home area away to another home area and back again. Generally, the reason for such seasonal back-and-forth movement is to seek resources that aren't available within a single area year-round.",
     },
     {
       label: 'E',
       content:
-        'Other movements can also qualify, such as daily vertical movement of zooplankton and multi-generational movement of aphids to new host plants.',
+        'But daily vertical movements by zooplankton in the ocean - upward by night to seek food, downward by day to escape predators - can also be considered migration. So can the movement of aphids when, having depleted the young leaves on one food plant, their offspring then fly onward to a different host plant, with no one aphid ever returning to where it started.',
     },
     {
       label: 'F',
       content:
-        'Hugh Dingle offers a broader evolutionary framework with defining characteristics shared across species, highlighting common migration principles rather than focusing on a single animal group.',
+        "Dingle is an evolutionary biologist who studies insects. His definition is more intricate than Berger's, citing those five features that distinguish migration from other forms of movement. They allow for the fact that, for example, aphids will become sensitive to blue light (from the sky) when it's time for takeoff on their big journey, and sensitive to yellow light (reflected from tender young leaves) when it's appropriate to land. Birds will fatten themselves with heavy feeding in advance of a long migrational flight. The value of his definition, Dingle argues, is that it focuses attention on what the phenomenon of wildebeest migration shares with the phenomenon of the aphids, and therefore helps guide researchers towards understanding how evolution has produced them all.",
     },
     {
       label: 'G',
       content:
-        'Human development increasingly threatens migration routes. Pronghorn in North America face bottlenecks where movement corridors narrow due to natural and human barriers, including fencing and housing expansion.',
+        "Human behaviour, however, is having a detrimental impact on animal migration. The pronghorn, which resembles an antelope, though they are unrelated, is the fastest land mammal of the New World. One population, which spends the summer in the mountainous Grand Teton National Park of the western USA, follows a narrow route from its summer range in the mountains, across a river, and down onto the plains. Here they wait out the frozen months, feeding mainly on sagebrush blown clear of snow. These pronghorn are notable for the invariance of their migration route and the severity of its constriction at three bottlenecks. If they cannot pass through each of the three during their spring migration, they cannot reach their bounty of summer grazing; if they cannot pass through again in autumn, escaping south onto those windblown plains, they are likely to die trying to overwinter in the deep snow. Pronghorn, dependent on distance vision and speed to keep safe from predators, traverse high, open shoulders of land, where they can see and run. At one of the bottlenecks, forested hills rise to form a V, leaving a corridor of open ground only about 150 metres wide, filled with private homes. Increasing development is leading toward a crisis for the pronghorn, threatening to choke off their passageway.",
     },
     {
       label: 'H',
       content:
-        'Conservation agencies are working to protect migration corridors, but long-distance routes crossing jurisdictions remain difficult to secure without coordinated policy and sustained commitment.',
+        "Conservation scientists, along with some biologists and land managers within the USA's National Park Service and other agencies, are now working to preserve migrational behaviours, not just species and habitats. A National Forest has recognised the path of the pronghorn, much of which passes across its land, as a protected migration corridor. But neither the Forest Service nor the Park Service can control what happens on private land at a bottleneck. And with certain other migrating species, the challenge is complicated further - by vastly greater distances traversed, more jurisdictions, more borders, more dangers along the way. We will require wisdom and resoluteness to ensure that migrating species can continue their journeying a while longer.",
     },
   ],
   questions: day18Questions,
@@ -1413,37 +1413,37 @@ const day19Section: Section = {
     {
       label: 'A',
       content:
-        'The author argues that some advanced mathematical discoveries can be understood with only elementary arithmetic. The book presents each chapter step by step so readers can participate in mathematical reasoning.',
+        "Occasionally, in some difficult musical compositions, there are beautiful, but easy parts - parts so simple a beginner could play them. So it is with mathematics as well. There are some discoveries in advanced mathematics that do not depend on specialized knowledge, not even on algebra, geometry, or trigonometry. Instead, they may involve, at most, a little arithmetic, such as 'the sum of two odd numbers is even', and common sense. Each of the eight chapters in this book illustrates this phenomenon. Anyone can understand every step in the reasoning. The thinking in each chapter uses at most only elementary arithmetic, and sometimes not even that. Thus all readers will have the chance to participate in a mathematical experience, to appreciate the beauty of mathematics, and to become familiar with its logical, yet intuitive, style of thinking.",
     },
     {
       label: 'B',
       content:
-        'A main goal is to reveal the reasoning behind discoveries. The author contrasts this book with many popular mathematics books that either focus on biographies, applications, or procedures requiring prior algebra expertise.',
+        "One of my purposes in writing this book is to give readers who haven't had the opportunity to see and enjoy real mathematics the chance to appreciate the mathematical way of thinking. I want to reveal not only some of the fascinating discoveries, but, more importantly, the reasoning behind them. In that respect, this book differs from most books on mathematics written for the general public. Some present the lives of colorful mathematicians. Others describe important applications of mathematics. Yet others go into mathematical procedures, but assume that the reader is adept in using algebra.",
     },
     {
       label: 'C',
       content:
-        'The book aims to bridge the divide between humanities and sciences, emphasizing that intuition matters alongside analytical thinking. The author cites people whose mixed talents challenge stereotypes.',
+        'I hope this book will help bridge that notorious gap that separates the two cultures: the humanities and the sciences, or should I say the right brain (intuitive) and the left brain (analytical, numerical). As the chapters will illustrate, mathematics is not restricted to the analytical and numerical; intuition plays a significant role. The alleged gap can be narrowed or completely overcome by anyone, in part because each of us is far from using the full capacity of either side of the brain. To illustrate our human potential, I cite a structural engineer who is an artist, an electrical engineer who is an opera singer, an opera singer who published mathematical research, and a mathematician who publishes short stories.',
     },
     {
       label: 'D',
       content:
-        'Other science writers often omit mathematics when addressing non-specialists, even though mathematics is foundational to their fields.',
+        'Other scientists have written books to explain their fields to non-scientists, but have necessarily had to omit the mathematics, although it provides the foundation of their theories. The reader must remain a tantalized spectator rather than an involved participant, since the appropriate language for describing the details in much of science is mathematics, whether the subject is expanding universe, subatomic particles, or chromosomes. Though the broad outline of a scientific theory can be sketched intuitively, when a part of the physical universe is finally understood, its description often looks like a page in a mathematics text.',
     },
     {
       label: 'E',
       content:
-        'Non-mathematical readers can still progress, but the reading requires sustained attention. The author recommends working slowly with pencil and paper and checking claims through experiments.',
+        'Still, the non-mathematical reader can go far in understanding mathematical reasoning. This book presents the details that illustrate the mathematical style of thinking, which involves sustained, step-by-step analysis, experiments, and insights. You will turn these pages much more slowly than when reading a novel or a newspaper. It may help to have a pencil and paper ready to check claims and carry out experiments.',
     },
     {
       label: 'F',
       content:
-        'The book targets multiple reader groups, including former maths enthusiasts and those seeking stronger analytical skills for professional fields.',
+        'As I wrote, I kept in mind two types of readers: those who enjoyed mathematics until they were turned off by an unpleasant episode, usually around fifth grade, and mathematics aficionados, who will find much that is new throughout the book. This book also serves readers who simply want to sharpen their analytical skills. Many careers, such as law and medicine, require extended, precise analysis. Each chapter offers practice in following a sustained and closely argued line of thought. That mathematics can develop this skill is shown by these two testimonials.',
     },
     {
       label: 'G',
       content:
-        'Testimonials from a physician and a lawyer claim that mathematical training improved their problem-solving and professional performance.',
+        'A physician wrote, "The discipline of analytical thought processes in mathematics prepared me extremely well for medical school. In medicine one is faced with a problem which must be thoroughly analyzed before a solution can be found. The process is similar to doing mathematics." A lawyer made the same point, "Although I had no background in law - not even one political science course - I did well at one of the best law schools. I attribute much of my success there to having learned, through the study of mathematics, and, in particular, theorems, how to analyze complicated principles. Lawyers who have studied mathematics can master the legal principles in a way that most others cannot."',
     },
   ],
   questions: day19Questions,
@@ -1456,37 +1456,42 @@ const day21Section: Section = {
     {
       label: 'A',
       content:
-        'Polar bears are increasingly threatened by climate change, yet they survive extreme Arctic conditions with very high body fat levels that would usually cause severe health problems in humans.',
+        'Polar bears are being increasingly threatened by the effects of climate change, but their disappearance could have far-reaching consequences. They are uniquely adapted to the extreme conditions of the Arctic Circle, where temperatures can reach -40°C. One reason for this is that they have up to 11 centimetres of fat underneath their skin. Humans with comparative levels of adipose tissue would be considered obese and would be likely to suffer from diabetes and heart disease. Yet the polar bear experiences no such consequences.',
     },
     {
       label: 'B',
       content:
-        'A 2014 study by Shi Ping Liu and colleagues compared polar bears with brown bears and identified genes linked to survival, including a gene affecting low-density lipoproteins (LDL). In humans, mutations in this gene are associated with heart disease risk.',
+        "A 2014 study by Shi Ping Liu and colleagues sheds light on this mystery. They compared the genetic structure of polar bears with that of their closest relatives from a warmer climate, the brown bears. This allowed them to determine the genes that have allowed polar bears to survive in one of the toughest environments on Earth. Liu and his colleagues found the polar bears had a gene known as APoB, which reduces levels of low-density lipoproteins (LDLs) - a form of 'bad' cholesterol. In humans, mutations of this gene are associated with increased risk of heart disease. Polar bears may therefore be an important study model to understand heart disease in humans.",
     },
     {
       label: 'C',
       content:
-        'The polar bear genome may also provide insights into osteoporosis. Female polar bears endure lengthy fasting during maternity denning while still maintaining strong bones despite calcium depletion.',
+        'The genome of the polar bear may also provide the solution for another condition, one that particularly affects our older generation: osteoporosis. This is a disease where bones show reduced density, usually caused by insufficient exercise, reduced calcium intake or food starvation. Bone tissue is constantly being remodelled, meaning that bone is added or removed, depending on nutrient availability and the stress that the bone is under. Female polar bears, however, undergo extreme conditions during every pregnancy. Once autumn comes around, these females will dig maternity dens in the snow and will remain there throughout the winter, both before and after the birth of their cubs. This process results in about six months of fasting, where the female bears have to keep themselves and their cubs alive, depleting their own calcium and calorie reserves. Despite this, their bones remain strong and dense.',
     },
     {
       label: 'D',
       content:
-        'Research by Alanda Lennox and Allen Goodship found that pregnant females increased bone density before denning and did not show major loss after emergence, suggesting unusual bone remodelling mechanisms with possible medical relevance.',
+        'Physiologists Alanda Lennox and Allen Goodship found an explanation for this paradox in 2008. They discovered that pregnant bears were able to increase the density of their bones before they started to build their dens. In addition, six months later, when they finally emerged from the den with their cubs, there was no evidence of significant loss of bone density. Hibernating brown bears do not have this capacity and must therefore resort to major bone reformation in the following spring. If the mechanism of bone remodelling in polar bears can be understood, many bedridden humans, and even astronauts, could potentially benefit.',
     },
     {
       label: 'E',
       content:
-        'Conservation arguments are not only medical. Anecdotal evidence challenges stereotypes of bears as unintelligent and violent. Examples include tool-like branch use to dislodge food and calculated problem-solving behaviours in the wild.',
+        'The medical benefits of the polar bear for humanity certainly have their importance in our conservation efforts, but these should not be the only factors taken into consideration. We tend to want to protect animals we think are intelligent and possess emotions, such as elephants and primates. Bears, on the other hand, seem to be perceived as stupid and in many cases violent. And yet anecdotal evidence from the field challenges those assumptions, suggesting for example that polar bears have good problem-solving abilities. A male bear called GoGo in Tennoji Zoo, Osaka, has even been observed making use of a tool to manipulate his environment. The bear used a tree branch on multiple occasions to dislodge a piece of meat hung out of his reach. Problem-solving ability has also been witnessed in wild polar bears, although not as obviously as with GoGo. A calculated move by a male bear involved running and jumping onto barrels in an attempt to get to a photographer standing on a platform four metres high.',
     },
     {
       label: 'F',
       content:
-        'Other observations describe deliberate manipulation and behaviour resembling play, suggesting creativity and focused action beyond earlier assumptions.',
+        'In other studies, such as one by Alison Annes in 2008, polar bears showed deliberate and focussed manipulation. For example, Annes observed bears putting objects in piles and then knocking them over in what appeared to be a game. The study demonstrates that bears are capable of agile and thought-out behaviours. These examples suggest bears have greater creativity and problem-solving abilities than previously thought.',
     },
     {
       label: 'G',
       content:
-        'Reports also suggest emotional responses and unusual cross-species social relationships in some bears, reinforcing the argument that their extinction would be a major biological and moral loss.',
+        'As for emotions, while the evidence is once again anecdotal, many bears have been seen to hit out at ice and snow - seemingly out of frustration - when they have just missed out on a kill. Moreover, polar bears can form unusual relationships with other species, including playing with the dogs used to pull sleds in the Arctic. Remarkably, one hand-raised polar bear called Agee has formed a close relationship with her owner Mark Dumas to the point where they even swim together. This is even more astonishing since polar bears are known to actively hunt humans in the wild.',
+    },
+    {
+      label: 'H',
+      content:
+        'If climate change were to lead to their extinction, this would mean not only the loss of potential breakthroughs in human medicine, but more importantly, the disappearance of an intelligent, majestic animal.',
     },
   ],
   questions: day21Questions,
@@ -1499,37 +1504,37 @@ const day22Section: Section = {
     {
       label: 'A',
       content:
-        'The Step Pyramid of Djoser at Saqqara is widely seen as the starting point of pyramid architecture in Egypt, despite ongoing debate over many details of early pyramid evolution.',
+        'The pyramids are the most famous monuments of ancient Egypt and still hold enormous interest for people in the present day. These grand, impressive tributes to the memory of the Egyptian kings have become linked with the country even though other cultures, such as the Chinese and Mayan, also built pyramids. The evolution of the pyramid form has been written and argued about for centuries. However, there is no question that, as far as Egypt is concerned, it began with one monument to one king designed by one brilliant architect: the Step Pyramid of Djoser at Saqqara.',
     },
     {
       label: 'B',
       content:
-        "Before Djoser, tombs were rectangular mud-brick mastabas. Imhotep conceived a new design by stacking progressively smaller stone slabs, creating the stepped form. The exact reasons remain uncertain, and even Djoser's reign length is debated.",
+        "Djoser was the first king of the Third Dynasty of Egypt and the first to build in stone. Prior to Djoser's reign, tombs were rectangular monuments made of dried clay brick, which covered underground passages where the deceased person was buried. For reasons which remain unclear, Djoser's main official, whose name was Imhotep, conceived of building a taller, more impressive tomb for his king by stacking stone slabs on top of one another, progressively making them smaller, to form the shape now known as the Step Pyramid. Djoser is thought to have reigned for 19 years, but some historians and scholars attribute a much longer time for his rule, owing to the number and size of the monuments he built.",
     },
     {
       label: 'C',
       content:
-        'Modern investigation indicates multiple design stages and extensive experimentation before the final six-level structure emerged. Managing the enormous weight required careful engineering choices.',
+        'The Step Pyramid has been thoroughly examined and investigated over the last century, and it is now known that the building process went through many different stages. Historian Marc Van de Mieroop comments on this, writing: Much experimentation was involved, which is especially clear in the construction of the pyramid in the center of the complex. It had several plans before it became the first Step Pyramid in history, piling six levels on top of one another. The weight of the enormous mass was a challenge for the builders, who placed the stones at an inward incline in order to prevent the monument breaking up.',
     },
     {
       label: 'D',
       content:
-        'The surrounding complex was vast, including temples, courtyards, shrines, housing for priests, and defensive-style features such as false doors and a trench to deter intruders.',
+        "When finally completed, the Step Pyramid rose 62 metres high and was the tallest structure of its time. The complex in which it was built was the size of a city in ancient Egypt and included a temple, courtyards, shrines, and living quarters for the priests. It covered a region of 16 hectares and was surrounded by a wall 10.5 meters high. The wall had 13 false doors cut into it with only one true entrance cut into the south-east corner; the entire wall was then ringed by a trench 750 meters long and 40 meters wide. The false doors and the trench were incorporated into the complex to discourage unwanted visitors. If someone wished to enter, he or she would have needed to know in advance how to find the location of the true opening in the wall. Djoser was so proud of his accomplishment that he broke the tradition of having only his own name on the monument and had Imhotep's name carved on it as well.",
     },
     {
       label: 'E',
       content:
-        'Beneath the pyramid lay the burial chamber and a large network of passages and chambers. Thousands of inscribed stone vessels were discovered, but their exact purpose remains contested.',
+        'The burial chamber of the tomb, where the kings body was laid to rest, was dug beneath the base of the pyramid, surrounded by a vast maze of long tunnels that had rooms off them to discourage robbers. One of the most mysterious discoveries found inside the pyramid was a large number of stone vessels. Over 40,000 of these vessels, of various forms and shapes, were discovered in storerooms off the pyramids underground passages. They are inscribed with the names of rulers from the First and Second Dynasties of Egypt and made from different kinds of stone. There is no agreement among scholars and archaeologists on why the vessels were placed in the tomb of Djoser or what they were supposed to represent. The archaeologist Jean-Philippe Lauer, who excavated most of the pyramid and complex, believes they were originally stored and then given a proper burial by Djoser in his pyramid to honor his predecessors. There are other historians, however, who claim the vessels were dumped into the shafts as yet another attempt to prevent grave robbers from getting to the kings burial chamber.',
     },
     {
       label: 'F',
       content:
-        'Despite precautions, robbers still reached the tomb and removed major valuables. Nevertheless, sufficient finds remained to astonish archaeologists.',
+        "Unfortunately, all of the precautions and intricate design of the underground network did not prevent ancient robbers from finding a way in. Djoser's grave goods, and even his body, were stolen at some point in the past and all archaeologists found were a small number of his valuables overlooked by the thieves. There was enough left throughout the pyramid and its complex, however, to astonish and amaze the archaeologists who excavated it.",
     },
     {
       label: 'G',
       content:
-        'Scholars regard the Step Pyramid as a major architectural milestone and an archetype for later pyramid builders in Egypt.',
+        'Egyptologist Miroslav Verner writes, Few monuments hold a place in human history as significant as that of the Step Pyramid in Saqqara. It can be said without exaggeration that this pyramid complex constitutes a milestone in the evolution of monumental stone architecture in Egypt and in the world as a whole. The Step Pyramid was a revolutionary advance in architecture and became the archetype which all the other great pyramid builders of Egypt would follow.',
     },
   ],
   questions: day22Questions,
@@ -1542,52 +1547,72 @@ const day23Section: Section = {
     {
       label: 'A',
       content:
-        'Forecasts suggest substantial workforce transition over coming years as occupations evolve alongside both embodied and disembodied AI systems.',
+        'According to a leading business consultancy, 3-14% of the global workforce will need to switch to a different occupation within the next 10-15 years, and all workers will need to adapt as their occupations evolve alongside increasingly capable machines. Automation - or embodied artificial intelligence (AI) - is one aspect of the disruptive effects of technology on the labour market. Disembodied AI, like the algorithms running in our smartphones, is another.',
     },
     {
       label: 'B',
       content:
-        "Stella Pachidi argues that major changes are occurring in data-dependent parts of the knowledge economy, where algorithms now handle tasks once requiring human judgement.",
+        'Dr Stella Pachidi from Cambridge Judge Business School believes that some of the most fundamental changes are happening as a result of the algorithmication of jobs that are dependent on data rather than on production - the so-called knowledge economy. Algorithms are capable of learning from data to undertake tasks that previously needed human judgement, such as reading legal contracts, analysing medical scans and gathering market intelligence.',
     },
     {
       label: 'C',
       content:
-        'Businesses are drawn to algorithms for speed, perceived informational quality, reduced costs, and productivity gains, including cases where AI outperforms humans in specific routine cognitive tasks.',
+        'In many cases, they can outperform humans, says Pachidi. Organisations are attracted to using algorithms because they want to make choices based on what they consider is perfect information, as well as to reduce costs and enhance productivity.',
     },
     {
       label: 'D',
       content:
-        'Pachidi warns that over-automation may weaken learning pathways for novices who traditionally acquire expertise through observation and guided participation.',
+        "But these enhancements are not without consequences, says Pachidi. 'If routine cognitive tasks are taken over by AI, how do professions develop their future experts?' she asks. One way of learning about a job is legitimate peripheral participation - a novice stands next to experts and learns by observation. If this is not happening, then you need to find new ways to learn.",
     },
     {
       label: 'E',
       content:
-        'Her fieldwork in telecommunications showed increasing algorithmic control of customer-contact decisions, displacing professional judgement built through practical experience.',
+        'Another issue is the extent to which the technology influences or even controls the workforce. For over two years, Pachidi monitored a telecommunications company. The way telecoms salespeople work is through personal and frequent contact with clients, using the benefit of experience to assess a situation and reach a decision. However, the company had started using an algorithm that defined when account managers should contact certain customers about which kinds of campaigns and what to offer them.',
     },
     {
       label: 'F',
       content:
-        'She also observed workers becoming dependent on algorithmic instruction and, in some cases, gaming systems by feeding misleading data to achieve targets.',
+        'The algorithm - usually built by external designers - often becomes the keeper of knowledge, she explains. In cases like this, Pachidi believes, a short-sighted view begins to creep into working practices whereby workers learn through the algorithms eyes and become dependent on its instructions. Alternative explorations - where experimentation and human instinct lead to progress and new ideas - are effectively discouraged.',
     },
     {
       label: 'G',
       content:
-        'Researchers are therefore working on more trustworthy and transparent AI systems to improve comprehension and user confidence in automated decisions.',
+        'Pachidi and colleagues even observed people developing strategies to make the algorithm work to their own advantage. We are seeing cases where workers feed the algorithm with false data to reach their targets, she reports.',
     },
     {
       label: 'H',
       content:
-        'Hamish Low predicts more varied and multi-stage career paths with retraining across life, while rejecting simplistic fixed-job assumptions in automation forecasts.',
+        "It is scenarios like these that many researchers are working to avoid. Their objective is to make AI technologies more trustworthy and transparent, so that organisations and individuals understand how AI decisions are made. In the meantime, says Pachidi, 'We need to make sure we fully understand the dilemmas that this new world raises regarding expertise, occupational boundaries and control.'",
     },
     {
       label: 'I',
       content:
-        'Ewan McGaughey argues that unemployment outcomes depend heavily on policy and law. He proposes proactive reforms to ensure secure employment, fair income, and broad-based economic participation.',
+        'Economist Professor Hamish Low believes that the future of work will involve major transitions across the whole life course for everyone: The traditional trajectory of full-time education followed by full-time work followed by a pensioned retirement is a thing of the past, says Low. Instead, he envisages a multistage employment life: one where retraining happens across the life course, and where multiple jobs and no job happen by choice at different stages.',
     },
     {
       label: 'J',
       content:
-        'He frames current AI change in historical perspective, comparing it with earlier social and industrial transformations and arguing that the next revolution should be social as well as technological.',
+        'On the subject of job losses, Low believes the predictions are founded on a fallacy: It assumes that the number of jobs is fixed. If in 30 years, half of 100 jobs are being carried out by robots, that does not mean we are left with just 50 jobs for humans. The number of jobs will increase: we would expect there to be 150 jobs.',
+    },
+    {
+      label: 'K',
+      content:
+        "Dr Ewan McGaughey, at Cambridge's Centre for Business Research and King's College London, agrees that apocalyptic views about the future of work are misguided. It is the laws that restrict the supply of capital to the job market, not the advent of new technologies that causes unemployment.",
+    },
+    {
+      label: 'L',
+      content:
+        'His recently published research answers the question of whether automation, AI and robotics will mean a jobless future by looking at the causes of unemployment. History is clear that change can mean redundancies. But social policies can tackle this through retraining and redeployment.',
+    },
+    {
+      label: 'M',
+      content:
+        "He adds: 'If there is going to be change to jobs as a result of AI and robotics then I'd like to see governments seizing the opportunity to improve policy to enforce good job security. We can reprogramme the law to prepare for a fairer future of work and leisure.' McGaughey's findings are a call to arms to leaders of organisations, governments and banks to pre-empt the coming changes with bold new policies that guarantee full employment, fair incomes and a thriving economic democracy.",
+    },
+    {
+      label: 'N',
+      content:
+        'The promises of these new technologies are astounding. They deliver humankind the capacity to live in a way that nobody could have once imagined, he adds. Just as the industrial revolution brought people past subsistence agriculture, and the corporate revolution enabled mass production, a third revolution has been pronounced. But it will not only be one of technology. The next revolution will be social.',
     },
   ],
   questions: day23Questions,
@@ -1604,3 +1629,4 @@ export const readingDaySectionsDay14To23: Record<number, Section> = {
   22: day22Section,
   23: day23Section,
 }
+

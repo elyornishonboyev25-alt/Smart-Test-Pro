@@ -924,37 +924,37 @@ const day11Section: Section = {
     {
       label: 'A',
       content:
-        'On 19 July 1545, English and French fleets were engaged in a sea battle in the Solent, between Portsmouth and the Isle of Wight. Among the English vessels was the Mary Rose. Built in Portsmouth about 35 years earlier, she had enjoyed a long and successful fighting career and was a favourite of Henry VIII. Accounts of her sinking vary: some suggest she was outdated, overladen and sailing too low, while others say she was mishandled by an undisciplined crew. What is undisputed is that she sank that day, taking at least 500 men with her. Attempts to recover her after the battle failed.',
+        'On 19 July 1545, English and French fleets were engaged in a sea battle off the coast of southern England in the area of water called the Solent, between Portsmouth and the Isle of Wight. Among the English vessels was a warship by the name of Mary Rose. Built in Portsmouth some 35 years earlier, she had had a long and successful fighting career, and was a favourite of King Henry VIII. Accounts of what happened to the ship vary: while witnesses agree that she was not hit by the French, some maintain that she was outdated, overladen and sailing too low in the water, others that she was mishandled by undisciplined crew. What is undisputed, however, is that the Mary Rose sank into the Solent that day, taking at least 500 men with her. After the battle, attempts were made to recover the ship, but these failed.',
     },
     {
       label: 'B',
       content:
-        'The Mary Rose came to rest on her starboard side at an angle of about 60 degrees. The hull trapped sand and mud carried by currents, so the starboard side filled rapidly while the exposed port side was eroded by marine organisms and mechanical degradation. Because of the way the ship sank, nearly all of the starboard half survived intact. In later centuries, the site became covered with hard grey clay, which reduced further erosion.',
+        'The Mary Rose came to rest on the seabed, lying on her starboard (right) side at an angle of approximately 60 degrees. The hull (the body of the ship) acted as a trap for the sand and mud carried by Solent currents. As a result, the starboard side filled rapidly, leaving the exposed port (left) side to be eroded by marine organisms and mechanical degradation. Because of the way the ship sank, nearly all of the starboard half survived intact. During the seventeenth and eighteenth centuries, the entire site became covered with a layer of hard grey clay, which minimised further erosion.',
     },
     {
       label: 'C',
       content:
-        'On 16 June 1836, fishermen in the Solent found their equipment snagged on an underwater obstruction, which turned out to be the Mary Rose. Diver John Deane was nearby exploring another wreck and was asked to free their gear. He dived down and found it caught on a timber protruding from the seabed. He then uncovered more timbers and a bronze gun, and continued intermittent dives until 1840, recovering guns, bows, timbers, part of a pump and other small finds.',
+        'Then, on 16 June 1836, some fishermen in the Solent found that their equipment was caught on an underwater obstruction, which turned out to be the Mary Rose. Diver John Deane happened to be exploring another sunken ship nearby, and the fishermen approached him, asking him to free their gear. Deane dived down, and found the equipment caught on a timber protruding slightly from the seabed. Exploring further, he uncovered several other timbers and a bronze gun. Deane continued diving on the site intermittently until 1840, recovering several more guns, two bows, various timbers, part of a pump and various other small finds.',
     },
     {
       label: 'D',
       content:
-        "The wreck then faded into obscurity for another century. In 1965, military historian and amateur diver Alexander McKee, with the British Sub-Aqua Club, began the 'Solent Ships' project. Although officially aimed at several known wrecks, McKee hoped to find the Mary Rose. Ordinary search techniques proved unsatisfactory, so he collaborated with Harold E. Edgerton of MIT. In 1967, Edgerton's side-scan sonar detected a large unusual object, which McKee believed was the Mary Rose.",
+        "The Mary Rose then faded into obscurity for another hundred years. But in 1965, military historian and amateur diver Alexander McKee, in conjunction with the British Sub-Aqua Club, initiated a project called 'Solent Ships'. While on paper this was a plan to examine a number of known wrecks in the Solent, what McKee really hoped for was to find the Mary Rose. Ordinary search techniques proved unsatisfactory, so McKee entered into collaboration with Harold E. Edgerton, professor of electrical engineering at the Massachusetts Institute of Technology. In 1967, Edgerton's side-scan sonar systems revealed a large, unusually shaped object, which McKee believed was the Mary Rose.",
     },
     {
       label: 'E',
       content:
-        "Further work uncovered stray timbers and an iron gun. The major breakthrough came on 5 May 1971, when part of the ship's frame was found. McKee and his team knew they had found the wreck, though they did not yet realise its rich store of artefacts. Interest grew, and in 1979 The Mary Rose Trust was formed, with Prince Charles as President and Dr Margaret Rule as Archaeological Director. The decision to salvage the wreck was difficult. Although an excavation in 1978 suggested raising the hull might be possible, final approval came only in January 1982 once all necessary information was available.",
+        "Further excavations revealed stray pieces of timber and an iron gun. But the climax to the operation came when, on 5 May 1971, part of the ship's frame was uncovered. McKee and his team now knew for certain that they had found the wreck, but were as yet unaware that it also housed a treasure trove of beautifully preserved artefacts. Interest in the project grew, and in 1979, The Mary Rose Trust was formed, with Prince Charles as its President and Dr Margaret Rule its Archaeological Director. The decision whether or not to salvage the wreck was not an easy one, although an excavation in 1978 had shown that it might be possible to raise the hull. While the original aim was to raise the hull if at all feasible, the operation was not given the go-ahead until January 1982, when all the necessary information was available.",
     },
     {
       label: 'F',
       content:
-        'A key issue was that the remaining hull was an open shell. This led to the decision to lift it in three distinct stages. The hull was attached to a lifting frame via bolts and lifting wires. The danger of it being sucked back into mud was overcome by using 12 hydraulic jacks. Over several days they raised it a few centimetres as the frame rose slowly on four legs.',
+        'An important factor in trying to salvage the Mary Rose was that the remaining hull was an open shell. This led to an important decision being taken: namely to carry out the lifting operation in three very distinct stages. The hull was attached to a lifting frame via a network of bolts and lifting wires. The problem of the hull being sucked back downwards into the mud was overcome by using 12 hydraulic jacks. These raised it a few centimetres over a period of several days, as the lifting frame rose slowly up its four legs. It was only when the hull was hanging freely from the lifting frame, clear of the seabed and the suction effect of the surrounding mud, that the salvage operation progressed to the second stage.',
     },
     {
       label: 'G',
       content:
-        "Once the hull was hanging freely, the second stage began. The lifting frame was connected to a crane and the hull was lifted clear of the seabed and transferred underwater into a lifting cradle. This required precise positioning so the legs entered the stabbing guides of the cradle. The cradle, designed from archaeological survey drawings, included air bags for cushioning. In the final stage, the whole structure was lifted into the air with support from below. On 11 October 1982, the timber skeleton of the Mary Rose emerged from the water and returned to Portsmouth.",
+        "In this stage, the lifting frame was fixed to a hook attached to a crane, and the hull was lifted completely clear of the seabed and transferred underwater into the lifting cradle. This required precise positioning to locate the legs into the stabbing guides of the lifting cradle. The lifting cradle was designed to fit the hull using archaeological survey drawings, and was fitted with air bags to provide additional cushioning for the hull's delicate timber framework. The third and final stage was to lift the entire structure into the air, by which time the hull was also supported from below. Finally, on 11 October 1982, millions of people around the world held their breath as the timber skeleton of the Mary Rose was lifted clear of the water, ready to be returned home to Portsmouth.",
     },
   ],
   questions: day11Questions,
@@ -967,37 +967,37 @@ const day12Section: Section = {
     {
       label: 'A',
       content:
-        'Easter Island, or Rapa Nui, is home to hundreds of ancient human statues called moai. After this remote Pacific island was settled by Polynesians, it remained isolated for centuries. The moai were carved with stone tools and moved for many kilometres to stone platforms without animals or wheels. The identity of the builders remained disputed until modern linguistic, archaeological and genetic evidence proved they were Polynesians. Yet debate remained about how the statues were moved. Local folklore says they walked, while many researchers assumed they were dragged with ropes and logs.',
+        "Easter Island, or Rapa Nui as it is known locally, is home to several hundred ancient human statues - the moai. After this remote Pacific island was settled by the Polynesians, it remained isolated for centuries. All the energy and resources that went into the moai - some of which are ten metres tall and weigh over 7,000 kilos - came from the island itself. Yet when Dutch explorers landed in 1722, they met a Stone Age culture. The moai were carved with stone tools, then transported for many kilometres, without the use of animals or wheels, to massive stone platforms. The identity of the moai builders was in doubt until well into the twentieth century. Thor Heyerdahl, the Norwegian ethnographer and adventurer, thought the statues had been created by pre-Inca peoples from Peru. Bestselling Swiss author Erich von Daniken believed they were built by stranded extraterrestrials. Modern science - linguistic, archaeological and genetic evidence - has definitively proved the moai builders were Polynesians, but not how they moved their creations. Local folklore maintains that the statues walked, while researchers have tended to assume the ancestors dragged the statues somehow, using ropes and logs.",
     },
     {
       label: 'B',
       content:
-        'When Europeans arrived in 1722, Rapa Nui was mostly grassland. Later pollen evidence showed that for thousands of years it had been covered in palm forests, which disappeared after Polynesian settlement. Jared Diamond argues that the Rapanui destroyed their own fragile environment by clearing forests for fuel and farming. Without trees, they could not build canoes, so they turned to birds for food. Soil erosion reduced crop yields, and he argues the society descended into civil war and cannibalism before Europeans arrived.',
+        "When the Europeans arrived, Rapa Nui was grassland, with only a few scrawny trees. In the 1970s and 1980s, though, researchers found pollen preserved in lake sediments, which proved the island had been covered in lush palm forests for thousands of years. Only after the Polynesians arrived did those forests disappear. US scientist Jared Diamond believes that the Rapanui people - descendants of Polynesian settlers - wrecked their own environment. They had unfortunately settled on an extremely fragile island - dry, cool, and too remote to be properly fertilised by windblown volcanic ash. When the islanders cleared the forests for firewood and farming, the forests didn't grow back. As trees became scarce and they could no longer construct wooden canoes for fishing, they ate birds. Soil erosion decreased their crop yields. Before Europeans arrived, the Rapanui had descended into civil war and cannibalism, he maintains. The collapse of their isolated civilisation, Diamond writes, is a 'worst-case scenario for what may lie ahead of us in our own future'.",
     },
     {
       label: 'C',
       content:
-        'Diamond also argues that the moai accelerated this self-destruction. He sees them as power displays by rival chiefs who competed by building larger and larger statues. He suggests the statues were moved on wooden sledges and log rails, which required huge amounts of wood and labour. Feeding that labour force drove even more deforestation. Once wood ran out and conflict grew, the islanders toppled the moai, and by the nineteenth century none were standing.',
+        'The moai, he thinks, accelerated the self-destruction. Diamond interprets them as power displays by rival chieftains who, trapped on a remote little island, lacked other ways of asserting their dominance. They competed by building ever bigger figures. Diamond thinks they laid the moai on wooden sledges, hauled over log rails, but that required both a lot of wood and a lot of people. To feed the people, even more land had to be cleared. When the wood was gone and civil war began, the islanders began toppling the moai. By the nineteenth century none were standing.',
     },
     {
       label: 'D',
       content:
-        "Archaeologists Terry Hunt and Carl Lipo agree that Easter Island suffered ecological catastrophe, but they do not blame the islanders themselves, and they reject the claim that the moai caused the collapse. Excavations suggest the Rapanui made extraordinary efforts to protect scarce resources. They built thousands of circular stone windbreaks and cultivated crops inside them, and used broken volcanic rock to retain soil moisture. Hunt and Lipo describe them as pioneers of sustainable farming.",
+        "Archaeologists Terry Hunt of the University of Hawaii and Carl Lipo of California State University agree that Easter Island lost its lush forests and that it was an 'ecological catastrophe' - but they believe the islanders themselves weren't to blame. And the moai certainly weren't. Archaeological excavations indicate that the Rapanui went to heroic efforts to protect the resources of their wind-lashed, infertile fields. They built thousands of circular stone windbreaks and gardened inside them, and used broken volcanic rocks to keep the soil moist. In short, Hunt and Lipo argue, the prehistoric Rapanui were pioneers of sustainable farming.",
     },
     {
       label: 'E',
       content:
-        'Hunt and Lipo also argue that moai-building may have helped keep peace between groups, and that moving the statues required few people and no wood because they were walked upright. They say archaeological evidence supports local folklore. Experiments suggest that as few as 18 people, using three ropes, could manoeuvre a one-tonne replica. The statues\' shape and D-shaped base helped handlers rock them side to side.',
+        "Hunt and Lipo contend that moai-building was an activity that helped keep the peace between islanders. They also believe that moving the moai required few people and no wood, because they were walked upright. On that issue, Hunt and Lipo say, archaeological evidence backs up Rapanui folklore. Recent experiments indicate that as few as 18 people could, with three strong ropes and a bit of practice, easily manoeuvre a 1,000 kg moai replica a few hundred metres. The figures' fat bellies tilted them forward, and a D-shaped base allowed handlers to roll and rock them side to side.",
     },
     {
       label: 'F',
       content:
-        "They further argue that settlers were not wholly responsible for forest loss. Nuts from the extinct Easter Island palm show grooves made by Polynesian rats, which arrived with settlers and multiplied quickly. The rats likely prevented reseeding of slow-growing palms and may have eaten birds' eggs. Hunt and Lipo also find no evidence that civilisation collapsed when the forest disappeared. They believe population remained relatively stable until Europeans brought deadly diseases, and nineteenth-century slave raids then devastated the island.",
+        "Moreover, Hunt and Lipo are convinced that the settlers were not wholly responsible for the loss of the island's trees. Archaeological finds of nuts from the extinct Easter Island palm show tiny grooves, made by the teeth of Polynesian rats. The rats arrived along with the settlers, and in just a few years, Hunt and Lipo calculate, they would have overrun the island. They would have prevented the reseeding of the slow-growing palm trees and thereby doomed Rapa Nui's forest, even without the settlers' campaign of deforestation. No doubt the rats ate birds' eggs too. Hunt and Lipo also see no evidence that Rapanui civilisation collapsed when the palm forest did. They think its population grew rapidly and then remained more or less stable until the arrival of the Europeans, who introduced deadly diseases to which islanders had no immunity. Then in the nineteenth century slave traders decimated the population, which shrivelled to 111 people by 1877.",
     },
     {
       label: 'G',
       content:
-        "Hunt and Lipo's view is therefore of a peaceful and ingenious society of moai builders and land stewards, not reckless destroyers. They call Rapa Nui an unlikely success story rather than an abject failure. Whichever interpretation is correct, the story offers important lessons for the wider world.",
+        "Hunt and Lipo's vision, therefore, is one of an island populated by peaceful and ingenious moai builders and careful stewards of the land, rather than by reckless destroyers ruining their own environment and society. 'Rather than a case of abject failure, Rapa Nui is an unlikely story of success', they claim. Whichever is the case, there are surely some valuable lessons which the world at large can learn from the story of Rapa Nui.",
     },
   ],
   questions: day12Questions,
@@ -1010,47 +1010,47 @@ const day13Section: Section = {
     {
       label: 'A',
       content:
-        "Neuroaesthetics is an emerging field that seeks to bring scientific objectivity to the study of art. It has already improved understanding of many masterpieces. For example, blurred imagery in Impressionist paintings appears to stimulate the amygdala, a brain region linked to feelings, which may explain why these works can be so moving.",
+        "An emerging discipline called neuroaesthetics is seeking to bring scientific objectivity to the study of art, and has already given us a better understanding of many masterpieces. The blurred imagery of Impressionist paintings seems to stimulate the brain's amygdala, for instance. Since the amygdala plays a crucial role in our feelings, that finding might explain why many people find these pieces so moving.",
     },
     {
       label: 'B',
       content:
-        'Researchers also ask whether this approach can explain reactions to abstract twentieth-century art, from Mondrian to Pollock. Sceptics argue that people may claim to like such works simply because they are famous. Humans are often influenced by others: in simple shape-matching tasks, people may choose clearly wrong answers if they see others doing so. This tendency could be even stronger in art, where there is no single correct answer.',
+        "Could the same approach also shed light on abstract twentieth-century pieces, from Mondrian's geometrical blocks of colour, to Pollock's seemingly haphazard arrangements of splashed paint on canvas? Sceptics believe that people claim to like such works simply because they are famous. We certainly do have an inclination to follow the crowd. When asked to make simple perceptual decisions such as matching a shape to its rotated image, for example, people often choose a definitively wrong answer if they see others doing the same. It is easy to imagine that this mentality would have even more impact on a fuzzy concept like art appreciation, where there is no right or wrong answer.",
     },
     {
       label: 'C',
       content:
-        "Angelina Hawley-Dolan tested this by showing volunteers pairs of paintings: either famous abstract works or doodles by children, chimps and elephants. Some images had no captions and others were deliberately mislabelled. Volunteers generally preferred the works of renowned artists, even when they believed the works were by animals or children. This suggests people can detect an artist's intention even if they cannot explain it.",
+        "Angelina Hawley-Dolan, of Boston College, Massachusetts, responded to this debate by asking volunteers to view pairs of paintings - either the creations of famous abstract artists or the doodles of infants, chimps and elephants. They then had to judge which they preferred. A third of the paintings were given no captions, while many were labelled incorrectly - volunteers might think they were viewing a chimp's messy brushstrokes when they were actually seeing an acclaimed masterpiece. In each set of trials, volunteers generally preferred the work of renowned artists, even when they believed it was by an animal or a child. It seems that the viewer can sense the artist's vision in paintings, even if they can't explain why.",
     },
     {
       label: 'D',
       content:
-        "Artist Robert Pepperell creates ambiguous pieces that are neither fully abstract nor clearly representational. In one study, volunteers judged how powerful an artwork felt and whether they recognized anything familiar in it. The longer they took, the higher they rated the piece, and the greater their neural activity. The brain seems to treat such images as puzzles, and finding meaning can be rewarding.",
+        "Robert Pepperell, an artist based at Cardiff University, creates ambiguous works that are neither entirely abstract nor clearly representational. In one study, Pepperell and his collaborators asked volunteers to decide how 'powerful' they considered an artwork to be, and whether they saw anything familiar in the piece. The longer they took to answer these questions, the more highly they rated the piece under scrutiny, and the greater their neural activity. It would seem that the brain sees these images as puzzles, and the harder it is to decipher the meaning, the more rewarding is the moment of recognition.",
     },
     {
       label: 'E',
       content:
-        "Mondrian's paintings of horizontal and vertical lines and colour blocks look simple, but eye-tracking studies show they are meticulously composed. Rotating the works changes viewing behaviour: with originals, viewers' eyes rest longer on certain areas; with altered versions, their gaze moves around more quickly. Viewers then rate altered versions as less pleasurable.",
+        "And what about artists such as Mondrian, whose paintings consist exclusively of horizontal and vertical lines encasing blocks of colour? Mondrian's works are deceptively simple, but eye-tracking studies confirm that they are meticulously composed, and that simply rotating a piece radically changes the way we view it. With the originals, volunteers' eyes tended to stay longer on certain places in the image, but with the altered versions they would flit across a piece more rapidly. As a result, the volunteers considered the altered versions less pleasurable when they later rated the work.",
     },
     {
       label: 'F',
       content:
-        'Oshin Vartanian similarly compared original paintings with versions where elements had been rearranged. Most people preferred the originals, whether representational or abstract. Rearranged versions also produced less activation in brain areas linked to meaning and interpretation.',
+        "In a similar study, Oshin Vartanian of Toronto University asked volunteers to compare original paintings with ones which he had altered by moving objects around within the frame. He found that almost everyone preferred the original, whether it was a Van Gogh still life or an abstract by Miro. Vartanian also found that changing the composition of the paintings reduced activation in those brain areas linked with meaning and interpretation.",
     },
     {
       label: 'G',
       content:
-        "Alex Forsythe analysed visual intricacy in art and found that many artists seem to use an optimal level of detail. Too little is boring; too much can cause perceptual overload. Appealing works, abstract and representational alike, often contain fractals - repeated motifs at different scales. Since such patterns are common in nature, our visual systems may process them more easily.",
+        "In another experiment, Alex Forsythe of the University of Liverpool analysed the visual intricacy of different pieces of art, and her results suggest that many artists use a key level of detail to please the brain. Too little and the work is boring, but too much results in a kind of 'perceptual overload', according to Forsythe. What's more, appealing pieces both abstract and representational, show signs of 'fractals' - repeated motifs recurring in different scales. Fractals are common throughout nature, for example in the shapes of mountain peaks or the branches of trees. It is possible that our visual system, which evolved in the great outdoors, finds it easier to process such patterns.",
     },
     {
       label: 'H',
       content:
-        "Other research suggests the brain may process movement when viewing handwritten marks, as if replaying the creator's actions. This has prompted the idea that Pollock's paintings feel dynamic because viewers mentally reconstruct his gestures, perhaps through mirror neurons. The hypothesis still needs thorough testing. Neuroaesthetics may even help explain why some artworks endure: while fashions shape short-term popularity, works better adapted to our visual system may persist longer.",
+        "It is also intriguing that the brain appears to process movement when we see a handwritten letter, as if we are replaying the writer's moment of creation. This has led some to wonder whether Pollock's works feel so dynamic because the brain reconstructs the energetic actions the artist used as he painted. This may be down to our brain's 'mirror neurons', which are known to mimic others' actions. The hypothesis will need to be thoroughly tested, however. It might even be the case that we could use neuroaesthetic studies to understand the longevity of some pieces of artwork. While the fashions of the time might shape what is currently popular, works that are best adapted to our visual system may be the most likely to linger once the trends of previous generations have been forgotten.",
     },
     {
       label: 'I',
       content:
-        "The field is still young. Yet reducing art appreciation to fixed scientific laws would be unwise. Style, historical context and the artistic environment remain crucial. Abstract art offers both challenge and freedom of interpretation. In this sense, art is not entirely unlike science, where we also seek patterns and decode meaning to see the world differently.",
+        "It's still early days for the field of neuroaesthetics - and these studies are probably only a taste of what is to come. It would, however, be foolish to reduce art appreciation to a set of scientific laws. We shouldn't underestimate the importance of the style of a particular artist, their place in history and the artistic environment of their time. Abstract art offers both a challenge and the freedom to play with different interpretations. In some ways, it's not so different to science, where we are constantly looking for systems and decoding meaning so that we can view and appreciate the world in a new way.",
     },
   ],
   questions: day13Questions,

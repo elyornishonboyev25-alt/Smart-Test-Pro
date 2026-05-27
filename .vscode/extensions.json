@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "github.copilot-chat",
-        "github.codespaces"
+        "github.codespaces",
+        "anthropic.claude-code"
     ]
 }

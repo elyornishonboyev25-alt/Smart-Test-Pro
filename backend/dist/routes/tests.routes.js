@@ -102,6 +102,34 @@ function toSafeSyncSlug(externalTestId, track) {
 function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
 }
+const LEADERBOARD_PASSAGE_MIN_TIME_SEC = 10 * 60;
+const LEADERBOARD_FULL_TEST_MIN_TIME_SEC = 30 * 60;
+const LEADERBOARD_FULL_TEST_QUESTION_THRESHOLD = 27;
+function resolveLeaderboardAttemptKind(input) {
+    const testKey = input.externalTestId?.toLowerCase() ?? '';
+    const isFullTest = input.totalQuestions >= LEADERBOARD_FULL_TEST_QUESTION_THRESHOLD ||
+        testKey.includes('full') ||
+        testKey.includes('mock');
+    return isFullTest ? 'full-test' : 'passage';
+}
+function getMinimumLeaderboardTimeSec(input) {
+    const requestedMinimum = resolveLeaderboardAttemptKind(input) === 'full-test'
+        ? LEADERBOARD_FULL_TEST_MIN_TIME_SEC
+        : LEADERBOARD_PASSAGE_MIN_TIME_SEC;
+    return Math.min(requestedMinimum, Math.max(60, input.durationSec));
+}
+function sendLeaderboardTimeGuard(res, input) {
+    const attemptKind = resolveLeaderboardAttemptKind(input);
+    const minMinutes = Math.round(input.minTimeSec / 60);
+    return res.status(422).json({
+        code: 'LEADERBOARD_MIN_TIME',
+        leaderboardEligible: false,
+        attemptKind,
+        minTimeSec: input.minTimeSec,
+        actualTimeSec: input.actualTimeSec,
+        message: `Integrity check: this ${attemptKind === 'full-test' ? 'full test' : 'passage'} was submitted too quickly. Spend at least ${minMinutes} minutes before submitting to earn leaderboard points.`,
+    });
+}
 router.get('/', requireAuth, validateQuery(testListQuerySchema), asyncHandler(async (req, res) => {
     const query = req.query;
     const skip = (query.page - 1) * query.limit;
@@ -208,16 +236,23 @@ router.get('/recommended', requireAuth, asyncHandler(async (req, res) => {
 router.post('/reading-sync', requireAuth, validateBody(readingSyncSchema), asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const payload = req.body;
-    if (payload.isPartial) {
-        return res.status(200).json({
-            synced: false,
-            skipped: true,
-            reason: 'Partial attempts are not synced to competitive analytics.',
-        });
-    }
     const completedAt = payload.completedAt ? new Date(payload.completedAt) : new Date();
     const safeCompletedAt = Number.isNaN(completedAt.getTime()) ? new Date() : completedAt;
     const safeTotalQuestions = Math.max(1, payload.totalQuestions);
+    const minLeaderboardTimeSec = getMinimumLeaderboardTimeSec({
+        totalQuestions: safeTotalQuestions,
+        durationSec: payload.durationSec,
+        externalTestId: payload.externalTestId,
+    });
+    if (payload.timeSpentSec < minLeaderboardTimeSec) {
+        return sendLeaderboardTimeGuard(res, {
+            minTimeSec: minLeaderboardTimeSec,
+            actualTimeSec: payload.timeSpentSec,
+            totalQuestions: safeTotalQuestions,
+            durationSec: payload.durationSec,
+            externalTestId: payload.externalTestId,
+        });
+    }
     const computedAccuracy = (payload.correctAnswers / safeTotalQuestions) * 100;
     const percentage = clamp(typeof payload.accuracy === 'number' ? payload.accuracy : computedAccuracy, 0, 100);
     const finalScore = clamp(typeof payload.finalScore === 'number' ? payload.finalScore : percentage, 0, 100);
@@ -418,16 +453,23 @@ router.post('/reading-sync', requireAuth, validateBody(readingSyncSchema), async
 router.post('/listening-sync', requireAuth, validateBody(listeningSyncSchema), asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const payload = req.body;
-    if (payload.isPartial) {
-        return res.status(200).json({
-            synced: false,
-            skipped: true,
-            reason: 'Partial attempts are not synced to competitive analytics.',
-        });
-    }
     const completedAt = payload.completedAt ? new Date(payload.completedAt) : new Date();
     const safeCompletedAt = Number.isNaN(completedAt.getTime()) ? new Date() : completedAt;
     const safeTotalQuestions = Math.max(1, payload.totalQuestions);
+    const minLeaderboardTimeSec = getMinimumLeaderboardTimeSec({
+        totalQuestions: safeTotalQuestions,
+        durationSec: payload.durationSec,
+        externalTestId: payload.externalTestId,
+    });
+    if (payload.timeSpentSec < minLeaderboardTimeSec) {
+        return sendLeaderboardTimeGuard(res, {
+            minTimeSec: minLeaderboardTimeSec,
+            actualTimeSec: payload.timeSpentSec,
+            totalQuestions: safeTotalQuestions,
+            durationSec: payload.durationSec,
+            externalTestId: payload.externalTestId,
+        });
+    }
     const computedAccuracy = (payload.correctAnswers / safeTotalQuestions) * 100;
     const percentage = clamp(typeof payload.accuracy === 'number' ? payload.accuracy : computedAccuracy, 0, 100);
     const finalScore = clamp(typeof payload.finalScore === 'number' ? payload.finalScore : percentage, 0, 100);
@@ -691,6 +733,18 @@ router.post('/:id/submit', requireAuth, validateBody(submitAttemptSchema), async
     });
     if (!test) {
         return res.status(404).json({ message: 'Test not found.' });
+    }
+    const minLeaderboardTimeSec = getMinimumLeaderboardTimeSec({
+        totalQuestions: test.questions.length,
+        durationSec: test.durationSec,
+    });
+    if (timeSpentSec < minLeaderboardTimeSec) {
+        return sendLeaderboardTimeGuard(res, {
+            minTimeSec: minLeaderboardTimeSec,
+            actualTimeSec: timeSpentSec,
+            totalQuestions: test.questions.length,
+            durationSec: test.durationSec,
+        });
     }
     const score = calculateAttemptScore({
         difficulty: test.difficulty,

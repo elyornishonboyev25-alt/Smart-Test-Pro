@@ -169,6 +169,7 @@ export default function Results() {
   useEffect(() => {
     if (!result || !test) return
     if (result.isPartial) return
+    if (result.leaderboardEligible === false) return
     if (typeof window === 'undefined') return
 
     const attemptKey = `${result.testId}-${result.date}`

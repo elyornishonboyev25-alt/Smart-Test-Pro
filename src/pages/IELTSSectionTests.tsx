@@ -28,6 +28,8 @@ import {
   type IeltsTrackType,
 } from '@/utils/ieltsTrackCatalog'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { getReadingAnalysisHistory } from '@/utils/readingAnalysisStorage'
+import { useAuthStore, type AuthState } from '@/store/authStore'
 
 type CatalogFilter = 'all-tests' | 'passages' | 'full-tests'
 
@@ -47,6 +49,7 @@ type CatalogRow = {
 
 type TrackEngagement = {
   completedIds: string[]
+  dismissedCompletedIds: string[]
   lastVisitedTestId: string | null
   streakDays: number
   lastActiveDate: string | null
@@ -172,6 +175,7 @@ const TRACK_THEMES: Record<IeltsTrackType, TrackTheme> = {
 function defaultTrackEngagement(): TrackEngagement {
   return {
     completedIds: [],
+    dismissedCompletedIds: [],
     lastVisitedTestId: null,
     streakDays: 0,
     lastActiveDate: null,
@@ -189,12 +193,16 @@ function normalizeTrackEngagement(input: Partial<TrackEngagement> | null | undef
   const completedIds = Array.isArray(input?.completedIds)
     ? input.completedIds.filter((id): id is string => typeof id === 'string')
     : []
+  const dismissedCompletedIds = Array.isArray(input?.dismissedCompletedIds)
+    ? input.dismissedCompletedIds.filter((id): id is string => typeof id === 'string')
+    : []
   const streakDays = typeof input?.streakDays === 'number' && Number.isFinite(input.streakDays)
     ? Math.max(0, Math.round(input.streakDays))
     : 0
 
   return {
     completedIds,
+    dismissedCompletedIds,
     lastVisitedTestId: typeof input?.lastVisitedTestId === 'string' ? input.lastVisitedTestId : null,
     streakDays,
     lastActiveDate: typeof input?.lastActiveDate === 'string' ? input.lastActiveDate : null,
@@ -332,6 +340,7 @@ export default function IELTSSectionTests() {
   const navigate = useNavigate()
   const location = useLocation()
   const { allowHoverMotion, minimalMotion } = useMotionPreferences()
+  const user = useAuthStore((state: AuthState) => state.user)
   const { section } = useParams<{ section: string }>()
 
   const isValidTrack = section === 'reading' || section === 'listening'
@@ -348,6 +357,9 @@ export default function IELTSSectionTests() {
   const deferredSearchTerm = useDeferredValue(searchTerm)
   const [roadmapBooting, setRoadmapBooting] = useState(true)
   const [celebrationRowId, setCelebrationRowId] = useState<string | null>(null)
+  const [attemptSyncToken, setAttemptSyncToken] = useState(0)
+  const [pendingUnmarkRow, setPendingUnmarkRow] = useState<CatalogRow | null>(null)
+  const [completionGuardRow, setCompletionGuardRow] = useState<CatalogRow | null>(null)
 
   const [engagementStore, setEngagementStore] = useState<EngagementStore>(() => {
     if (typeof window === 'undefined') {
@@ -362,7 +374,6 @@ export default function IELTSSectionTests() {
   })
 
   const trackEngagement = engagementStore[track] ?? defaultTrackEngagement()
-  const completedSet = useMemo(() => new Set(trackEngagement.completedIds), [trackEngagement.completedIds])
 
   const passages = useMemo(() => getIeltsPassageCatalog(track), [track])
   const fullTests = useMemo(() => getIeltsFullTestCatalog(track), [track])
@@ -422,6 +433,28 @@ export default function IELTSSectionTests() {
 
   const allRows = useMemo<CatalogRow[]>(() => [...passageRows, ...fullTestRows], [fullTestRows, passageRows])
 
+  const scoredCompletedIds = useMemo(() => {
+    if (track !== 'reading') return []
+    const history = getReadingAnalysisHistory(user?.id)
+    const scoredTestIds = new Set(
+      history
+        .filter((entry) => entry.correctAnswers > 0 && entry.totalQuestions > 0)
+        .map((entry) => entry.testId),
+    )
+
+    return allRows
+      .filter((row) => scoredTestIds.has(row.testId))
+      .map((row) => row.id)
+  }, [allRows, attemptSyncToken, track, user?.id])
+
+  const completedSet = useMemo(() => {
+    const dismissed = new Set(trackEngagement.dismissedCompletedIds)
+    const ids = new Set(trackEngagement.completedIds)
+    scoredCompletedIds.forEach((id) => ids.add(id))
+    dismissed.forEach((id) => ids.delete(id))
+    return ids
+  }, [scoredCompletedIds, trackEngagement.completedIds, trackEngagement.dismissedCompletedIds])
+
   const filteredRows = useMemo(() => {
     if (activeFilter === 'passages') return passageRows
     if (activeFilter === 'full-tests') return fullTestRows
@@ -475,6 +508,19 @@ export default function IELTSSectionTests() {
     if (typeof window === 'undefined') return
     window.localStorage.setItem(TRACK_ENGAGEMENT_STORAGE_KEY, JSON.stringify(engagementStore))
   }, [engagementStore])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const refreshCompletionState = () => setAttemptSyncToken((current) => current + 1)
+
+    window.addEventListener('smarttest:attempt-submitted', refreshCompletionState)
+    window.addEventListener('storage', refreshCompletionState)
+
+    return () => {
+      window.removeEventListener('smarttest:attempt-submitted', refreshCompletionState)
+      window.removeEventListener('storage', refreshCompletionState)
+    }
+  }, [])
 
   useEffect(() => {
     const today = new Date().toISOString().slice(0, 10)
@@ -566,23 +612,34 @@ export default function IELTSSectionTests() {
 
   const handleToggleComplete = (row: CatalogRow) => {
     const currentlyCompleted = completedSet.has(row.id)
+    if (!currentlyCompleted) {
+      setCompletionGuardRow(row)
+      return
+    }
+
+    setPendingUnmarkRow(row)
+  }
+
+  const confirmUnmarkComplete = () => {
+    if (!pendingUnmarkRow) return
+    const row = pendingUnmarkRow
+
     updateTrackEngagement((current) => {
-      const completedIds = currentlyCompleted
-        ? current.completedIds.filter((id) => id !== row.id)
-        : [...current.completedIds, row.id]
+      const dismissedCompletedIds = Array.from(new Set([...current.dismissedCompletedIds, row.id]))
+      const completedIds = current.completedIds.filter((id) => id !== row.id)
 
       return {
         ...current,
         completedIds,
+        dismissedCompletedIds,
         lastVisitedTestId: row.id,
       }
     })
 
-    if (!currentlyCompleted) {
-      setCelebrationRowId(row.id)
-    } else if (celebrationRowId === row.id) {
+    if (celebrationRowId === row.id) {
       setCelebrationRowId(null)
     }
+    setPendingUnmarkRow(null)
   }
 
   return (
@@ -592,6 +649,107 @@ export default function IELTSSectionTests() {
       transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: CARD_EASE }}
       className="w-full px-4 py-6 sm:px-6 lg:px-8"
     >
+      <AnimatePresence>
+        {pendingUnmarkRow ? (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-950/55 backdrop-blur-md"
+              onClick={() => setPendingUnmarkRow(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 18, scale: 0.94, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: 12, scale: 0.96, filter: 'blur(6px)' }}
+              transition={{ duration: 0.28, ease: CARD_EASE }}
+              className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-rose-100 bg-[linear-gradient(145deg,#fff,#fff7f7_58%,#fffaf8)] p-6 text-center shadow-[0_34px_78px_rgba(127,29,29,0.28)]"
+            >
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-rose-600 via-red-500 to-orange-400" />
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-100 bg-white text-rose-600 shadow-[0_18px_34px_rgba(225,29,72,0.18)]">
+                <CheckCircle2 className="h-8 w-8" />
+              </div>
+              <h3 className="mt-4 text-2xl font-black text-slate-950">Remove completion mark?</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                This test was marked completed because a scored attempt exists. Remove the completed status only if this
+                attempt should not belong to your study progress.
+              </p>
+              <div className="mt-5 flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPendingUnmarkRow(null)}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Keep completed
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmUnmarkComplete}
+                  className="rounded-xl bg-gradient-to-r from-rose-600 to-red-600 px-4 py-2.5 text-sm font-black text-white shadow-[0_14px_26px_rgba(225,29,72,0.26)] hover:brightness-105"
+                >
+                  Remove mark
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {completionGuardRow ? (
+          <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-950/50 backdrop-blur-md"
+              onClick={() => setCompletionGuardRow(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 14, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.97 }}
+              transition={{ duration: 0.26, ease: CARD_EASE }}
+              className="relative w-full max-w-lg overflow-hidden rounded-[30px] border border-red-100 bg-[linear-gradient(160deg,#fff_0%,#fff8f8_52%,#fffaf8_100%)] p-7 text-center shadow-[0_38px_86px_rgba(220,38,38,0.26)]"
+            >
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-400" />
+              <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-rose-200/45 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-20 left-4 h-40 w-40 rounded-full bg-orange-200/30 blur-3xl" />
+              <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-red-200 bg-white text-red-600 shadow-[0_14px_30px_rgba(220,38,38,0.18)]">
+                <PlayCircle className="h-8 w-8" />
+              </div>
+              <h3 className="relative mt-5 text-2xl font-black tracking-tight text-slate-950">
+                Start the test to complete it
+              </h3>
+              <p className="relative mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-600">
+                Completion is automatic: submit a scored attempt and this roadmap item will be marked completed.
+              </p>
+              <div className="relative mt-5 flex flex-col-reverse items-stretch justify-center gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setCompletionGuardRow(null)}
+                  className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                >
+                  Not now
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const row = completionGuardRow
+                    setCompletionGuardRow(null)
+                    handleRowLaunch(row)
+                  }}
+                  className="rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 px-5 py-2.5 text-sm font-black text-white shadow-[0_14px_30px_rgba(220,38,38,0.32)] transition hover:brightness-105"
+                >
+                  Start test
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        ) : null}
+      </AnimatePresence>
+
       <section className={`relative overflow-hidden rounded-[1.9rem] border p-5 sm:p-6 ${theme.heroPanel}`}>
         <div className="pointer-events-none absolute inset-0">
           <div className={`absolute -left-16 -top-16 h-44 w-44 rounded-full blur-3xl ${theme.heroGlowPrimary}`} />

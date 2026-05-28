@@ -60,6 +60,7 @@ const CURRENTLY_AVAILABLE_TRACK_TESTS: Record<IeltsTrackType, Set<string>> = {
     'reading-day-21',
     'reading-day-22',
     'reading-day-23',
+    'reading-day-24',
     'reading-day-11',
     'reading-day-12',
     'reading-day-13',
@@ -146,4 +147,3 @@ export function isPremiumIeltsTrackTest(track: IeltsTrackType, testId: string): 
   void testId
   return false
 }
-

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   BookOpen,
   Calculator,
@@ -10,12 +11,15 @@ import {
   ChevronRight,
   ClipboardPlus,
   Clock3,
+  LogIn,
   Lock,
   Sparkles,
   Trophy,
   User,
+  UserPlus,
 } from 'lucide-react'
 import { useAuthStore, type AuthState } from '@/store/authStore'
+import { useRegisterModalStore, type RegisterModalState } from '@/store/registerModalStore'
 import {
   addCustomTaskToDay,
   ensureRollingWeek,
@@ -89,6 +93,13 @@ const HOURS_OPTIONS = [3, 4, 5, 6]
 
 const STEP_LABELS = ['Profile', 'Timeline', 'Generate']
 
+const PLAN_GENERATION_STEPS = [
+  'Analysing your exam target',
+  'Balancing daily workload',
+  'Arranging module practice',
+  'Polishing your 7-day plan',
+]
+
 const slideVariants = {
   enterRight: { x: 60, opacity: 0 },
   enterLeft: { x: -60, opacity: 0 },
@@ -97,8 +108,44 @@ const slideVariants = {
   exitRight: { x: 60, opacity: 0 },
 }
 
+function playPlanSuccessSound() {
+  if (typeof window === 'undefined') return
+  const AudioContextCtor = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+  if (!AudioContextCtor) return
+
+  try {
+    const context = new AudioContextCtor()
+    const masterGain = context.createGain()
+    masterGain.gain.setValueAtTime(0.0001, context.currentTime)
+    masterGain.gain.exponentialRampToValueAtTime(0.12, context.currentTime + 0.03)
+    masterGain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.7)
+    masterGain.connect(context.destination)
+
+    ;[523.25, 659.25, 783.99].forEach((frequency, index) => {
+      const oscillator = context.createOscillator()
+      const gain = context.createGain()
+      const startAt = context.currentTime + index * 0.11
+      oscillator.type = 'sine'
+      oscillator.frequency.setValueAtTime(frequency, startAt)
+      gain.gain.setValueAtTime(0.0001, startAt)
+      gain.gain.exponentialRampToValueAtTime(0.24, startAt + 0.025)
+      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.34)
+      oscillator.connect(gain)
+      gain.connect(masterGain)
+      oscillator.start(startAt)
+      oscillator.stop(startAt + 0.36)
+    })
+
+    window.setTimeout(() => void context.close().catch(() => undefined), 900)
+  } catch {
+    // Audio feedback is optional; plan generation should never fail because sound is blocked.
+  }
+}
+
 export default function WeeklyPlannerLab() {
+  const navigate = useNavigate()
   const user = useAuthStore((state: AuthState) => state.user)
+  const openRegisterModal = useRegisterModalStore((state: RegisterModalState) => state.openRegisterModal)
 
   const [profile, setProfile] = useState<OnboardingProfile | null>(null)
   const [plan, setPlan] = useState<WeeklyPlan | null>(null)
@@ -119,10 +166,21 @@ export default function WeeklyPlannerLab() {
   const [customDuration, setCustomDuration] = useState(30)
   const [customDayId, setCustomDayId] = useState<string>('')
   const [activityRefreshToken, setActivityRefreshToken] = useState(0)
+  const [generationStage, setGenerationStage] = useState<'idle' | 'generating' | 'success'>('idle')
+  const [generationMessageIndex, setGenerationMessageIndex] = useState(0)
+  const [showPlanCreatedBanner, setShowPlanCreatedBanner] = useState(false)
 
   const firstNameRef = useRef<HTMLInputElement>(null)
+  const planSectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    if (!user) {
+      setProfile(null)
+      setPlan(null)
+      setShowOnboarding(false)
+      return
+    }
+
     const storedProfile = loadOnboardingProfile(user?.id)
     if (!storedProfile) {
       setProfile(null)
@@ -159,6 +217,19 @@ export default function WeeklyPlannerLab() {
     }
   }, [showOnboarding, onboardingStep])
 
+  useEffect(() => {
+    if (generationStage !== 'generating') {
+      setGenerationMessageIndex(0)
+      return
+    }
+
+    const intervalId = window.setInterval(() => {
+      setGenerationMessageIndex((current) => (current + 1) % PLAN_GENERATION_STEPS.length)
+    }, 520)
+
+    return () => window.clearInterval(intervalId)
+  }, [generationStage])
+
   const activityLog = useMemo(() => loadActivityLog(user?.id), [user?.id, activityRefreshToken])
 
   const selectedDay = useMemo(() => {
@@ -187,30 +258,45 @@ export default function WeeklyPlannerLab() {
   const createOnboarding = () => {
     const safeFirst = firstName.trim()
     const safeLast = lastName.trim()
-    if (!safeFirst || !safeLast) return
+    if (!safeFirst || !safeLast || generationStage !== 'idle') return
 
-    const nextProfile: OnboardingProfile = {
-      firstName: safeFirst,
-      lastName: safeLast,
-      targetExam,
-      daysToExam: Math.max(1, resolvedDays),
-      dailyHours: Math.max(3, dailyHours),
-      createdAt: new Date().toISOString(),
-    }
+    setGenerationStage('generating')
 
-    const nextPlan = generateWeeklyPlan(nextProfile, new Date())
-    const defaultDayId = resolveDefaultDayId(nextPlan)
+    window.setTimeout(() => {
+      const nextProfile: OnboardingProfile = {
+        firstName: safeFirst,
+        lastName: safeLast,
+        targetExam,
+        daysToExam: Math.max(1, resolvedDays),
+        dailyHours: Math.max(3, dailyHours),
+        createdAt: new Date().toISOString(),
+      }
 
-    saveOnboardingProfile(nextProfile, user?.id)
-    saveWeeklyPlan(nextPlan, user?.id)
-    saveToAccountProfile(safeFirst, safeLast, targetExam)
+      const nextPlan = generateWeeklyPlan(nextProfile, new Date())
+      const defaultDayId = resolveDefaultDayId(nextPlan)
 
-    setProfile(nextProfile)
-    setPlan(nextPlan)
-    setSelectedDayId(defaultDayId)
-    setCustomDayId(defaultDayId ?? '')
-    setShowOnboarding(false)
-    setOnboardingStep(1)
+      saveOnboardingProfile(nextProfile, user?.id)
+      saveWeeklyPlan(nextPlan, user?.id)
+      saveToAccountProfile(safeFirst, safeLast, targetExam)
+
+      setProfile(nextProfile)
+      setPlan(nextPlan)
+      setSelectedDayId(defaultDayId)
+      setCustomDayId(defaultDayId ?? '')
+      setGenerationStage('success')
+      playPlanSuccessSound()
+
+      window.setTimeout(() => {
+        setShowOnboarding(false)
+        setOnboardingStep(1)
+        setGenerationStage('idle')
+        setShowPlanCreatedBanner(true)
+        window.setTimeout(() => {
+          planSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }, 120)
+        window.setTimeout(() => setShowPlanCreatedBanner(false), 4600)
+      }, 800)
+    }, 2200)
   }
 
   const addCustomTask = () => {
@@ -564,6 +650,7 @@ export default function WeeklyPlannerLab() {
                 <button
                   type="button"
                   onClick={() => goToStep((onboardingStep - 1) as 1 | 2 | 3, 'back')}
+                  disabled={generationStage !== 'idle'}
                   className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -607,23 +694,178 @@ export default function WeeklyPlannerLab() {
                 <motion.button
                   type="button"
                   onClick={createOnboarding}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(220,38,38,0.36)] transition hover:shadow-[0_12px_28px_rgba(220,38,38,0.46)]"
+                  disabled={generationStage !== 'idle'}
+                  whileHover={generationStage === 'idle' ? { scale: 1.02 } : undefined}
+                  whileTap={generationStage === 'idle' ? { scale: 0.98 } : undefined}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-6 py-2.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(220,38,38,0.36)] transition hover:shadow-[0_12px_28px_rgba(220,38,38,0.46)] disabled:cursor-wait disabled:opacity-75"
                 >
                   <Sparkles className="h-4 w-4" />
-                  Generate My Plan
+                  {generationStage === 'idle' ? 'Generate My Plan' : 'Generating...'}
                 </motion.button>
               )}
             </div>
           </div>
+
+          <AnimatePresence>
+            {generationStage !== 'idle' ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 flex items-center justify-center overflow-hidden bg-white/88 backdrop-blur-xl"
+              >
+                <motion.div
+                  aria-hidden="true"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.92 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute inset-0 bg-[radial-gradient(circle_at_50%_34%,rgba(248,113,113,0.22),transparent_34%),radial-gradient(circle_at_32%_72%,rgba(251,146,60,0.16),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,241,242,0.72))]"
+                />
+                {[0, 1, 2, 3, 4, 5].map((dot) => (
+                  <motion.span
+                    key={`plan-orb-${dot}`}
+                    aria-hidden="true"
+                    className="absolute h-2 w-2 rounded-full bg-red-400/45 shadow-[0_0_22px_rgba(239,68,68,0.45)]"
+                    initial={{
+                      x: `${18 + dot * 13}%`,
+                      y: `${22 + (dot % 3) * 19}%`,
+                      opacity: 0,
+                      scale: 0.6,
+                    }}
+                    animate={{
+                      y: [`${22 + (dot % 3) * 19}%`, `${18 + (dot % 3) * 22}%`, `${22 + (dot % 3) * 19}%`],
+                      opacity: [0.2, 0.68, 0.2],
+                      scale: [0.8, 1.35, 0.8],
+                    }}
+                    transition={{
+                      duration: 2.6 + dot * 0.18,
+                      repeat: Infinity,
+                      ease: [0.45, 0, 0.55, 1],
+                      delay: dot * 0.12,
+                    }}
+                  />
+                ))}
+                <motion.div
+                  initial={{ opacity: 0, y: 18, scale: 0.94, filter: 'blur(8px)' }}
+                  animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: 12, scale: 0.94, filter: 'blur(8px)' }}
+                  transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative mx-5 w-full max-w-md overflow-hidden rounded-[2rem] border border-red-100 bg-white/95 p-6 text-center shadow-[0_36px_90px_rgba(127,29,29,0.24)]"
+                >
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-600 via-rose-400 to-orange-400" />
+                  <div className="relative mx-auto flex h-24 w-24 items-center justify-center">
+                    {generationStage === 'generating' ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}
+                          className="absolute inset-0 rounded-full bg-[conic-gradient(from_90deg,rgba(220,38,38,0),rgba(220,38,38,0.16),rgba(220,38,38,0.95),rgba(251,146,60,0.75),rgba(220,38,38,0))] p-[3px]"
+                        >
+                          <div className="h-full w-full rounded-full bg-white" />
+                        </motion.div>
+                        <motion.div
+                          animate={{ scale: [1, 1.08, 1], opacity: [0.72, 1, 0.72] }}
+                          transition={{ repeat: Infinity, duration: 1.45, ease: [0.45, 0, 0.55, 1] }}
+                          className="absolute inset-3 rounded-full bg-gradient-to-br from-red-50 to-rose-100 shadow-inner"
+                        />
+                        <motion.div
+                          animate={{ rotate: -360 }}
+                          transition={{ repeat: Infinity, duration: 4.2, ease: 'linear' }}
+                          className="absolute h-16 w-16 rounded-full border border-dashed border-red-200"
+                        />
+                        <Sparkles className="relative h-8 w-8 text-red-600" />
+                      </>
+                    ) : (
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0, rotate: -12 }}
+                        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+                        className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-[0_20px_38px_rgba(16,185,129,0.32)]"
+                      >
+                        <CheckCircle2 className="h-10 w-10" />
+                      </motion.div>
+                    )}
+                  </div>
+                  <p className="mt-4 text-2xl font-black text-slate-900">
+                    {generationStage === 'generating' ? 'Creating your study plan...' : 'Plan created successfully'}
+                  </p>
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={`${generationStage}-${generationMessageIndex}`}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                      className="mt-2 text-sm leading-6 text-slate-500"
+                    >
+                      {generationStage === 'generating'
+                        ? PLAN_GENERATION_STEPS[generationMessageIndex]
+                        : 'Taking you to your weekly plan now.'}
+                    </motion.p>
+                  </AnimatePresence>
+
+                  {generationStage === 'generating' ? (
+                    <div className="relative mt-5 overflow-hidden rounded-full border border-red-100 bg-white/80 p-1 shadow-inner">
+                      <motion.div
+                        className="h-2 rounded-full bg-[linear-gradient(90deg,#dc2626,#fb7185,#fb923c,#dc2626)] bg-[length:220%_100%] shadow-[0_0_22px_rgba(239,68,68,0.35)]"
+                        initial={{ width: '18%', backgroundPosition: '0% 50%' }}
+                        animate={{ width: ['18%', '54%', '78%', '92%'], backgroundPosition: ['0% 50%', '100% 50%'] }}
+                        transition={{ duration: 2.1, repeat: Infinity, repeatType: 'reverse', ease: [0.45, 0, 0.55, 1] }}
+                      />
+                      <motion.span
+                        aria-hidden="true"
+                        className="absolute inset-y-1 left-0 w-16 rounded-full bg-white/50 blur-md"
+                        animate={{ x: ['-30%', '680%'] }}
+                        transition={{ duration: 1.55, repeat: Infinity, ease: [0.45, 0, 0.55, 1] }}
+                      />
+                    </div>
+                  ) : null}
+
+                  {generationStage === 'generating' ? (
+                    <div className="mt-5 grid gap-2 text-left">
+                      {PLAN_GENERATION_STEPS.map((step, index) => {
+                        const isActive = index === generationMessageIndex
+                        const isComplete = index < generationMessageIndex
+                        return (
+                          <div
+                            key={step}
+                            className={`flex items-center gap-2 rounded-2xl border px-3 py-2 text-xs font-bold transition-all ${
+                              isActive
+                                ? 'border-red-200 bg-red-50 text-red-700 shadow-[0_10px_22px_rgba(220,38,38,0.12)]'
+                                : isComplete
+                                  ? 'border-emerald-100 bg-emerald-50 text-emerald-700'
+                                  : 'border-slate-100 bg-slate-50 text-slate-400'
+                            }`}
+                          >
+                            <span className={`h-2 w-2 rounded-full ${isActive ? 'animate-pulse bg-red-500' : isComplete ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                            {step}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <p className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
+                      Your personalized 7-day plan is ready.
+                    </p>
+                  )}
+
+                  <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                    {generationStage === 'generating'
+                      ? 'Please keep this tab open'
+                      : 'Success'}
+                  </p>
+                </motion.div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </motion.div>
       </div>
     </div>
   ) : null
 
   return (
-    <section className="panel-surface p-5">
+    <section ref={planSectionRef} className="panel-surface p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-black text-slate-900">Weekly Planner Lab</h2>
@@ -637,8 +879,60 @@ export default function WeeklyPlannerLab() {
         </div>
       </div>
 
-      {profile && plan ? (
+      {!user ? (
+        <div className="mt-4 rounded-2xl border border-red-100 bg-white p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-lg font-black text-slate-900">Sign in to generate your plan</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                The setup questions appear after you create an account or sign in, so your plan stays connected to your profile.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => openRegisterModal()}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_8px_20px_rgba(220,38,38,0.3)]"
+              >
+                <UserPlus className="h-4 w-4" />
+                Create Account
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-50"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : profile && plan ? (
         <>
+          <AnimatePresence>
+            {showPlanCreatedBanner ? (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                className="mt-4 overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-[0_16px_34px_rgba(16,185,129,0.14)]"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-base font-black">Your plan has been created</p>
+                    <p className="mt-1 text-sm text-emerald-700">
+                      Your personalized 7-day study plan is ready below.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
           {/* Profile summary */}
           <div className="mt-4 grid gap-3 lg:grid-cols-3">
             <div className="rounded-2xl border border-red-100 bg-white p-4">

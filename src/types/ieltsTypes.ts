@@ -97,6 +97,7 @@ export interface TestResult {
     answers: Record<string, any>
     detailedBreakdown?: TestResultBreakdown
     isPartial?: boolean
+    leaderboardEligible?: boolean
 }
 
 export type QuestionReviewStatus = 'correct' | 'incorrect' | 'skipped'

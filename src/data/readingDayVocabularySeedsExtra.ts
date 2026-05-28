@@ -1,7 +1,9 @@
 import type { ReadingVocabularySeed } from './ieltsReadingVocabularySource'
+import { readingDayVocabularySeedsDay24 } from './readingDayVocabularySeedsDay24'
 import { readingDayVocabularySeedsDay14To23 } from './readingDayVocabularySeedsDay14To23'
 
 export const readingDayVocabularySeedsExtra: Record<number, ReadingVocabularySeed[]> = {
+  ...readingDayVocabularySeedsDay24,
   7: [
     {
       term: 'astonishing',

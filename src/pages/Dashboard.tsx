@@ -344,7 +344,7 @@ export default function Dashboard() {
                       }`}
                   >
                     <p className="text-sm font-semibold text-[#1F2937]">#{row.rank} {row.fullName}</p>
-                    <p className="mt-1 text-xs text-[#64748B]">XP: {Math.max(0, row.totalXp)}</p>
+                    <p className="mt-1 text-xs text-[#64748B]">Pts: {Math.max(0, row.totalXp)}</p>
                   </div>
                 ))}
               </div>

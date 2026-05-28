@@ -4,16 +4,18 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Lock, Mail } from 'lucide-react'
 import { apiClient } from '@/lib/apiClient'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { BrandMark } from '@/components/brand/BrandLogo'
-import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
 
 const loginSchema = z.object({
-  email: z.string().email('Valid email is required'),
+  email: z
+    .string()
+    .email('Valid Gmail address is required')
+    .refine((value) => value.toLowerCase().endsWith('@gmail.com'), 'Use your Gmail address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
@@ -60,7 +62,14 @@ export default function Login() {
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      const payload = await apiClient.post<AuthSessionPayload>('/auth/login', values, { auth: false })
+      const payload = await apiClient.post<AuthSessionPayload>(
+        '/auth/login',
+        {
+          email: values.email.trim().toLowerCase(),
+          password: values.password,
+        },
+        { auth: false },
+      )
 
       setSession(payload)
       pushToast({
@@ -78,31 +87,6 @@ export default function Login() {
     }
   }
 
-  const onGoogleSignIn = async (idToken: string) => {
-    try {
-      const payload = await apiClient.post<AuthSessionPayload>(
-        '/auth/google',
-        { idToken },
-        { auth: false },
-      )
-
-      setSession(payload)
-      pushToast({
-        type: 'success',
-        title: 'Google sign-in completed',
-        message: 'Welcome back to SmartTest Pro.',
-      })
-      navigate(redirectPath, { replace: true })
-    } catch (error) {
-      pushToast({
-        type: 'error',
-        title: 'Google sign-in failed',
-        message: error instanceof Error ? error.message : 'Unable to continue with Google',
-      })
-      throw error
-    }
-  }
-
   return (
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-12">
       <motion.div
@@ -114,22 +98,25 @@ export default function Login() {
         <div className="mb-7 text-center">
           <BrandMark size={56} className="mx-auto shadow-[0_14px_26px_rgba(220,38,38,0.32)]" />
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[#1F2937]">Sign in to SmartTest Pro</h1>
-          <p className="mt-2 text-sm text-[#6B7280]">Access AI testing, leaderboard, and performance analytics.</p>
+          <p className="mt-2 text-sm text-[#6B7280]">Enter your Gmail and password to continue your saved study plan.</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" aria-label="Login form">
           <div>
             <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-slate-700">
-              Email
+              Gmail address
             </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              className="input"
-              placeholder="student@example.com"
-              {...register('email')}
-            />
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                className="input pl-10"
+                placeholder="name@gmail.com"
+                {...register('email')}
+              />
+            </div>
             {errors.email ? <p className="mt-1 text-xs text-red-600">{errors.email.message}</p> : null}
           </div>
 
@@ -137,14 +124,17 @@ export default function Login() {
             <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-slate-700">
               Password
             </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              className="input"
-              placeholder="Enter your password"
-              {...register('password')}
-            />
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                className="input pl-10"
+                placeholder="Enter your password"
+                {...register('password')}
+              />
+            </div>
             {errors.password ? <p className="mt-1 text-xs text-red-600">{errors.password.message}</p> : null}
           </div>
 
@@ -164,14 +154,6 @@ export default function Login() {
             )}
           </motion.button>
         </form>
-
-        <div className="my-5 flex items-center gap-3">
-          <span className="h-px flex-1 bg-slate-200" />
-          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">or continue with</span>
-          <span className="h-px flex-1 bg-slate-200" />
-        </div>
-
-        <GoogleAuthButton mode="signin" disabled={isSubmitting} onCredential={onGoogleSignIn} />
 
         <p className="mt-6 text-center text-sm text-[#6B7280]">
           New account?{' '}

@@ -29,7 +29,7 @@ export default function PremiumRoute({ children, showGuestBanner = false }: Prem
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700">Guest Preview</p>
               <p className="text-sm font-medium text-slate-700">
-                Explore all sections freely. Register with Google to save progress across devices.
+                Explore all sections freely. Create an account to save progress across devices.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

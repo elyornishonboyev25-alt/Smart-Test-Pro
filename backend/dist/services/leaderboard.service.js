@@ -2,8 +2,11 @@ import { LeaderboardPeriod } from '@prisma/client';
 import { prisma } from '../lib/prisma.js';
 import { addUtcDays, getPeriodStart, startOfUtcDay } from '../utils/date.js';
 const LEADERBOARD_CACHE_TTL_MS = 45_000;
-const MIN_VALID_TIME_RATIO = 0.23;
-const MIN_FAST_SCORE_THRESHOLD = 68;
+const LEADERBOARD_FULL_TEST_QUESTION_THRESHOLD = 27;
+const LEADERBOARD_PASSAGE_MAX_POINTS = 10;
+const LEADERBOARD_FULL_TEST_MAX_POINTS = 30;
+const LEADERBOARD_PASSAGE_MIN_TIME_MINUTES = 10;
+const LEADERBOARD_FULL_TEST_MIN_TIME_MINUTES = 30;
 const leaderboardCache = new Map();
 export const DIFFICULTY_MULTIPLIERS = {
     EASY: 1.0,
@@ -164,10 +167,23 @@ function resolveWeeklyPerformanceBoard(period, rows) {
 }
 function resolveAntiCheatRules() {
     return [
-        'Only one validated attempt per test is counted in a leaderboard period.',
-        `Attempts finished under ${Math.round(MIN_VALID_TIME_RATIO * 100)}% of test duration with high score are excluded.`,
-        'Ranking score is weighted by integrity to reduce repeat-abuse advantage.',
+        'Only one validated attempt per test is counted in each leaderboard period.',
+        `Single-passage attempts require at least ${LEADERBOARD_PASSAGE_MIN_TIME_MINUTES} minutes and can earn up to ${LEADERBOARD_PASSAGE_MAX_POINTS} points.`,
+        `Full tests require at least ${LEADERBOARD_FULL_TEST_MIN_TIME_MINUTES} minutes and can earn up to ${LEADERBOARD_FULL_TEST_MAX_POINTS} points.`,
+        'Ranking is based on accumulated board points, accuracy, and consistency so regular high-quality practice ranks higher.',
     ];
+}
+function resolveAttemptMaxPoints(totalQuestions) {
+    return totalQuestions >= LEADERBOARD_FULL_TEST_QUESTION_THRESHOLD
+        ? LEADERBOARD_FULL_TEST_MAX_POINTS
+        : LEADERBOARD_PASSAGE_MAX_POINTS;
+}
+function calculateLeaderboardAttemptPoints(attempt) {
+    const safeTotalQuestions = Math.max(1, attempt.totalQuestions);
+    const safeCorrectAnswers = clamp(attempt.correctAnswers, 0, safeTotalQuestions);
+    const maxPoints = resolveAttemptMaxPoints(safeTotalQuestions);
+    const accuracyRatio = safeCorrectAnswers / safeTotalQuestions;
+    return Number((maxPoints * accuracyRatio).toFixed(2));
 }
 function readCache(period, category) {
     const key = getCacheKey(period, category);
@@ -210,13 +226,6 @@ function buildUserAggregates(params) {
         const validatedAttempts = [];
         let discardedAttempts = 0;
         for (const attempt of userAttempts) {
-            const safeDuration = Math.max(1, attempt.test.durationSec);
-            const timeRatio = attempt.timeSpentSec / safeDuration;
-            const suspiciousSpeedScore = timeRatio < MIN_VALID_TIME_RATIO && attempt.finalScore >= MIN_FAST_SCORE_THRESHOLD;
-            if (suspiciousSpeedScore) {
-                discardedAttempts += 1;
-                continue;
-            }
             if (seenTests.has(attempt.testId)) {
                 discardedAttempts += 1;
                 continue;
@@ -240,14 +249,12 @@ function buildUserAggregates(params) {
             period: params.period,
         });
         const rollingScores = [];
-        let weightedScoreTotal = 0;
-        let weightedScoreWeight = 0;
         let accuracyTotal = 0;
         let speedTotal = 0;
         let consistencyTotal = 0;
         let improvementTotal = 0;
         let difficultyTotal = 0;
-        let xpTotalForPeriod = 0;
+        let leaderboardPointsTotal = 0;
         for (let index = 0; index < validatedAttempts.length; index += 1) {
             const attempt = validatedAttempts[index];
             const previousFiveScores = rollingScores.slice(-5);
@@ -257,33 +264,18 @@ function buildUserAggregates(params) {
             const consistencyScore = calculateConsistencyScore(consistencyWindow);
             const improvementDelta = calculateImprovementDelta(attempt.finalScore, previousFiveScores);
             const difficultyMultiplier = DIFFICULTY_MULTIPLIERS[attempt.test.difficulty];
-            const rankScore = calculateRankScore({
-                accuracy,
-                speedEfficiency,
-                consistencyScore,
-                engagementScore,
-                focusConsistency: focusStats.focusConsistency,
-                dailyCompletionRate: focusStats.dailyCompletionRate,
-                inactivityDays,
-                difficultyMultiplier,
-                improvementDelta,
-            });
-            const recencyWeight = 1 + (index / Math.max(1, validatedAttempts.length - 1)) * 0.45;
-            weightedScoreTotal += rankScore * recencyWeight;
-            weightedScoreWeight += recencyWeight;
             accuracyTotal += accuracy;
             speedTotal += speedEfficiency;
             consistencyTotal += consistencyScore;
             improvementTotal += improvementDelta;
             difficultyTotal += difficultyMultiplier;
-            xpTotalForPeriod += attempt.xpEarned;
+            leaderboardPointsTotal += calculateLeaderboardAttemptPoints(attempt);
             rollingScores.push(attempt.finalScore);
         }
         const testsCompleted = validatedAttempts.length;
-        const rawRankingScore = weightedScoreWeight > 0 ? weightedScoreTotal / weightedScoreWeight : 0;
         const integrityScore = clamp((testsCompleted / Math.max(1, userAttempts.length)) * 100, 0, 100);
         const integrityWeight = clamp(0.35 + (integrityScore / 100) * 0.65, 0.35, 1);
-        const rankingScore = rawRankingScore * integrityWeight;
+        const rankingScore = leaderboardPointsTotal * integrityWeight;
         const avgAccuracy = accuracyTotal / testsCompleted;
         const avgSpeed = speedTotal / testsCompleted;
         const avgConsistency = consistencyTotal / testsCompleted;
@@ -295,7 +287,7 @@ function buildUserAggregates(params) {
             userId,
             fullName: user.fullName,
             avatarUrl: user.avatarUrl,
-            totalXp: params.period === 'all' ? user.xp : Math.round(xpTotalForPeriod),
+            totalXp: Math.round(leaderboardPointsTotal),
             testsCompleted,
             accuracy: Number(avgAccuracy.toFixed(2)),
             streak: user.currentStreak,
@@ -373,6 +365,9 @@ export async function generateLeaderboard(params) {
             finalScore: true,
             timeSpentSec: true,
             xpEarned: true,
+            testId: true,
+            totalQuestions: true,
+            correctAnswers: true,
             completedAt: true,
             test: {
                 select: {

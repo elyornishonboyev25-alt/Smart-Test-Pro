@@ -121,6 +121,7 @@ export default function Leaderboard() {
   }, [period, category, user])
 
   const rows = data?.rows ?? []
+  const currentUserRow = useMemo(() => rows.find((row) => row.isCurrentUser) ?? null, [rows])
   const podiumRows = useMemo(() => {
     if (data?.podium?.length) return data.podium.slice(0, 3)
     return rows.slice(0, 3)
@@ -128,13 +129,13 @@ export default function Leaderboard() {
 
   const summary = useMemo(() => {
     if (rows.length === 0) return null
-    const totalXp = rows.reduce((sum, row) => sum + row.totalXp, 0)
+    const totalPoints = rows.reduce((sum, row) => sum + row.totalXp, 0)
     const avgAccuracy = rows.reduce((sum, row) => sum + row.accuracy, 0) / rows.length
     const avgConsistency = rows.reduce((sum, row) => sum + row.consistencyScore, 0) / rows.length
     const verifiedCount = rows.filter((row) => row.integrityScore >= 70).length
 
     return {
-      totalXp,
+      totalPoints,
       avgAccuracy,
       avgConsistency,
       verifiedCount,
@@ -154,7 +155,7 @@ export default function Leaderboard() {
             </p>
             <h1 className="mt-3 text-3xl font-black text-slate-900 sm:text-4xl">Global Leaderboard</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Verified SAT + IELTS performance standings with integrity checks, live XP race, and consistency metrics.
+              Verified SAT + IELTS performance standings with integrity checks, live point race, and consistency metrics.
             </p>
           </div>
 
@@ -164,8 +165,8 @@ export default function Leaderboard() {
               <p className="mt-1 text-lg font-bold text-slate-900">{data?.currentUserRank ? `#${data.currentUserRank}` : '--'}</p>
             </div>
             <div className="rounded-xl border border-red-200 bg-white px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Your XP</p>
-              <p className="mt-1 text-lg font-bold text-slate-900">{user ? Math.max(0, user.xp).toLocaleString() : '--'}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Your Points</p>
+              <p className="mt-1 text-lg font-bold text-slate-900">{currentUserRow ? currentUserRow.totalXp.toLocaleString() : '--'}</p>
             </div>
             <div className="rounded-xl border border-red-200 bg-white px-3 py-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Avg Accuracy</p>
@@ -259,7 +260,7 @@ export default function Leaderboard() {
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-base font-bold text-slate-900">{row.fullName}</p>
-                        <p className="text-xs text-slate-600">{row.totalXp.toLocaleString()} XP</p>
+                        <p className="text-xs text-slate-600">{row.totalXp.toLocaleString()} pts</p>
                       </div>
                     </div>
 
@@ -296,7 +297,7 @@ export default function Leaderboard() {
             <h3 className="text-xl font-black text-slate-900">Top 10 Verified Rankings</h3>
             {summary ? (
               <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
-                Total board XP: {summary.totalXp.toLocaleString()}
+                Total board points: {summary.totalPoints.toLocaleString()}
               </span>
             ) : null}
           </div>
@@ -312,7 +313,7 @@ export default function Leaderboard() {
               <div className="grid grid-cols-[74px_minmax(0,1.2fr)_0.8fr_0.7fr_0.7fr_0.7fr_0.7fr] bg-red-50/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-700">
                 <p>Rank</p>
                 <p>Player</p>
-                <p>XP</p>
+                <p>Points</p>
                 <p>Tests</p>
                 <p>Accuracy</p>
                 <p>Consist.</p>

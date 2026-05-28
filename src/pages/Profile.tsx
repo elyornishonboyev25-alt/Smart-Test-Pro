@@ -326,7 +326,7 @@ export default function Profile() {
             <Skeleton className="mt-3 h-4 w-80" />
           </>
         ) : data ? (
-          <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
+          <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_31rem] xl:items-start">
             <div className="xl:pr-2">
               <div className="premium-top-controls">
                 <button
@@ -347,20 +347,20 @@ export default function Profile() {
               </p>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-3 xl:w-full">
-              <div className="hero-metric-card interactive-lift">
+            <div className="grid gap-3 sm:grid-cols-3 xl:w-full">
+              <div className="hero-metric-card hero-metric-card-fit interactive-lift">
                 <p className="hero-metric-label">Current Rank</p>
-                <p className="hero-metric-value-sm">{data.competitive ? `#${data.competitive.rank}` : '--'}</p>
+                <p className="hero-metric-value-sm hero-metric-value-fit">{data.competitive ? `#${data.competitive.rank}` : '--'}</p>
                 <p className="hero-metric-note">{trendText ?? 'Stable'}</p>
               </div>
-              <div className="hero-metric-card interactive-lift">
+              <div className="hero-metric-card hero-metric-card-fit interactive-lift">
                 <p className="hero-metric-label">Level / XP</p>
-                <p className="hero-metric-value-sm">{data.profile.level} | {data.profile.xp}</p>
+                <p className="hero-metric-value-sm hero-metric-value-fit">{data.profile.level} | {data.profile.xp}</p>
                 <p className="hero-metric-note">Career progress</p>
               </div>
-              <div className="hero-metric-card interactive-lift">
+              <div className="hero-metric-card hero-metric-card-fit interactive-lift">
                 <p className="hero-metric-label">Division</p>
-                <p className="hero-metric-value-sm">
+                <p className="hero-metric-value-sm hero-metric-value-fit">
                   {data.competitive ? data.competitive.divisionLabel : 'Unranked'}
                 </p>
                 <p className="hero-metric-note">Competitive tier</p>

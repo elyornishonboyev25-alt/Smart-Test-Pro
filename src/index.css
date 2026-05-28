@@ -22,11 +22,18 @@
 
 @layer base {
   html {
+    font-size: 100%;
     scroll-behavior: smooth;
     min-height: 100%;
     background: var(--app-bg);
     overflow-y: scroll;
     scrollbar-gutter: stable;
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      font-size: 80%;
+    }
   }
 
   body {
@@ -211,10 +218,12 @@
 
   .premium-stat {
     @apply rounded-2xl border border-red-100 bg-white/90 px-4 py-3 shadow-[0_12px_28px_rgba(220,38,38,0.11)];
+    min-width: 0;
+    overflow: hidden;
   }
 
   .hero-metric-card {
-    @apply relative isolate grid min-h-[8.75rem] grid-rows-[auto_1fr_auto] overflow-hidden rounded-[1.35rem] border border-red-200/85 bg-white/95 px-4 py-3.5;
+    @apply relative isolate grid min-h-[8.25rem] min-w-0 grid-rows-[auto_1fr_auto] overflow-hidden rounded-[1.35rem] border border-red-200/85 bg-white/95 px-4 py-3.5;
     background-image:
       radial-gradient(circle at 116% -16%, rgba(251, 113, 133, 0.24), transparent 48%),
       radial-gradient(circle at -20% 120%, rgba(254, 202, 202, 0.25), transparent 54%),
@@ -246,7 +255,9 @@
   }
 
   .hero-metric-label {
-    @apply relative z-10 text-[11px] font-semibold uppercase tracking-[0.18em] text-red-600;
+    @apply relative z-10 text-[10px] font-semibold uppercase tracking-[0.14em] text-red-600;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   .hero-metric-value {
@@ -255,17 +266,38 @@
   }
 
   .hero-metric-value-sm {
-    @apply relative z-10 self-center text-[clamp(1.95rem,2.2vw,2.4rem)] font-black leading-[0.92] text-slate-900;
+    @apply relative z-10 min-w-0 self-center text-[clamp(1.55rem,1.8vw,2.08rem)] font-black leading-[0.96] text-slate-900;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
+  .hero-metric-card-fit {
+    @apply px-3.5;
+  }
+
+  .hero-metric-card-fit .hero-metric-label {
+    letter-spacing: 0.105em;
+  }
+
+  .hero-metric-value-fit {
+    font-size: clamp(1.08rem, 1.35vw, 1.72rem);
+    line-height: 1.04;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
   .hero-metric-value-compact {
-    @apply text-[clamp(1.55rem,1.75vw,1.9rem)] leading-[1.02];
+    @apply text-[clamp(1.1rem,1.28vw,1.52rem)] leading-[1.08];
   }
 
   .hero-metric-note {
-    @apply relative z-10 pt-1 text-[12px] font-semibold leading-[1.25] text-slate-500;
+    @apply relative z-10 pt-1 text-[11px] font-semibold leading-[1.25] text-slate-500;
     min-height: 1.9rem;
+    overflow-wrap: anywhere;
   }
 
   .premium-hero-blue {
@@ -712,6 +744,136 @@
 .ielts-note {
   background: linear-gradient(180deg, rgba(254, 202, 202, 0.66), rgba(253, 186, 116, 0.52));
   box-shadow: inset 0 -2px 0 rgba(239, 68, 68, 0.48), 0 1px 4px rgba(220, 38, 38, 0.18);
+}
+
+.day1-reading-pane {
+  background:
+    radial-gradient(circle at 7% 0%, rgba(255, 228, 230, 0.58), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 250, 250, 0.96));
+}
+
+.day1-reading-title-card {
+  box-shadow:
+    0 18px 34px rgba(225, 29, 72, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.ielts-reading-prose,
+.day1-reading-prose {
+  max-width: 78ch;
+  color: #334155;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.ielts-reading-prose p,
+.day1-reading-prose p {
+  font-size: clamp(0.93rem, 0.46vw + 0.78rem, 1rem);
+  font-weight: 500;
+  line-height: 1.72;
+  letter-spacing: -0.002em;
+  text-align: justify;
+  text-wrap: pretty;
+}
+
+.ielts-reading-prose p + p,
+.day1-reading-prose p + p {
+  margin-top: 0.82rem;
+}
+
+.reading-shell.reading-scale-120 .reading-pane {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.reading-shell.reading-scale-120 #reading-passage-pane {
+  padding: 1.45rem 1.55rem 1.55rem;
+}
+
+.reading-shell.reading-scale-120 #reading-questions-pane {
+  padding: 1.45rem 1.55rem 1.55rem;
+}
+
+.reading-shell.reading-scale-120 .ielts-reading-prose,
+.reading-shell.reading-scale-120 .day1-reading-prose {
+  max-width: 82ch;
+}
+
+.reading-shell.reading-scale-120 .ielts-reading-prose p,
+.reading-shell.reading-scale-120 .day1-reading-prose p,
+.reading-shell.reading-scale-120 .ielts-reading-prose.whitespace-pre-wrap {
+  font-size: clamp(1.05rem, 0.54vw + 0.88rem, 1.16rem);
+  font-weight: 520;
+  line-height: 1.78;
+  letter-spacing: -0.003em;
+}
+
+.reading-shell.reading-scale-120 #reading-passage-pane h2 {
+  font-size: clamp(1.24rem, 0.52vw + 1.08rem, 1.42rem);
+}
+
+.reading-shell.reading-scale-120 #reading-passage-pane .text-base {
+  font-size: clamp(1.06rem, 0.42vw + 0.96rem, 1.18rem) !important;
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography {
+  color: #334155;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography section {
+  border-color: rgba(254, 202, 202, 0.86);
+  box-shadow: 0 12px 28px rgba(220, 38, 38, 0.08);
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography h4 {
+  font-size: clamp(1.12rem, 0.46vw + 0.98rem, 1.28rem) !important;
+  font-weight: 800;
+  letter-spacing: -0.018em;
+  line-height: 1.22;
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography section > p,
+.reading-shell.reading-scale-120 .reading-question-typography section > div[class*='mt-1'] p,
+.reading-shell.reading-scale-120 .reading-question-typography article p,
+.reading-shell.reading-scale-120 .reading-question-typography li,
+.reading-shell.reading-scale-120 .reading-question-typography td p,
+.reading-shell.reading-scale-120 .reading-question-typography [class*='text-[15px]'] {
+  font-size: clamp(1.02rem, 0.42vw + 0.9rem, 1.13rem) !important;
+  font-weight: 520 !important;
+  line-height: 1.68 !important;
+  letter-spacing: -0.004em;
+  color: #334155;
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography article p span:first-child,
+.reading-shell.reading-scale-120 .reading-question-typography td p span:first-child {
+  font-weight: 850 !important;
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography button {
+  font-family: inherit;
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography button[class*='text-sm'],
+.reading-shell.reading-scale-120 .reading-question-typography button[class*='text-[13px]'],
+.reading-shell.reading-scale-120 .reading-question-typography button[class*='text-xs'] {
+  font-size: clamp(0.95rem, 0.32vw + 0.86rem, 1.04rem) !important;
+  line-height: 1.35;
+}
+
+.reading-shell.reading-scale-120 .reading-question-typography input {
+  font-family: inherit;
+  font-size: clamp(0.95rem, 0.32vw + 0.86rem, 1.04rem) !important;
+}
+
+.day1-question-group {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(254, 226, 226, 0.5), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.995), rgba(255, 252, 252, 0.98));
+  box-shadow: 0 12px 26px rgba(220, 38, 38, 0.07);
+}
+
+.day1-question-card {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.035);
 }
 
 .reading-shell.reading-size-large .reading-content {

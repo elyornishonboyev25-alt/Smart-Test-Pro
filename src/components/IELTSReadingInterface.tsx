@@ -78,6 +78,13 @@ function sectionHasLabeledParagraphs(section: Section | undefined): boolean {
   )
 }
 
+function formatShortDuration(totalSeconds: number): string {
+  const safeSeconds = Math.max(0, Math.round(totalSeconds))
+  const minutes = Math.floor(safeSeconds / 60)
+  const seconds = safeSeconds % 60
+  return `${minutes}:${String(seconds).padStart(2, '0')}`
+}
+
 function sanitizeSelectedParts(value: number[] | undefined, sectionCount: number): number[] {
   if (sectionCount <= 0) return []
   const fallback = [0]
@@ -227,6 +234,11 @@ export default function IELTSReadingInterface({
   } | null>(null)
   const [showSubmitConfirmModal, setShowSubmitConfirmModal] = useState(false)
   const [showSubmitLoading, setShowSubmitLoading] = useState(false)
+  const [integrityWarning, setIntegrityWarning] = useState<{
+    attemptKind: 'passage' | 'full-test'
+    minTimeSec: number
+    actualTimeSec: number
+  } | null>(null)
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false)
   const [reviewShowCorrectAnswers, setReviewShowCorrectAnswers] = useState(Boolean(reviewPayload?.showCorrectAnswers))
   const [optionsPage, setOptionsPage] = useState<'menu' | 'contrast' | 'text-size'>('menu')
@@ -397,6 +409,18 @@ export default function IELTSReadingInterface({
   }, [activeSections.length, currentSectionIndex])
 
   const currentSection = activeSections[currentSectionIndex] || activeSections[0]
+  const isDayOneCurieSection = currentSection?.id === 'day1-curie-p1'
+
+  const activeQuestionCount = useMemo(
+    () =>
+      activeSections.reduce(
+        (total, section) => total + section.questions.reduce((sum, question) => sum + getQuestionSlotCount(question), 0),
+        0,
+      ),
+    [activeSections],
+  )
+  const leaderboardAttemptKind = activeQuestionCount >= 27 ? 'full-test' : 'passage'
+  const minimumLeaderboardTimeSec = leaderboardAttemptKind === 'full-test' ? 30 * 60 : 10 * 60
 
   const sectionMeta = useMemo(() => {
     let currentIndex = 0;
@@ -1021,15 +1045,19 @@ export default function IELTSReadingInterface({
     })
   }, [isReviewMode, isTestActive, launchPreset, test.sections.length])
 
-  const completeAndSubmitTest = () => {
+  const getCurrentTimeSpent = () => {
+    const elapsedByClock = Math.max(0, (testMode === 'practice' && customTime !== -1 ? customTime : test.duration) * 60 - Math.max(0, timeRemaining))
+    const elapsedByTimestamp = startedAtRef.current ? Math.max(0, Math.round((Date.now() - startedAtRef.current) / 1000)) : 0
+    return Math.max(elapsedByClock, elapsedByTimestamp)
+  }
+
+  const completeAndSubmitTest = (leaderboardEligible = true) => {
     const analysis = evaluateReadingAnswers(activeSections, answers)
     const correctCount = analysis.summary.correctAnswers
     const totalQuestions = analysis.summary.totalQuestions
     const isPartial = activeSections.length < test.sections.length
     const score = isPartial ? 0 : calculateBandScore(correctCount)
-    const elapsedByClock = Math.max(0, (testMode === 'practice' && customTime !== -1 ? customTime : test.duration) * 60 - Math.max(0, timeRemaining))
-    const elapsedByTimestamp = startedAtRef.current ? Math.max(0, Math.round((Date.now() - startedAtRef.current) / 1000)) : 0
-    const timeSpent = Math.max(elapsedByClock, elapsedByTimestamp)
+    const timeSpent = getCurrentTimeSpent()
 
     const result: TestResult = {
       testId: test.id,
@@ -1043,19 +1071,43 @@ export default function IELTSReadingInterface({
       detailedBreakdown: {
         activeSectionIds: activeSections.map(s => s.id),
         readingAnalysis: analysis
-      }
+      },
+      leaderboardEligible,
     }
     onComplete(result)
     clearSession()
   }
 
-  const confirmSubmitTest = () => {
-    setShowSubmitConfirmModal(false)
+  const beginSubmitLoading = (leaderboardEligible = true) => {
+    if (showSubmitLoading) return
     setShowSubmitLoading(true)
     window.setTimeout(() => {
       setShowSubmitLoading(false)
-      completeAndSubmitTest()
+      completeAndSubmitTest(leaderboardEligible)
     }, 3000)
+  }
+
+  const warnBeforeLeaderboardSubmit = (timeSpent: number) => {
+    setIntegrityWarning({
+      attemptKind: leaderboardAttemptKind,
+      minTimeSec: minimumLeaderboardTimeSec,
+      actualTimeSec: timeSpent,
+    })
+  }
+
+  const confirmSubmitTest = () => {
+    setShowSubmitConfirmModal(false)
+    const timeSpent = getCurrentTimeSpent()
+    if (!isReviewMode && timeSpent < minimumLeaderboardTimeSec) {
+      warnBeforeLeaderboardSubmit(timeSpent)
+      return
+    }
+    beginSubmitLoading(true)
+  }
+
+  const submitWithoutLeaderboardPoints = () => {
+    setIntegrityWarning(null)
+    beginSubmitLoading(false)
   }
 
   const openSubmitModal = () => {
@@ -1067,11 +1119,7 @@ export default function IELTSReadingInterface({
   const handleTimeUp = () => {
     if (isReviewMode) return
     if (showSubmitLoading) return
-    setShowSubmitLoading(true)
-    window.setTimeout(() => {
-      setShowSubmitLoading(false)
-      completeAndSubmitTest()
-    }, 3000)
+    beginSubmitLoading(getCurrentTimeSpent() >= minimumLeaderboardTimeSec)
   }
 
   const handleAnswerChange = (qId: string, value: string | number | string[]) => {
@@ -1900,110 +1948,166 @@ export default function IELTSReadingInterface({
   }
 
   const renderDay1CurieNotesGroup = (questions: Question[]) => {
+    return (
+      <section className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
+        <h4 className="text-xl font-black leading-tight text-slate-900">Questions 7-13</h4>
+        <div className="mt-1 space-y-0.5 text-sm text-slate-700">
+          <p>Complete the notes below.</p>
+          <p>
+            Choose <span className="font-black text-slate-900">ONE WORD</span> from the passage for each answer.
+          </p>
+          <p>Write your answers in boxes 7-13 on your answer sheet.</p>
+        </div>
+
+        <div className="mt-2.5 rounded-xl border border-slate-200 bg-[#fefefe] px-3 py-2.5">
+          <p className="text-lg leading-tight font-black text-slate-900 sm:text-xl">
+            Marie Curie&apos;s research on radioactivity
+          </p>
+
+          <ul className="mt-2 space-y-1.5 text-[15px] leading-relaxed text-slate-900">
+            {questions.map((question) => {
+              const globalIdx = getCurrentSectionGlobalIndex(question.id)
+              const isFlagged = flaggedQuestions.includes(globalIdx)
+              const meta = getQuestionReviewMeta(question)
+              const isCorrect = meta?.status === 'correct'
+              const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
+              return (
+                <li key={question.id} id={`question-card-${question.id}`} className="rounded-lg border border-transparent px-1 py-1">
+                  <div className="flex items-start gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleFlagQuestion(globalIdx)}
+                      className={`mt-1 rounded-md p-1 transition ${isFlagged ? 'bg-red-100 text-red-700' : 'text-slate-400 hover:bg-red-50 hover:text-red-600'}`}
+                      title={`Flag question ${question.number}`}
+                    >
+                      <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
+                    </button>
+                    <span className="pt-0.5 select-none text-slate-600">•</span>
+                    <span className="flex-1">
+                      {question.text.split(/(______|_+)/).map((part, partIndex) =>
+                        /^_+$/.test(part) || part === '______' ? (
+                          <input
+                            key={`${question.id}-blank-${partIndex}`}
+                            type="text"
+                            value={(answers[question.id] as string) || ''}
+                            onChange={(event) => handleAnswerChange(question.id, event.target.value)}
+                            disabled={isReviewMode}
+                            className={`mx-1 inline-flex h-8 min-w-[88px] max-w-[140px] rounded-md border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                              isReviewMode && reviewShowCorrectAnswers
+                                ? isWrong
+                                  ? 'border-red-300 bg-red-50/70 text-red-700'
+                                  : isCorrect
+                                    ? 'border-emerald-300 bg-emerald-50/80 text-emerald-700'
+                                    : 'border-slate-300'
+                                : 'border-slate-400'
+                            }`}
+                            placeholder={String(question.number)}
+                          />
+                        ) : (
+                          <span key={`${question.id}-text-${partIndex}`}>{part}</span>
+                        ),
+                      )}
+                    </span>
+                  </div>
+                  {reviewHint(question, 'ml-8 mt-1')}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  const renderDay24PrestonNotesGroup = (questions: Question[]) => {
     const questionByNumber = new Map<number, Question>(questions.map((question) => [question.number, question]))
 
-    const renderLine = (questionNumber: number, prefix: string, suffix = '') => {
+    const renderAnswerInput = (questionNumber: number) => {
       const question = questionByNumber.get(questionNumber)
       if (!question) return null
 
-      const globalIdx = getCurrentSectionGlobalIndex(question.id)
-      const isFlagged = flaggedQuestions.includes(globalIdx)
       const meta = getQuestionReviewMeta(question)
       const isCorrect = meta?.status === 'correct'
       const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
 
       return (
-        <div key={question.id} id={`question-card-${question.id}`} className="py-1.5">
-          <div className="flex items-start gap-2.5">
-            <button
-              type="button"
-              onClick={() => handleFlagQuestion(globalIdx)}
-              className={`mt-0.5 rounded-md p-1 transition ${isFlagged ? 'bg-red-100 text-red-700' : 'text-slate-400 hover:bg-red-50 hover:text-red-600'}`}
-              title={`Flag question ${question.number}`}
-            >
-              <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
-            </button>
-            <span className="pt-0.5 select-none text-slate-600">•</span>
-            <p className="flex-1 text-[15px] leading-relaxed text-slate-900">
-              {prefix}
-              <span className="mx-1 inline-flex h-6 min-w-6 items-center justify-center rounded bg-slate-100 px-1 text-xs font-black text-slate-700">
-                {question.number}
-              </span>
-              <input
-                type="text"
-                value={(answers[question.id] as string) || ''}
-                onChange={(event) => handleAnswerChange(question.id, event.target.value)}
-                disabled={isReviewMode}
-                className={`mx-1 inline-flex h-9 min-w-[110px] max-w-[180px] rounded-lg border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
-                  isReviewMode && reviewShowCorrectAnswers
-                    ? isWrong
-                      ? 'border-red-300 bg-red-50/70 text-red-700'
-                      : isCorrect
-                        ? 'border-emerald-300 bg-emerald-50/80 text-emerald-700'
-                        : 'border-red-200'
-                    : 'border-red-200 bg-rose-50/45'
-                }`}
-                placeholder={String(question.number)}
-              />
-              {suffix}
-            </p>
-          </div>
-          {reviewHint(question, 'ml-8 mt-1')}
+        <span id={`question-card-${question.id}`} className="inline-flex align-middle">
+          <input
+            type="text"
+            value={(answers[question.id] as string) || ''}
+            onChange={(event) => handleAnswerChange(question.id, event.target.value)}
+            disabled={isReviewMode}
+            className={`mx-1 inline-flex h-8 min-w-[96px] max-w-[150px] rounded-md border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+              isReviewMode && reviewShowCorrectAnswers
+                ? isWrong
+                  ? 'border-red-300 bg-red-50/70 text-red-700'
+                  : isCorrect
+                    ? 'border-emerald-300 bg-emerald-50/80 text-emerald-700'
+                    : 'border-slate-300'
+                : 'border-slate-300 bg-white'
+            }`}
+            placeholder={String(question.number)}
+          />
+        </span>
+      )
+    }
+
+    const renderReviewHints = () => {
+      if (!isReviewMode || !reviewShowCorrectAnswers) return null
+      return (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {questions.map((question) => (
+            <div key={`day24-review-${question.id}`}>{reviewHint(question, 'mt-0')}</div>
+          ))}
         </div>
       )
     }
 
     return (
       <section className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
-        <h4 className="text-xl font-black text-slate-900">Questions 7-13</h4>
-        <p className="mt-1 text-sm text-slate-700">Complete the notes below.</p>
-        <p className="text-sm text-slate-700">
-          Choose <span className="font-black text-slate-900">ONE WORD</span> from the passage for each answer.
-        </p>
-        <p className="text-sm text-slate-600">Write your answers in boxes 7-13 on your answer sheet.</p>
-
-        <div className="mt-2 rounded-xl border border-slate-300 bg-[#fffefe] px-3 py-3">
-          <p className="text-2xl font-black tracking-tight text-slate-900">
-            Marie Curie&apos;s research on radioactivity
+        <h4 className="text-xl font-black leading-tight text-slate-900">Questions 8-13</h4>
+        <div className="mt-1 space-y-0.5 text-sm text-slate-700">
+          <p>Complete the notes below.</p>
+          <p>
+            Choose <span className="font-black text-slate-900">ONE WORD AND/OR A NUMBER</span> from the passage for each answer.
           </p>
+          <p>Write your answers in boxes 8-13 on your answer sheet.</p>
+        </div>
 
-          <div className="mt-2.5 space-y-0.5">
-            {renderLine(
-              7,
-              'When uranium was discovered to be radioactive, Marie Curie found that the element called',
-              'had the same property.',
-            )}
-            {renderLine(
-              8,
-              "Marie and Pierre Curie's research into the radioactivity of the mineral known as",
-              'led to the discovery of two new elements.',
-            )}
-            {renderLine(
-              9,
-              'In 1911, Marie Curie received recognition for her work on the element',
-              '',
-            )}
-            {renderLine(
-              10,
-              'Marie and Irene Curie developed X-radiography which was used as a medical technique for',
-              '',
-            )}
-            {renderLine(
-              11,
-              'Marie Curie saw the importance of collecting radioactive material both for research and for cases of',
-              '',
-            )}
-            {renderLine(
-              12,
-              'The radioactive material stocked in Paris contributed to the discoveries in the 1930s of the',
-              'and of what was known as artificial radioactivity.',
-            )}
-            {renderLine(
-              13,
-              'During her research, Marie Curie was exposed to radiation and as a result she suffered from',
-              '',
-            )}
+        <div className="mt-2.5 rounded-xl border border-slate-200 bg-[#fefefe] px-3 py-3">
+          <p className="text-lg leading-tight font-black text-slate-900 sm:text-xl">Margaret Preston&apos;s later life</p>
+
+          <div className="mt-3 space-y-5 text-[15px] leading-relaxed text-slate-900">
+            <div>
+              <p className="font-black text-slate-900">Aboriginal influence</p>
+              <ul className="mt-2 list-disc space-y-1.5 pl-6">
+                <li>interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home</li>
+                <li>
+                  incorporated {renderAnswerInput(8)} and colours from Aboriginal art in her own work often referred to Aboriginal sources in the {renderAnswerInput(9)} she gave her artworks
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-black text-slate-900">1953 exhibition</p>
+              <ul className="mt-2 list-disc space-y-1.5 pl-6">
+                <li>very old method of {renderAnswerInput(10)} was used for some prints</li>
+                <li>was inspired by {renderAnswerInput(11)} about Chinese art that she had started collecting in 1915</li>
+                <li>combination of Chinese and Aboriginal elements</li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="font-medium text-slate-700">Old age</p>
+              <ul className="mt-2 list-disc space-y-1.5 pl-6">
+                <li>still interested in {renderAnswerInput(12)} and art</li>
+                <li>worked for nearly six decades making more than {renderAnswerInput(13)} artworks</li>
+                <li>dedicated to Australian art and the originality of her work is seen in Preston&apos;s long career</li>
+              </ul>
+            </div>
           </div>
+
+          {renderReviewHints()}
         </div>
       </section>
     )
@@ -2240,17 +2344,18 @@ export default function IELTSReadingInterface({
     instruction: string,
     options: string[],
   ) => {
+    const isDayOneLayout = isDayOneCurieSection
     return (
-      <section className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
-        <h4 className="text-xl font-black text-slate-900">{title}</h4>
-        <p className="mt-1 text-sm text-slate-700">{instruction}</p>
+      <section className={`rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)] ${isDayOneLayout ? 'day1-question-group' : ''}`}>
+        <h4 className={isDayOneLayout ? 'text-[1rem] font-black tracking-tight text-slate-950' : 'text-xl font-black text-slate-900'}>{title}</h4>
+        <p className={isDayOneLayout ? 'mt-1 max-w-[58rem] text-[12.5px] font-medium leading-5 text-slate-600' : 'mt-1 text-sm text-slate-700'}>{instruction}</p>
         <div className="mt-2 space-y-2">
           {questions.map((question) => {
             const globalIdx = getCurrentSectionGlobalIndex(question.id)
             const isFlagged = flaggedQuestions.includes(globalIdx)
             const selectedValue = String(answers[question.id] ?? '')
             return (
-              <article key={question.id} id={`question-card-${question.id}`} className="rounded-xl border border-red-100 bg-white px-3 py-2.5">
+              <article key={question.id} id={`question-card-${question.id}`} className={`rounded-xl border border-red-100 bg-white px-3 py-2.5 ${isDayOneLayout ? 'day1-question-card' : ''}`}>
                 <div className="mb-1.5 flex items-start gap-2">
                   <button
                     type="button"
@@ -2259,13 +2364,13 @@ export default function IELTSReadingInterface({
                   >
                     <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
                   </button>
-                  <p className="text-[15px] font-bold leading-relaxed text-slate-950">
+                  <p className={isDayOneLayout ? 'text-[13.5px] font-medium leading-[1.55] text-slate-900' : 'text-[15px] font-bold leading-relaxed text-slate-950'}>
                     <span className="mr-2 font-black text-red-600">{question.number}</span>
                     {question.text}
                   </p>
                 </div>
 
-                <div className="space-y-1.5 pl-7">
+                <div className={`${isDayOneLayout ? 'space-y-1 pl-7' : 'space-y-1.5 pl-7'}`}>
                   {options.map((option) => {
                     const state = getChoiceVisualState(question, option)
                     const checked = selectedValue.toUpperCase() === option
@@ -2287,7 +2392,7 @@ export default function IELTSReadingInterface({
                           if (isReviewMode) return
                           handleAnswerChange(question.id, option)
                         }}
-                        className={`flex w-full items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 ${tone} ${
+                        className={`flex w-full items-center gap-3 rounded-2xl border px-3 ${isDayOneLayout ? 'py-1.5 text-[12.5px]' : 'py-2.5 text-sm'} text-left font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 ${tone} ${
                           isReviewMode ? 'cursor-default' : 'cursor-pointer'
                         }`}
                       >
@@ -2529,7 +2634,7 @@ export default function IELTSReadingInterface({
         id="reading-passage-pane"
         data-reading-markable="1"
         onClick={handleMarkPaneClick}
-        className="reading-pane reading-content h-full overflow-y-auto border-r border-red-100 bg-gradient-to-b from-white via-red-50/30 to-white p-4 sm:p-5 lg:p-6 font-serif leading-relaxed text-slate-800 transition-colors duration-300 scrollbar-thin scrollbar-thumb-red-200"
+        className={`reading-pane reading-content h-full overflow-y-auto border-r border-red-100 bg-gradient-to-b from-white via-red-50/30 to-white p-4 sm:p-5 lg:p-6 font-sans leading-relaxed text-slate-800 transition-colors duration-300 scrollbar-thin scrollbar-thumb-red-200 ${isDayOneCurieSection ? 'day1-reading-pane' : ''}`}
       >
         <div className="mb-4">
           <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-red-600 sm:text-sm">PART {currentSectionIndex + 1}</p>
@@ -2538,7 +2643,7 @@ export default function IELTSReadingInterface({
             You should spend about 20 minutes on <strong>Questions {sectionMeta[currentSectionIndex]?.questionNumbers[0]}-{sectionMeta[currentSectionIndex]?.questionNumbers[sectionMeta[currentSectionIndex]?.questionNumbers.length - 1]}</strong>, which are based on Reading Passage {currentSectionIndex + 1} below.
           </p>
         </div>
-        <div className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-4 py-2.5 text-white shadow-[0_14px_30px_rgba(220,38,38,0.24)]">
+        <div className={`mb-4 overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-4 py-2.5 text-white shadow-[0_14px_30px_rgba(220,38,38,0.24)] ${isDayOneCurieSection ? 'day1-reading-title-card' : ''}`}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] opacity-90">Reading Passage {currentSectionIndex + 1}</p>
           <p className="text-base font-bold sm:text-lg">{currentSection?.title?.replace(/^Reading Passage \d+:?\s*/i, '').trim() || currentSection?.title}</p>
         </div>
@@ -2546,7 +2651,7 @@ export default function IELTSReadingInterface({
           (() => {
             const showLabels = sectionHasLabeledParagraphs(currentSection)
             return (
-              <div className={showLabels ? 'space-y-5' : 'space-y-3'}>
+              <div className={`${showLabels ? 'space-y-5' : 'space-y-3'} ielts-reading-prose ${isDayOneCurieSection ? 'day1-reading-prose' : ''}`}>
                 {currentSection.paragraphs.map((para, paraIndex) => (
                   <div key={`${currentSection.id}-${para.label || paraIndex}`} className="relative">
                     <p className="text-justify leading-relaxed text-slate-800">
@@ -2561,7 +2666,7 @@ export default function IELTSReadingInterface({
             )
           })()
         ) : currentSection?.content ? (
-          <div className="whitespace-pre-wrap text-justify text-slate-800 leading-relaxed">{currentSection.content}</div>
+          <div className="ielts-reading-prose whitespace-pre-wrap text-justify text-slate-800 leading-relaxed">{currentSection.content}</div>
         ) : null}
       </div>
     </div>
@@ -2572,7 +2677,7 @@ export default function IELTSReadingInterface({
       id="reading-questions-pane"
       data-reading-markable="1"
       onClick={handleMarkPaneClick}
-      className="reading-pane reading-content h-full overflow-y-auto border-l border-red-100 bg-white p-4 sm:p-5 lg:p-6 font-sans transition-colors duration-300 scrollbar-thin scrollbar-thumb-red-200"
+      className="reading-pane reading-content reading-question-typography h-full overflow-y-auto border-l border-red-100 bg-white p-4 sm:p-5 lg:p-6 font-sans transition-colors duration-300 scrollbar-thin scrollbar-thumb-red-200"
     >
       <div className="sticky top-0 z-10 -mx-4 mb-5 flex items-center justify-between border-b border-red-100 bg-white/95 px-4 py-2.5 backdrop-blur-sm sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6">
         <div>
@@ -3332,6 +3437,32 @@ export default function IELTSReadingInterface({
               )
             }
             if (q.number > 35 && q.number <= 40) return null
+          }
+
+          if (currentSection?.id === 'day24-margaret-preston-p1') {
+            if (q.number === 1) {
+              return (
+                <div key="day24-preston-statement-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 7),
+                    'Questions 1-7',
+                    'Do the following statements agree with the information given in Reading Passage? In boxes 1-7 on your answer sheet, write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
+                    ['TRUE', 'FALSE', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 1 && q.number <= 7) return null
+            if (q.number === 8) {
+              return (
+                <div key="day24-preston-notes-group">
+                  {renderDay24PrestonNotesGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 8 && entry.number <= 13),
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 8 && q.number <= 13) return null
           }
 
           if (currentSection?.id === 'metropolis-p3') {
@@ -4451,7 +4582,7 @@ export default function IELTSReadingInterface({
   return (
     <div
       ref={testShellRef}
-      className={`reading-shell ${contrastClass} reading-size-${textSizeMode} flex flex-col h-screen overflow-hidden relative z-50 bg-[linear-gradient(160deg,#ffffff_0%,#fff5f5_52%,#fffaf8_100%)] text-slate-900 transition-colors duration-300 font-sans`}
+      className={`reading-shell reading-scale-120 ${contrastClass} reading-size-${textSizeMode} flex flex-col h-screen overflow-hidden relative z-50 bg-[linear-gradient(160deg,#ffffff_0%,#fff5f5_52%,#fffaf8_100%)] text-slate-900 transition-colors duration-300 font-sans`}
     >
       {!isTestActive ? renderStartScreen() : (
         <>
@@ -4942,6 +5073,67 @@ export default function IELTSReadingInterface({
                   className="rounded-xl border border-red-500 bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 text-sm font-bold text-white hover:from-red-500 hover:to-rose-500"
                 >
                   Exit test
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {integrityWarning && (
+          <div className="fixed inset-0 z-[121] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-950/55 backdrop-blur-md"
+              onClick={() => setIntegrityWarning(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 14, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.97 }}
+              transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-xl overflow-hidden rounded-[30px] border border-red-100 bg-[linear-gradient(160deg,#fff_0%,#fff8f8_52%,#fffaf8_100%)] p-7 text-center shadow-[0_38px_86px_rgba(220,38,38,0.28)]"
+            >
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-400" />
+              <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-rose-200/45 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-20 left-4 h-44 w-44 rounded-full bg-orange-200/30 blur-3xl" />
+              <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-red-200 bg-white shadow-[0_14px_30px_rgba(220,38,38,0.2)]">
+                <ClockIcon className="h-8 w-8 text-red-600" />
+              </div>
+              <h3 className="relative mt-5 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+                Leaderboard integrity check
+              </h3>
+              <p className="relative mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+                This {integrityWarning.attemptKind === 'full-test' ? 'full test' : 'passage'} was submitted in{' '}
+                <strong className="text-slate-900">{formatShortDuration(integrityWarning.actualTimeSec)}</strong>.
+                To protect fair rankings, you need at least{' '}
+                <strong className="text-slate-900">{Math.round(integrityWarning.minTimeSec / 60)} minutes</strong>
+                {' '}before submitting for leaderboard points.
+              </p>
+              <div className="relative mt-5 rounded-2xl border border-red-100 bg-white/85 px-4 py-3 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-red-600">Fair-play notice</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Want the score only? Press <strong className="text-slate-900">Check score</strong> to see your result now
+                  without adding leaderboard points.
+                </p>
+              </div>
+              <div className="relative mt-5 flex flex-col-reverse items-stretch justify-center gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  onClick={() => setIntegrityWarning(null)}
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                >
+                  Continue working
+                </button>
+                <button
+                  type="button"
+                  onClick={submitWithoutLeaderboardPoints}
+                  className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 px-5 py-2.5 text-sm font-black text-white shadow-[0_14px_30px_rgba(220,38,38,0.32)] transition hover:brightness-105"
+                >
+                  Check score
                 </button>
               </div>
             </motion.div>

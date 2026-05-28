@@ -22,8 +22,9 @@ import { isPremiumUser } from '../utils/premium.js'
 const router = Router()
 
 const registerSchema = z.object({
-  fullName: z.string().min(2).max(80),
-  email: z.string().email(),
+  email: z.string().email().refine((value) => value.toLowerCase().endsWith('@gmail.com'), {
+    message: 'Use your Gmail address.',
+  }),
   password: z.string().min(8).max(72),
 })
 
@@ -71,6 +72,22 @@ function sanitizeUser(user: {
     level: user.level,
     currentStreak: user.currentStreak,
   }
+}
+
+function deriveFullNameFromEmail(email: string) {
+  const localPart = email.split('@')[0] || 'SmartTest Learner'
+  const cleaned = localPart
+    .replace(/[._-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  if (!cleaned) return 'SmartTest Learner'
+
+  return cleaned
+    .split(' ')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ')
+    .slice(0, 80)
 }
 
 async function issueAuthTokens(args: {
@@ -132,9 +149,11 @@ router.post(
   authRateLimit,
   validateBody(registerSchema),
   asyncHandler(async (req, res) => {
-    const { fullName, email, password } = req.body
+    const { email, password } = req.body
+    const normalizedEmail = email.trim().toLowerCase()
+    const fullName = deriveFullNameFromEmail(normalizedEmail)
 
-    const exists = await prisma.user.findUnique({ where: { email } })
+    const exists = await prisma.user.findUnique({ where: { email: normalizedEmail } })
     if (exists) {
       return res.status(409).json({ message: 'User with this email already exists.' })
     }
@@ -144,7 +163,7 @@ router.post(
     const user = await prisma.user.create({
       data: {
         fullName,
-        email,
+        email: normalizedEmail,
         passwordHash,
       },
       select: {

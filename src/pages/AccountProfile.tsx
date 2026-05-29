@@ -111,7 +111,7 @@ export default function AccountProfile() {
 
   const completion = useMemo(() => {
     const requiredFields = [form.fullName, form.email, form.phone, form.country, form.timezone, form.targetScore, form.examDate]
-    const filled = requiredFields.filter((entry) => entry.trim().length > 0).length
+   const filled = requiredFields.filter((entry) => (entry ?? '').trim().length > 0).length
     return Math.round((filled / requiredFields.length) * 100)
   }, [form])
 

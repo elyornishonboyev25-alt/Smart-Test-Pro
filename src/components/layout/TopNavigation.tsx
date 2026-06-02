@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { LogOut, Menu, UserRound, Zap } from 'lucide-react'
@@ -82,6 +83,63 @@ export function TopNavigation({ withSidebar = false }: { withSidebar?: boolean }
       navigate('/login', { replace: true })
     }
   }
+
+  const signOutConfirmDialog =
+    typeof document === 'undefined'
+      ? null
+      : createPortal(
+          <AnimatePresence>
+            {showSignOutConfirm ? (
+              <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-slate-950/55 backdrop-blur-md"
+                  onClick={() => {
+                    if (!signingOut) setShowSignOutConfirm(false)
+                  }}
+                />
+                <motion.div
+                  initial={minimalMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.94, filter: 'blur(8px)' }}
+                  animate={minimalMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                  exit={minimalMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96, filter: 'blur(6px)' }}
+                  transition={{ duration: minimalMotion ? 0.16 : 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-red-100 bg-[linear-gradient(145deg,#fff,#fff7f7_58%,#fffaf8)] p-6 text-center shadow-[0_34px_78px_rgba(127,29,29,0.3)]"
+                >
+                  <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-400" />
+                  <div className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full bg-red-200/45 blur-3xl" />
+                  <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-red-100 bg-white text-red-600 shadow-[0_18px_34px_rgba(220,38,38,0.18)]">
+                    <LogOut className="h-8 w-8" />
+                  </div>
+                  <h3 className="relative mt-4 text-2xl font-black text-slate-950">Sign out of your account?</h3>
+                  <p className="relative mt-2 text-sm leading-6 text-slate-600">
+                    Your progress is saved to this account. You can sign back in anytime with your email and password.
+                  </p>
+                  <div className="relative mt-5 flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      disabled={signingOut}
+                      onClick={() => setShowSignOutConfirm(false)}
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Stay signed in
+                    </button>
+                    <button
+                      type="button"
+                      disabled={signingOut}
+                      onClick={() => void confirmSignOut()}
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 text-sm font-black text-white shadow-[0_14px_26px_rgba(220,38,38,0.28)] hover:brightness-105 disabled:cursor-wait disabled:opacity-75"
+                    >
+                      {signingOut ? 'Signing out...' : 'Yes, sign out'}
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+            ) : null}
+          </AnimatePresence>,
+          document.body,
+        )
 
   return (
     <motion.nav
@@ -270,56 +328,7 @@ export function TopNavigation({ withSidebar = false }: { withSidebar?: boolean }
           </motion.div>
         ) : null}
       </AnimatePresence>
-      <AnimatePresence>
-        {showSignOutConfirm ? (
-          <div className="fixed inset-0 z-[130] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-950/55 backdrop-blur-md"
-              onClick={() => {
-                if (!signingOut) setShowSignOutConfirm(false)
-              }}
-            />
-            <motion.div
-              initial={minimalMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.94, filter: 'blur(8px)' }}
-              animate={minimalMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-              exit={minimalMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96, filter: 'blur(6px)' }}
-              transition={{ duration: minimalMotion ? 0.16 : 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-red-100 bg-[linear-gradient(145deg,#fff,#fff7f7_58%,#fffaf8)] p-6 text-center shadow-[0_34px_78px_rgba(127,29,29,0.3)]"
-            >
-              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-400" />
-              <div className="pointer-events-none absolute -right-20 -top-24 h-48 w-48 rounded-full bg-red-200/45 blur-3xl" />
-              <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-red-100 bg-white text-red-600 shadow-[0_18px_34px_rgba(220,38,38,0.18)]">
-                <LogOut className="h-8 w-8" />
-              </div>
-              <h3 className="relative mt-4 text-2xl font-black text-slate-950">Sign out of your account?</h3>
-              <p className="relative mt-2 text-sm leading-6 text-slate-600">
-                Your progress is saved to this account. You can sign back in anytime with your email and password.
-              </p>
-              <div className="relative mt-5 flex items-center justify-center gap-2">
-                <button
-                  type="button"
-                  disabled={signingOut}
-                  onClick={() => setShowSignOutConfirm(false)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  Stay signed in
-                </button>
-                <button
-                  type="button"
-                  disabled={signingOut}
-                  onClick={() => void confirmSignOut()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 text-sm font-black text-white shadow-[0_14px_26px_rgba(220,38,38,0.28)] hover:brightness-105 disabled:cursor-wait disabled:opacity-75"
-                >
-                  {signingOut ? 'Signing out...' : 'Yes, sign out'}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        ) : null}
-      </AnimatePresence>
+      {signOutConfirmDialog}
     </motion.nav>
   )
 }

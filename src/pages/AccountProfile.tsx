@@ -30,6 +30,62 @@ type PreferenceDraft = {
   compactView: boolean
 }
 
+const DEFAULT_PREFERENCES: PreferenceDraft = {
+  twoFactor: true,
+  loginAlerts: true,
+  weeklyReport: true,
+  speakingSessionReminders: true,
+  marketingUpdates: false,
+  compactView: false,
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function safeText(value: unknown, fallback = '') {
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+  return fallback
+}
+
+function safeBoolean(value: unknown, fallback: boolean) {
+  return typeof value === 'boolean' ? value : fallback
+}
+
+function safeExamTarget(value: unknown): ExamTarget {
+  return value === 'IELTS' || value === 'SAT' || value === 'BOTH' ? value : 'BOTH'
+}
+
+function normalizeProfileDraft(value: unknown, fallback: ProfileDraft): ProfileDraft {
+  const source = isRecord(value) ? value : {}
+
+  return {
+    fullName: safeText(source.fullName, fallback.fullName),
+    email: safeText(source.email, fallback.email),
+    phone: safeText(source.phone, fallback.phone),
+    country: safeText(source.country, fallback.country),
+    timezone: safeText(source.timezone, fallback.timezone),
+    targetExam: safeExamTarget(source.targetExam),
+    targetScore: safeText(source.targetScore, fallback.targetScore),
+    examDate: safeText(source.examDate, fallback.examDate),
+    bio: safeText(source.bio, fallback.bio),
+  }
+}
+
+function normalizePreferenceDraft(value: unknown): PreferenceDraft {
+  const source = isRecord(value) ? value : {}
+
+  return {
+    twoFactor: safeBoolean(source.twoFactor, DEFAULT_PREFERENCES.twoFactor),
+    loginAlerts: safeBoolean(source.loginAlerts, DEFAULT_PREFERENCES.loginAlerts),
+    weeklyReport: safeBoolean(source.weeklyReport, DEFAULT_PREFERENCES.weeklyReport),
+    speakingSessionReminders: safeBoolean(source.speakingSessionReminders, DEFAULT_PREFERENCES.speakingSessionReminders),
+    marketingUpdates: safeBoolean(source.marketingUpdates, DEFAULT_PREFERENCES.marketingUpdates),
+    compactView: safeBoolean(source.compactView, DEFAULT_PREFERENCES.compactView),
+  }
+}
+
 function ToggleRow({
   label,
   detail,
@@ -85,33 +141,32 @@ export default function AccountProfile() {
     [user?.email, user?.fullName],
   )
 
-  const initialPreferences: PreferenceDraft = {
-    twoFactor: true,
-    loginAlerts: true,
-    weeklyReport: true,
-    speakingSessionReminders: true,
-    marketingUpdates: false,
-    compactView: false,
-  }
-
   const [savedProfile, setSavedProfile] = useLocalStorage<ProfileDraft>('smarttest-account-profile-v1', initialProfile)
-  const [preferences, setPreferences] = useLocalStorage<PreferenceDraft>('smarttest-account-preferences-v1', initialPreferences)
+  const [savedPreferences, setSavedPreferences] = useLocalStorage<PreferenceDraft>('smarttest-account-preferences-v1', DEFAULT_PREFERENCES)
+  const normalizedSavedProfile = useMemo(
+    () => normalizeProfileDraft(savedProfile, initialProfile),
+    [initialProfile, savedProfile],
+  )
+  const preferences = useMemo(
+    () => normalizePreferenceDraft(savedPreferences),
+    [savedPreferences],
+  )
 
-  const [form, setForm] = useState<ProfileDraft>(savedProfile)
+  const [form, setForm] = useState<ProfileDraft>(() => normalizedSavedProfile)
 
   useEffect(() => {
-    setForm(savedProfile)
-  }, [savedProfile])
+    setForm(normalizedSavedProfile)
+  }, [normalizedSavedProfile])
 
   useEffect(() => {
-    if (!savedProfile.fullName && user?.fullName) {
-      setForm((prev) => ({ ...prev, fullName: user.fullName, email: user.email }))
+    if (!normalizedSavedProfile.fullName && user?.fullName) {
+      setForm((prev) => ({ ...prev, fullName: user.fullName, email: user.email ?? prev.email }))
     }
-  }, [savedProfile.fullName, user?.email, user?.fullName])
+  }, [normalizedSavedProfile.fullName, user?.email, user?.fullName])
 
   const completion = useMemo(() => {
     const requiredFields = [form.fullName, form.email, form.phone, form.country, form.timezone, form.targetScore, form.examDate]
-   const filled = requiredFields.filter((entry) => (entry ?? '').trim().length > 0).length
+    const filled = requiredFields.filter((entry) => safeText(entry).trim().length > 0).length
     return Math.round((filled / requiredFields.length) * 100)
   }, [form])
 
@@ -132,11 +187,16 @@ export default function AccountProfile() {
   }
 
   const togglePreference = (field: keyof PreferenceDraft) => {
-    setPreferences((prev) => ({ ...prev, [field]: !prev[field] }))
+    setSavedPreferences((prev) => {
+      const safePrevious = normalizePreferenceDraft(prev)
+      return { ...safePrevious, [field]: !safePrevious[field] }
+    })
   }
 
   const saveProfile = () => {
-    setSavedProfile(form)
+    const normalizedForm = normalizeProfileDraft(form, initialProfile)
+    setForm(normalizedForm)
+    setSavedProfile(normalizedForm)
     pushToast({
       type: 'success',
       title: 'Profile saved',
@@ -145,7 +205,8 @@ export default function AccountProfile() {
   }
 
   const resetProfile = () => {
-    setForm(initialProfile)
+    const cleanProfile = normalizeProfileDraft(initialProfile, initialProfile)
+    setForm(cleanProfile)
     pushToast({
       type: 'info',
       title: 'Draft reset',
@@ -485,5 +546,4 @@ export default function AccountProfile() {
     </div>
   )
 }
-
 

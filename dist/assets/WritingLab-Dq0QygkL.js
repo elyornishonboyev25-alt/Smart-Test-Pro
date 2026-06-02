@@ -1,0 +1,1 @@
+import{j as t}from"./index-gPdsI66o.js";import{I as i}from"./IeltsSectionView-D0uTA8aa.js";import"./arrow-left-B9P1NfKg.js";import"./headphones-BJlvM0OR.js";import"./audio-lines-Bz8prKAr.js";import"./square-pen-DHZQtWRk.js";function p(){return t.jsx(i,{section:"writing",backPath:"/tests"})}export{p as default};

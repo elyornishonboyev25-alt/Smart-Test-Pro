@@ -1,4 +1,3 @@
-﻿import { motion } from 'framer-motion'
 import {
   ArrowLeft,
   AudioLines,
@@ -11,7 +10,7 @@ import {
   TimerReset,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { CountUp, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 
 export type IeltsSectionKey = 'reading' | 'listening' | 'writing' | 'speaking'
 
@@ -135,6 +134,14 @@ function resolveModuleIcon(icon: ModuleCard['icon']) {
   return BookOpen
 }
 
+function renderHeroMetric(value: string) {
+  // Animate when the metric is purely numeric; otherwise show the literal text.
+  if (/^\d+$/.test(value)) {
+    return <CountUp value={Number(value)} />
+  }
+  return value
+}
+
 export function IeltsSectionView({
   section,
   backPath = '/ielts',
@@ -142,7 +149,6 @@ export function IeltsSectionView({
   backState = null,
 }: IeltsSectionViewProps) {
   const navigate = useNavigate()
-  const { allowHoverMotion } = useMotionPreferences()
   const content = SECTION_CONFIG[section]
   const ieltsTitleSuffix = content.title.startsWith('IELTS ') ? content.title.slice(6) : content.title
 
@@ -180,99 +186,104 @@ export function IeltsSectionView({
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <section className="premium-hero p-6 sm:p-9">
-        <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <div className="premium-top-controls">
-              <button
-                onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
-                className="premium-back-btn"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                {backLabel}
-              </button>
-              <span className="premium-top-chip">{content.chip}</span>
+      <Reveal>
+        <section className="premium-hero p-6 sm:p-9">
+          <div className="relative flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+            <div>
+              <div className="premium-top-controls">
+                <button
+                  onClick={() => navigate(backPath, backState ? { state: backState } : undefined)}
+                  className="premium-back-btn"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  {backLabel}
+                </button>
+                <span className="premium-top-chip">{content.chip}</span>
+              </div>
+              <h1 className="premium-section-title mt-4">
+                IELTS <span className="arena-title-accent-red">{ieltsTitleSuffix}</span>
+              </h1>
+              <p className="premium-section-subtitle">{content.subtitle}</p>
             </div>
-            <h1 className="premium-section-title mt-4">
-              IELTS <span className="arena-title-accent-red">{ieltsTitleSuffix}</span>
-            </h1>
-            <p className="premium-section-subtitle">{content.subtitle}</p>
+
+            <div className="grid gap-2 sm:grid-cols-3 xl:w-[28rem]">
+              <div className="premium-stat">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-red-600">{content.heroMetricLabel}</p>
+                <p className="mt-1 text-2xl font-black text-slate-900">{renderHeroMetric(content.heroMetricValue)}</p>
+              </div>
+              <div className="premium-stat">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-red-600">{content.modeLabel}</p>
+                <p className="mt-1 text-2xl font-black text-slate-900">{content.modeValue}</p>
+              </div>
+              <div className="premium-stat">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-red-600">{content.feedbackLabel}</p>
+                <p className="mt-1 text-2xl font-black text-slate-900">{content.feedbackValue}</p>
+              </div>
+            </div>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-3 xl:w-[28rem]">
-            <div className="premium-stat">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-red-600">{content.heroMetricLabel}</p>
-              <p className="mt-1 text-2xl font-black text-slate-900">{content.heroMetricValue}</p>
-            </div>
-            <div className="premium-stat">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-red-600">{content.modeLabel}</p>
-              <p className="mt-1 text-2xl font-black text-slate-900">{content.modeValue}</p>
-            </div>
-            <div className="premium-stat">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-red-600">{content.feedbackLabel}</p>
-              <p className="mt-1 text-2xl font-black text-slate-900">{content.feedbackValue}</p>
-            </div>
+          <div className="relative mt-6 flex flex-wrap gap-2">
+            <button className="arena-primary-btn cta-sheen" onClick={handlePrimaryAction}>
+              {content.primaryAction}
+              <Sparkles className="ml-2 h-4 w-4" />
+            </button>
+            <button className="arena-secondary-btn" onClick={handleSecondaryAction}>
+              <TimerReset className="mr-2 h-4 w-4 text-red-600" />
+              {content.secondaryAction}
+            </button>
           </div>
-        </div>
+        </section>
+      </Reveal>
 
-        <div className="relative mt-6 flex flex-wrap gap-2">
-          <button className="arena-primary-btn" onClick={handlePrimaryAction}>
-            {content.primaryAction}
-            <Sparkles className="ml-2 h-4 w-4" />
-          </button>
-          <button className="arena-secondary-btn" onClick={handleSecondaryAction}>
-            <TimerReset className="mr-2 h-4 w-4 text-red-600" />
-            {content.secondaryAction}
-          </button>
-        </div>
-      </section>
-
-      <section className="mt-6 grid gap-4 md:grid-cols-3">
+      <Stagger className="mt-6 grid gap-4 md:grid-cols-3">
         {content.modules.map((item) => {
           const Icon = resolveModuleIcon(item.icon)
           return (
-            <motion.article
-              key={item.title}
-              whileHover={allowHoverMotion ? { y: -4, scale: 1.015 } : undefined}
-              className="surface-card p-5"
-            >
-              <div className="mb-3 inline-flex rounded-xl bg-red-100 p-2 text-red-700">
-                <Icon className="h-4 w-4" />
-              </div>
-              <h2 className="text-lg font-semibold text-slate-900">{item.title}</h2>
-              <p className="mt-2 text-sm text-slate-700">{item.detail}</p>
-            </motion.article>
+            <StaggerItem key={item.title} className="h-full">
+              <Tilt3D className="h-full rounded-3xl" max={6}>
+                <article className="surface-card h-full p-5">
+                  <div className="mb-3 inline-flex rounded-xl bg-red-100 p-2 text-red-700">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-slate-900">{item.title}</h2>
+                  <p className="mt-2 text-sm text-slate-700">{item.detail}</p>
+                </article>
+              </Tilt3D>
+            </StaggerItem>
           )
         })}
-      </section>
+      </Stagger>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-2">
-        <div className="surface-card p-5">
-          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-            <CheckCircle2 className="h-4 w-4 text-red-600" />
-            Practice Workflow
-          </h3>
-          <p className="mt-2 text-sm text-slate-700">
-            Timed mode, error-log sync, and coaching cues are active for this section.
-          </p>
-          <div className="mt-3 inline-flex items-center text-xs font-semibold text-red-600">
-            <CheckCircle2 className="mr-1 h-4 w-4" />
-            Practice pipeline ready
+      <Stagger className="mt-6 grid gap-4 md:grid-cols-2">
+        <StaggerItem>
+          <div className="surface-card p-5">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+              <CheckCircle2 className="h-4 w-4 text-red-600" />
+              Practice Workflow
+            </h3>
+            <p className="mt-2 text-sm text-slate-700">
+              Timed mode, error-log sync, and coaching cues are active for this section.
+            </p>
+            <div className="mt-3 inline-flex items-center text-xs font-semibold text-red-600">
+              <CheckCircle2 className="mr-1 h-4 w-4" />
+              Practice pipeline ready
+            </div>
           </div>
-        </div>
-        <div className="surface-card p-5">
-          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
-            {section === 'listening' ? <Headphones className="h-4 w-4 text-red-700" /> : <Sparkles className="h-4 w-4 text-red-700" />}
-            {content.insightTitle}
-          </h3>
-          <p className="mt-2 text-sm text-slate-700">{content.insightDescription}</p>
-          <div className="mt-3 inline-flex items-center text-xs font-semibold text-red-700">
-            <Sparkles className="mr-1 h-4 w-4" />
-            Insight channel active
+        </StaggerItem>
+        <StaggerItem>
+          <div className="surface-card p-5">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+              {section === 'listening' ? <Headphones className="h-4 w-4 text-red-700" /> : <Sparkles className="h-4 w-4 text-red-700" />}
+              {content.insightTitle}
+            </h3>
+            <p className="mt-2 text-sm text-slate-700">{content.insightDescription}</p>
+            <div className="mt-3 inline-flex items-center text-xs font-semibold text-red-700">
+              <Sparkles className="mr-1 h-4 w-4" />
+              Insight channel active
+            </div>
           </div>
-        </div>
-      </section>
+        </StaggerItem>
+      </Stagger>
     </div>
   )
 }
-

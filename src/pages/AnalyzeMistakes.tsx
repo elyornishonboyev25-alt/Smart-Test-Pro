@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiClient } from '@/lib/apiClient'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import type { ProfileOverview } from '@/types/platform'
+import { Reveal } from '@/components/fx'
 import {
   clearReadingAnalysisHistory,
   getReadingAnalysisHistory,
@@ -300,6 +301,7 @@ export default function AnalyzeMistakes() {
   return (
     <>
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Reveal>
         <section className="rounded-[2rem] border border-red-100 bg-white p-6 shadow-[0_24px_56px_rgba(220,38,38,0.12)] sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -409,6 +411,7 @@ export default function AnalyzeMistakes() {
             )}
           </div>
         </section>
+        </Reveal>
       </div>
 
       {typeof document !== 'undefined' && confirmModal ? createPortal(confirmModal, document.body) : confirmModal}

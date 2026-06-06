@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 
 import { AnimatedBackground } from '@/components/AnimatedBackground'
+import { Burst, CountUp, Reveal } from '@/components/fx'
 import { apiClient } from '@/lib/apiClient'
 import { useAuthStore } from '@/store/authStore'
 import type {
@@ -266,7 +267,9 @@ export default function Results() {
         </header>
 
         <main className="mx-auto w-full max-w-7xl px-4 py-8 pb-12 sm:px-6">
-          <section className="premium-hero p-6 sm:p-8">
+          <Reveal>
+          <section className="relative premium-hero p-6 sm:p-8">
+            <Burst count={24} play={analysis.summary.accuracy >= 80} />
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <span className="premium-top-chip">
@@ -311,31 +314,42 @@ export default function Results() {
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <div className="hero-metric-card">
                 <p className="hero-metric-label">Band</p>
-                <p className="hero-metric-value-sm">{effectiveBandScore.toFixed(1)}</p>
+                <p className="hero-metric-value-sm">
+                  <CountUp value={effectiveBandScore} decimals={1} />
+                </p>
                 <p className="hero-metric-note">Estimated score</p>
               </div>
               <div className="hero-metric-card">
                 <p className="hero-metric-label">Accuracy</p>
-                <p className="hero-metric-value-sm">{analysis.summary.accuracy}%</p>
+                <p className="hero-metric-value-sm">
+                  <CountUp value={analysis.summary.accuracy} suffix="%" />
+                </p>
                 <p className="hero-metric-note">Overall precision</p>
               </div>
               <div className="hero-metric-card">
                 <p className="hero-metric-label">Correct</p>
-                <p className="hero-metric-value-sm">{analysis.summary.correctAnswers}</p>
+                <p className="hero-metric-value-sm">
+                  <CountUp value={analysis.summary.correctAnswers} />
+                </p>
                 <p className="hero-metric-note">Right answers</p>
               </div>
               <div className="hero-metric-card">
                 <p className="hero-metric-label">Incorrect</p>
-                <p className="hero-metric-value-sm">{analysis.summary.incorrectAnswers}</p>
+                <p className="hero-metric-value-sm">
+                  <CountUp value={analysis.summary.incorrectAnswers} />
+                </p>
                 <p className="hero-metric-note">Need correction</p>
               </div>
               <div className="hero-metric-card">
                 <p className="hero-metric-label">Skipped</p>
-                <p className="hero-metric-value-sm">{analysis.summary.skippedAnswers}</p>
+                <p className="hero-metric-value-sm">
+                  <CountUp value={analysis.summary.skippedAnswers} />
+                </p>
                 <p className="hero-metric-note">Unanswered</p>
               </div>
             </div>
           </section>
+          </Reveal>
 
           <section className="mt-5 surface-card p-4">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

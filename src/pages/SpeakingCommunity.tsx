@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, AudioLines, CheckCircle2, Clock3, Copy, Ear, Headphones, Mic, MicOff, RefreshCcw, Search, ShieldCheck, Users, Volume2, Wifi } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { Burst, CountUp, Reveal } from '@/components/fx'
 
 type SpeakingPart = 1 | 2 | 3
 
@@ -105,7 +106,7 @@ function ToggleRow({
 
 export default function SpeakingCommunity() {
   const navigate = useNavigate()
-  const { allowHoverMotion, minimalMotion } = useMotionPreferences()
+  const { allowHoverMotion } = useMotionPreferences()
   const matchingTimeoutRef = useRef<number | null>(null)
 
   const [selectedPart, setSelectedPart] = useState<SpeakingPart>(1)
@@ -278,58 +279,57 @@ export default function SpeakingCommunity() {
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-6">
-        <motion.section
-          initial={minimalMotion ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-          className="premium-hero p-6 sm:p-10"
-        >
-          <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
-            <div>
-              <div className="premium-top-controls">
-                <button
-                  onClick={() => navigate('/tests')}
-                  className="premium-back-btn"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Back to Test Library
-                </button>
-                <span className="premium-top-chip">
-                  <AudioLines className="h-3.5 w-3.5" />
-                  IELTS Speaking Community
-                </span>
+        <Reveal>
+          <section className="premium-hero p-6 sm:p-10">
+            <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
+              <div>
+                <div className="premium-top-controls">
+                  <button
+                    onClick={() => navigate('/tests')}
+                    className="premium-back-btn"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Back to Test Library
+                  </button>
+                  <span className="premium-top-chip">
+                    <AudioLines className="h-3.5 w-3.5" />
+                    IELTS Speaking Community
+                  </span>
+                </div>
+                <h1 className="premium-section-title mt-4">
+                  Voice-Only <span className="arena-title-accent-red">Speaking Arena</span>
+                </h1>
+                <p className="premium-section-subtitle max-w-3xl">
+                  Partner-to-partner IELTS speaking practice with microphone-only communication, timer discipline, and part-based question flow.
+                </p>
+                <p className="mt-2 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-red-700">
+                  <Mic className="h-3.5 w-3.5" />
+                  Camera is disabled by design
+                </p>
               </div>
-              <h1 className="premium-section-title mt-4">
-                Voice-Only <span className="arena-title-accent-red">Speaking Arena</span>
-              </h1>
-              <p className="premium-section-subtitle max-w-3xl">
-                Partner-to-partner IELTS speaking practice with microphone-only communication, timer discipline, and part-based question flow.
-              </p>
-              <p className="mt-2 inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-red-700">
-                <Mic className="h-3.5 w-3.5" />
-                Camera is disabled by design
-              </p>
-            </div>
 
-            <div className="grid gap-2 sm:grid-cols-3 xl:w-full">
-              <div className="hero-metric-card interactive-lift">
-                <p className="hero-metric-label">Live Rooms</p>
-                <p className="hero-metric-value-sm">4</p>
-                <p className="hero-metric-note">Voice channels</p>
-              </div>
-              <div className="hero-metric-card interactive-lift">
-                <p className="hero-metric-label">Avg Wait</p>
-                <p className="hero-metric-value-sm">00:45</p>
-                <p className="hero-metric-note">Queue to pair</p>
-              </div>
-              <div className="hero-metric-card interactive-lift">
-                <p className="hero-metric-label">Audio Mode</p>
-                <p className="hero-metric-value-sm hero-metric-value-compact">Mic Only</p>
-                <p className="hero-metric-note">No video stream</p>
+              <div className="grid gap-2 sm:grid-cols-3 xl:w-full">
+                <div className="hero-metric-card interactive-lift">
+                  <p className="hero-metric-label">Live Rooms</p>
+                  <p className="hero-metric-value-sm">
+                    <CountUp value={4} />
+                  </p>
+                  <p className="hero-metric-note">Voice channels</p>
+                </div>
+                <div className="hero-metric-card interactive-lift">
+                  <p className="hero-metric-label">Avg Wait</p>
+                  <p className="hero-metric-value-sm">00:45</p>
+                  <p className="hero-metric-note">Queue to pair</p>
+                </div>
+                <div className="hero-metric-card interactive-lift">
+                  <p className="hero-metric-label">Audio Mode</p>
+                  <p className="hero-metric-value-sm hero-metric-value-compact">Mic Only</p>
+                  <p className="hero-metric-note">No video stream</p>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.section>
+          </section>
+        </Reveal>
 
         <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-6">
@@ -532,7 +532,7 @@ export default function SpeakingCommunity() {
                 <button
                   onClick={startPartnerSearch}
                   disabled={matchStatus === 'searching'}
-                  className="arena-primary-btn flex-1 justify-center px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-55"
+                  className="arena-primary-btn cta-sheen flex-1 justify-center px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-55"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   {matchStatus === 'searching' ? 'Searching...' : 'Find Partner'}
@@ -546,7 +546,8 @@ export default function SpeakingCommunity() {
               </div>
 
               {matchedPartner ? (
-                <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50/75 p-3">
+                <div className="relative mt-3 overflow-hidden rounded-2xl border border-emerald-200 bg-emerald-50/75 p-3">
+                  <Burst count={20} play={matchStatus === 'matched'} />
                   <p className="text-sm font-semibold text-emerald-900">
                     Matched with {matchedPartner.name} ({matchedPartner.country})
                   </p>

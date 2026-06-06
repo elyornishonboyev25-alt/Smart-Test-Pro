@@ -6,6 +6,7 @@ import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { CountUp, Reveal } from '@/components/fx'
 
 type ExamTarget = 'IELTS' | 'SAT' | 'BOTH'
 
@@ -216,12 +217,13 @@ export default function AccountProfile() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <motion.section
-        initial={minimalMotion ? false : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-        className="premium-hero p-6 sm:p-9"
-      >
+      <Reveal>
+        <motion.section
+          initial={minimalMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+          className="premium-hero p-6 sm:p-9"
+        >
         <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start">
           <div className="xl:pr-2">
             <div className="premium-top-controls">
@@ -248,7 +250,9 @@ export default function AccountProfile() {
           <div className="grid gap-2 sm:grid-cols-3 xl:w-full">
             <div className="hero-metric-card interactive-lift">
               <p className="hero-metric-label">Profile Complete</p>
-              <p className="hero-metric-value-sm">{completion}%</p>
+              <p className="hero-metric-value-sm">
+                <CountUp value={completion} suffix="%" />
+              </p>
               <p className="hero-metric-note">Personal setup</p>
             </div>
             <div className="hero-metric-card interactive-lift">
@@ -263,7 +267,8 @@ export default function AccountProfile() {
             </div>
           </div>
         </div>
-      </motion.section>
+        </motion.section>
+      </Reveal>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <article className="surface-card p-6">

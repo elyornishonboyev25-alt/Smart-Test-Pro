@@ -28,6 +28,7 @@ import type { ProfileOverview } from '@/types/platform'
 import { Skeleton } from '@/components/common/Skeleton'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { useAuthStore, type AuthState } from '@/store/authStore'
+import { Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 
 function toneByInsight(type: 'warning' | 'tip' | 'success') {
   if (type === 'warning') {
@@ -314,12 +315,13 @@ export default function Profile() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <motion.section
-        initial={minimalMotion ? false : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-        className="premium-hero p-6 sm:p-9"
-      >
+      <Reveal>
+        <motion.section
+          initial={minimalMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+          className="premium-hero p-6 sm:p-9"
+        >
         {loading ? (
           <>
             <Skeleton className="h-8 w-64" />
@@ -368,7 +370,8 @@ export default function Profile() {
             </div>
           </div>
         ) : null}
-      </motion.section>
+        </motion.section>
+      </Reveal>
 
       {isGuestPreview ? (
         <div className="mt-6 rounded-2xl border border-red-200/80 bg-[linear-gradient(120deg,rgba(254,226,226,0.76),rgba(255,255,255,0.92),rgba(255,228,230,0.8))] p-4 text-sm text-red-800 shadow-[0_10px_24px_rgba(220,38,38,0.1)]">
@@ -377,26 +380,26 @@ export default function Profile() {
       ) : null}
       {!isGuestPreview && error ? <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {loading
           ? Array.from({ length: 4 }).map((_, index) => <CompactSkeletonCard key={index} />)
           : summaryCards.map((card) => {
             const Icon = card.icon
             return (
-              <motion.article
-                key={card.label}
-                whileHover={allowHoverMotion ? { y: -4, scale: 1.015 } : undefined}
-                className="surface-card p-5"
-              >
-                <div className="relative flex items-center justify-between">
-                  <p className="text-sm text-slate-500">{card.label}</p>
-                  <Icon className="h-4 w-4 text-red-600" />
-                </div>
-                <p className="mt-3 text-3xl font-black text-slate-900">{card.value}</p>
-              </motion.article>
+              <StaggerItem key={card.label} className="h-full">
+                <Tilt3D className="h-full rounded-3xl" max={6}>
+                  <article className="surface-card h-full p-5">
+                    <div className="relative flex items-center justify-between">
+                      <p className="text-sm text-slate-500">{card.label}</p>
+                      <Icon className="h-4 w-4 text-red-600" />
+                    </div>
+                    <p className="mt-3 text-3xl font-black text-slate-900">{card.value}</p>
+                  </article>
+                </Tilt3D>
+              </StaggerItem>
             )
           })}
-      </section>
+      </Stagger>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-2">
         <div className="surface-card p-6">

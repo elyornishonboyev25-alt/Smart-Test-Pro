@@ -39,6 +39,7 @@ const AnalyzeMistakes = lazy(() => import('@/pages/AnalyzeMistakes'))
 const AccountProfile = lazy(() => import('@/pages/AccountProfile'))
 const Login = lazy(() => import('@/pages/Login'))
 const Register = lazy(() => import('@/pages/Register'))
+const Premium = lazy(() => import('@/pages/Premium'))
 const Leaderboard = lazy(() => import('@/pages/Leaderboard'))
 const TestRunner = lazy(() => import('@/pages/TestRunner'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
@@ -383,6 +384,7 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
+                      <Route path="/premium" element={<AnimatedRoute><Premium /></AnimatedRoute>} />
                       <Route path="/login" element={<AnimatedRoute><Login /></AnimatedRoute>} />
                       <Route path="/register" element={<AnimatedRoute><Register /></AnimatedRoute>} />
                       <Route path="*" element={<AnimatedRoute><NotFound /></AnimatedRoute>} />

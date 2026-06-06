@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BarChart3, BookMarked, BookOpen, GraduationCap, Headset, Home, ShieldCheck, Trophy, TriangleAlert } from 'lucide-react'
+import { BarChart3, BookMarked, BookOpen, Crown, GraduationCap, Headset, Home, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../ui/utils'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -94,7 +94,7 @@ export function Sidebar() {
       <div className="my-6 h-px bg-gradient-to-r from-transparent via-red-300/65 to-transparent" />
 
       <div className="sidebar-heading-chip">Labs</div>
-      <nav className="space-y-2 pb-10">
+      <nav className="space-y-2 pb-5">
         {labItems.map((item) => {
           const active = isActive(item.path)
           const Icon = item.icon
@@ -129,6 +129,24 @@ export function Sidebar() {
           )
         })}
       </nav>
+
+      <motion.button
+        onClick={() => navigate('/premium')}
+        whileHover={allowHoverMotion ? { y: -2 } : undefined}
+        whileTap={allowHoverMotion ? { scale: 0.98 } : undefined}
+        className="interactive-lift cta-sheen group relative mb-2 flex w-full items-center gap-3 overflow-hidden rounded-2xl border border-amber-300/60 bg-gradient-to-br from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-3.5 py-3 text-left shadow-[0_16px_30px_rgba(220,38,38,0.32)]"
+      >
+        <span className="relative z-10 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 text-white shadow-inner backdrop-blur-sm">
+          <Crown className="h-5 w-5" />
+        </span>
+        <span className="relative z-10 min-w-0 flex-1">
+          <span className="flex items-center gap-1 text-sm font-black tracking-tight text-white">
+            Go Premium
+            <Sparkles className="h-3.5 w-3.5 text-amber-200" />
+          </span>
+          <span className="block truncate text-[11px] font-medium text-red-50/90">Unlock AI &amp; all features</span>
+        </span>
+      </motion.button>
     </motion.aside>
   )
 }

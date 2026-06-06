@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { vocabularyCollections, type VocabularyTrack } from '@/data/vocabularyCollections'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { CountUp, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 
 const fastTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const }
 const collapseDurationMs = 320
@@ -157,92 +158,98 @@ export default function Vocabulary() {
         </div>
 
         <div className="relative mx-auto w-full max-w-6xl space-y-6">
-          <section className="rounded-[2rem] border border-red-100 bg-white/90 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-9">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <div className="premium-top-controls">
-                  <motion.button
-                    onClick={goBack}
-                    whileHover={allowHoverMotion ? { y: -2, x: -1 } : undefined}
-                    whileTap={allowHoverMotion ? { scale: 0.99 } : undefined}
-                    transition={fastTransition}
-                    className="premium-back-btn group"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
-                    Back
-                  </motion.button>
-                  <span className="premium-top-chip gap-1">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Vocabulary Lab
-                  </span>
+          <Reveal>
+            <section className="rounded-[2rem] border border-red-100 bg-white/90 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-9">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="premium-top-controls">
+                    <motion.button
+                      onClick={goBack}
+                      whileHover={allowHoverMotion ? { y: -2, x: -1 } : undefined}
+                      whileTap={allowHoverMotion ? { scale: 0.99 } : undefined}
+                      transition={fastTransition}
+                      className="premium-back-btn group"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
+                      Back
+                    </motion.button>
+                    <span className="premium-top-chip gap-1">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Vocabulary Lab
+                    </span>
+                  </div>
+                  <h1 className="mt-4 text-4xl font-black leading-tight text-[#0f172a] sm:text-5xl">
+                    Choose your <span className="bg-gradient-to-r from-red-700 via-rose-600 to-orange-500 bg-clip-text text-transparent">Vocabulary Arena</span>
+                  </h1>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                    IELTS and SAT now run as separate immersive pages. Each track includes smooth accordion navigation and passage-level activity views.
+                  </p>
                 </div>
-                <h1 className="mt-4 text-4xl font-black leading-tight text-[#0f172a] sm:text-5xl">
-                  Choose your <span className="bg-gradient-to-r from-red-700 via-rose-600 to-orange-500 bg-clip-text text-transparent">Vocabulary Arena</span>
-                </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                  IELTS and SAT now run as separate immersive pages. Each track includes smooth accordion navigation and passage-level activity views.
-                </p>
-              </div>
-              <div className="relative overflow-hidden rounded-3xl border border-red-200 bg-gradient-to-br from-white via-rose-50/70 to-red-100/65 px-5 py-4 text-right shadow-[0_18px_38px_rgba(220,38,38,0.18)]">
-                <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-red-200/55 blur-2xl" />
-                <div className="pointer-events-none absolute -left-8 bottom-0 h-20 w-20 rounded-full bg-orange-200/45 blur-2xl" />
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Total Terms</p>
-                <p className="mt-1 text-4xl font-black text-slate-900">{ieltsStats.words + satStats.words}</p>
-                <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-semibold">
-                  <div className="rounded-xl border border-red-100 bg-white/90 px-2 py-1.5 text-red-700">{ieltsStats.words} IELTS</div>
-                  <div className="rounded-xl border border-blue-100 bg-white/90 px-2 py-1.5 text-blue-700">{satStats.words} SAT</div>
+                <div className="relative overflow-hidden rounded-3xl border border-red-200 bg-gradient-to-br from-white via-rose-50/70 to-red-100/65 px-5 py-4 text-right shadow-[0_18px_38px_rgba(220,38,38,0.18)]">
+                  <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-red-200/55 blur-2xl" />
+                  <div className="pointer-events-none absolute -left-8 bottom-0 h-20 w-20 rounded-full bg-orange-200/45 blur-2xl" />
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Total Terms</p>
+                  <p className="mt-1 text-4xl font-black text-slate-900">
+                    <CountUp value={ieltsStats.words + satStats.words} />
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-semibold">
+                    <div className="rounded-xl border border-red-100 bg-white/90 px-2 py-1.5 text-red-700">{ieltsStats.words} IELTS</div>
+                    <div className="rounded-xl border border-blue-100 bg-white/90 px-2 py-1.5 text-blue-700">{satStats.words} SAT</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </Reveal>
 
-          <section className="grid gap-5 md:grid-cols-2">
-            <motion.button
-              onClick={() => navigate('/vocabulary/ielts')}
-              whileHover={allowHoverMotion ? { y: -5, scale: 1.012 } : undefined}
-              whileTap={allowHoverMotion ? { scale: 0.996 } : undefined}
-              transition={fastTransition}
-              className="interactive-lift group rounded-[1.8rem] border border-red-200 bg-gradient-to-br from-white via-rose-50 to-red-100/70 p-6 text-left shadow-[0_18px_36px_rgba(244,63,94,0.16)]"
-            >
-              <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700">
-                <BookOpen className="h-3.5 w-3.5" />
-                IELTS Academic Track
-              </div>
-              <h2 className="mt-4 text-3xl font-black text-slate-900">IELTS Vocabulary</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                Reading-focused roadmap with Day 1-30 plus Full Test 1-20. Full tests open by Passage 1, 2, and 3.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-                <span className="rounded-full bg-white px-3 py-1 text-slate-700">{ieltsStats.books} books</span>
-                <span className="rounded-full bg-white px-3 py-1 text-slate-700">{ieltsStats.tests} tests</span>
-                <span className="rounded-full bg-white px-3 py-1 text-slate-700">{ieltsStats.passages} passages</span>
-              </div>
-              <p className="mt-6 text-sm font-semibold text-red-700 transition group-hover:translate-x-1">Open IELTS page -&gt;</p>
-            </motion.button>
+          <Stagger className="grid gap-5 md:grid-cols-2">
+            <StaggerItem className="h-full">
+              <Tilt3D className="h-full rounded-[1.8rem]" max={6}>
+                <button
+                  onClick={() => navigate('/vocabulary/ielts')}
+                  className="interactive-lift group h-full w-full rounded-[1.8rem] border border-red-200 bg-gradient-to-br from-white via-rose-50 to-red-100/70 p-6 text-left shadow-[0_18px_36px_rgba(244,63,94,0.16)]"
+                >
+                  <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700">
+                    <BookOpen className="h-3.5 w-3.5" />
+                    IELTS Academic Track
+                  </div>
+                  <h2 className="mt-4 text-3xl font-black text-slate-900">IELTS Vocabulary</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Reading-focused roadmap with Day 1-30 plus Full Test 1-20. Full tests open by Passage 1, 2, and 3.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{ieltsStats.books} books</span>
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{ieltsStats.tests} tests</span>
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{ieltsStats.passages} passages</span>
+                  </div>
+                  <p className="mt-6 text-sm font-semibold text-red-700 transition group-hover:translate-x-1">Open IELTS page -&gt;</p>
+                </button>
+              </Tilt3D>
+            </StaggerItem>
 
-            <motion.button
-              onClick={() => navigate('/vocabulary/sat')}
-              whileHover={allowHoverMotion ? { y: -5, scale: 1.012 } : undefined}
-              whileTap={allowHoverMotion ? { scale: 0.996 } : undefined}
-              transition={fastTransition}
-              className="interactive-lift group rounded-[1.8rem] border border-blue-200 bg-gradient-to-br from-white via-blue-50 to-indigo-100/75 p-6 text-left shadow-[0_18px_36px_rgba(59,130,246,0.16)]"
-            >
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-blue-700">
-                <Star className="h-3.5 w-3.5" />
-                SAT Advanced Track
-              </div>
-              <h2 className="mt-4 text-3xl font-black text-slate-900">SAT Vocabulary</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                10 packs, each with 4 sections. Each section opens on its own activity page with group-based matching rewards.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-                <span className="rounded-full bg-white px-3 py-1 text-slate-700">{satStats.packs} packs</span>
-                <span className="rounded-full bg-white px-3 py-1 text-slate-700">{satStats.sections} sections</span>
-                <span className="rounded-full bg-white px-3 py-1 text-slate-700">{satStats.words} words</span>
-              </div>
-              <p className="mt-6 text-sm font-semibold text-blue-700 transition group-hover:translate-x-1">Open SAT page -&gt;</p>
-            </motion.button>
-          </section>
+            <StaggerItem className="h-full">
+              <Tilt3D className="h-full rounded-[1.8rem]" max={6}>
+                <button
+                  onClick={() => navigate('/vocabulary/sat')}
+                  className="interactive-lift group h-full w-full rounded-[1.8rem] border border-blue-200 bg-gradient-to-br from-white via-blue-50 to-indigo-100/75 p-6 text-left shadow-[0_18px_36px_rgba(59,130,246,0.16)]"
+                >
+                  <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-blue-700">
+                    <Star className="h-3.5 w-3.5" />
+                    SAT Advanced Track
+                  </div>
+                  <h2 className="mt-4 text-3xl font-black text-slate-900">SAT Vocabulary</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    10 packs, each with 4 sections. Each section opens on its own activity page with group-based matching rewards.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{satStats.packs} packs</span>
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{satStats.sections} sections</span>
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{satStats.words} words</span>
+                  </div>
+                  <p className="mt-6 text-sm font-semibold text-blue-700 transition group-hover:translate-x-1">Open SAT page -&gt;</p>
+                </button>
+              </Tilt3D>
+            </StaggerItem>
+          </Stagger>
         </div>
       </div>
     )
@@ -260,37 +267,41 @@ export default function Vocabulary() {
         </div>
 
         <div className="relative mx-auto w-full max-w-6xl space-y-6">
-          <section className="rounded-[2rem] border border-red-100 bg-white/90 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-8">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <div className="premium-top-controls">
-                  <button
-                    onClick={() => navigate('/vocabulary')}
-                    className="premium-back-btn"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" />
-                    Back
-                  </button>
-                  <span className="premium-top-chip">IELTS Vocabulary Track</span>
+          <Reveal>
+            <section className="rounded-[2rem] border border-red-100 bg-white/90 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-8">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div className="premium-top-controls">
+                    <button
+                      onClick={() => navigate('/vocabulary')}
+                      className="premium-back-btn"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" />
+                      Back
+                    </button>
+                    <span className="premium-top-chip">IELTS Vocabulary Track</span>
+                  </div>
+                  <h1 className="mt-4 text-4xl font-black leading-tight text-slate-900 sm:text-5xl">IELTS Reading Vocabulary Studio</h1>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                    Reading vocabulary by roadmap: Day 1-30 and Full Test 1-20. Opening one test automatically closes the previous one.
+                  </p>
                 </div>
-                <h1 className="mt-4 text-4xl font-black leading-tight text-slate-900 sm:text-5xl">IELTS Reading Vocabulary Studio</h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                  Reading vocabulary by roadmap: Day 1-30 and Full Test 1-20. Opening one test automatically closes the previous one.
-                </p>
+                <div className="rounded-2xl border border-red-100 bg-gradient-to-br from-red-50 to-white px-4 py-3 text-right shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-600">IELTS Stats</p>
+                  <p className="mt-1 text-lg font-extrabold text-slate-900">{ieltsStats.tests} tests / {ieltsStats.passages} passages</p>
+                  <p className="text-sm font-semibold text-red-700">
+                    <CountUp value={ieltsStats.words} /> terms
+                  </p>
+                </div>
               </div>
-              <div className="rounded-2xl border border-red-100 bg-gradient-to-br from-red-50 to-white px-4 py-3 text-right shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-600">IELTS Stats</p>
-                <p className="mt-1 text-lg font-extrabold text-slate-900">{ieltsStats.tests} tests / {ieltsStats.passages} passages</p>
-                <p className="text-sm font-semibold text-red-700">{ieltsStats.words} terms</p>
-              </div>
-            </div>
-          </section>
+            </section>
+          </Reveal>
 
-          <section className="space-y-3">
+          <Stagger className="space-y-3">
             {vocabularyCollections.ielts.map((book) => {
               const bookOpen = openIeltsBookId === book.id
               return (
-                <article
+                <StaggerItem
                   key={book.id}
                   className="overflow-hidden rounded-[1.4rem] border border-red-100 bg-white/90 shadow-[0_12px_30px_rgba(15,23,42,0.08)]"
                 >
@@ -375,10 +386,10 @@ export default function Vocabulary() {
                       })}
                     </div>
                   </CollapsiblePanel>
-                </article>
+                </StaggerItem>
               )
             })}
-          </section>
+          </Stagger>
         </div>
       </div>
     )
@@ -395,40 +406,42 @@ export default function Vocabulary() {
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-6">
-        <section className="rounded-[2rem] border border-blue-100 bg-white/95 p-6 shadow-[0_30px_70px_rgba(30,64,175,0.13)] backdrop-blur-xl sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="premium-top-controls">
-                <button
-                  onClick={() => navigate('/vocabulary')}
-                  className="premium-back-btn-blue"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Back
-                </button>
-                <span className="premium-top-chip-blue">SAT Vocabulary Track</span>
+        <Reveal>
+          <section className="rounded-[2rem] border border-blue-100 bg-white/95 p-6 shadow-[0_30px_70px_rgba(30,64,175,0.13)] backdrop-blur-xl sm:p-8">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="premium-top-controls">
+                  <button
+                    onClick={() => navigate('/vocabulary')}
+                    className="premium-back-btn-blue"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Back
+                  </button>
+                  <span className="premium-top-chip-blue">SAT Vocabulary Track</span>
+                </div>
+                <h1 className="mt-4 text-4xl font-black leading-tight text-slate-900 sm:text-5xl">SAT Vocabulary Collection</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                  Each pack opens independently. Choose a section to enter its activity page. The matching game uses group-level diamond rewards.
+                </p>
               </div>
-              <h1 className="mt-4 text-4xl font-black leading-tight text-slate-900 sm:text-5xl">SAT Vocabulary Collection</h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                Each pack opens independently. Choose a section to enter its activity page. The matching game uses group-level diamond rewards.
-              </p>
+              <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white px-4 py-3 text-right shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">SAT Stats</p>
+                <p className="mt-1 text-lg font-extrabold text-slate-900">{satStats.packs} packs / {satStats.sections} sections</p>
+                <p className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700">
+                  <Gem className="h-4 w-4" />
+                  <CountUp value={satStats.words} /> terms
+                </p>
+              </div>
             </div>
-            <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white px-4 py-3 text-right shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">SAT Stats</p>
-              <p className="mt-1 text-lg font-extrabold text-slate-900">{satStats.packs} packs / {satStats.sections} sections</p>
-              <p className="inline-flex items-center gap-1 text-sm font-semibold text-blue-700">
-                <Gem className="h-4 w-4" />
-                {satStats.words} terms
-              </p>
-            </div>
-          </div>
-        </section>
+          </section>
+        </Reveal>
 
-        <section className="space-y-3">
+        <Stagger className="space-y-3">
           {vocabularyCollections.sat.map((pack) => {
             const isOpen = openSatPackId === pack.id
             return (
-              <article
+              <StaggerItem
                 key={pack.id}
                 className="overflow-hidden rounded-[1.4rem] border border-blue-100 bg-white/95 shadow-[0_12px_30px_rgba(30,64,175,0.09)]"
               >
@@ -471,10 +484,10 @@ export default function Vocabulary() {
                     </div>
                   )}
                 </CollapsiblePanel>
-              </article>
+              </StaggerItem>
             )
           })}
-        </section>
+        </Stagger>
       </div>
     </div>
   )

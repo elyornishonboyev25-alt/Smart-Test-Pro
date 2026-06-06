@@ -1031,3 +1031,97 @@
   color: #1f2937 !important;
   box-shadow: inset 0 -2px 0 rgba(120, 53, 15, 0.55);
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   FX layer — premium gamification primitives (src/components/fx/*)
+   All of these honour the global prefers-reduced-motion block above, which
+   neutralises every animation/transition, so no per-rule guards are needed.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Moving sheen used inside AnimatedBar fills */
+.fx-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  transform: translateX(-100%);
+  animation: fxShimmer 2.2s var(--app-ease-smooth) infinite;
+  mix-blend-mode: screen;
+}
+
+/* Gentle vertical bob for hero art / badges */
+.fx-float {
+  animation: fxFloat 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Breathing glow ring for "live" / active elements */
+.fx-glow-breath {
+  animation: fxGlowBreath 2.8s ease-in-out infinite;
+}
+
+/* Diagonal shine sweep for leaderboard medals / premium chips */
+.fx-medal-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.fx-medal-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0) 62%
+  );
+  transform: translateX(-160%);
+  animation: fxMedalShine 4.2s var(--app-ease-smooth) infinite;
+  mix-blend-mode: screen;
+}
+
+/* Slow drifting aurora gradient for premium hero backdrops */
+.fx-aurora {
+  background-size: 200% 200%;
+  animation: fxAurora 14s ease-in-out infinite;
+}
+
+/* Soft live pulse dot */
+.fx-pulse-dot {
+  animation: fxPulseDot 1.8s ease-in-out infinite;
+}
+
+@keyframes fxShimmer {
+  0% { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(220%); }
+}
+
+@keyframes fxFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes fxGlowBreath {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
+  50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+}
+
+@keyframes fxMedalShine {
+  0% { transform: translateX(-160%); }
+  55%, 100% { transform: translateX(160%); }
+}
+
+@keyframes fxAurora {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes fxPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.82); }
+}

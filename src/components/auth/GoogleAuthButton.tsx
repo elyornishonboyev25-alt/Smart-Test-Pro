@@ -154,10 +154,10 @@ export default function GoogleAuthButton({ mode, disabled = false, onCredential 
         },
       })
 
-      const renderWidth = Math.max(250, Math.min(420, buttonContainer.clientWidth || 320))
+      const renderWidth = Math.max(230, Math.min(300, buttonContainer.clientWidth || 260))
       window.google.accounts.id.renderButton(buttonContainer, {
         theme: 'outline',
-        size: 'large',
+        size: 'medium',
         shape: 'pill',
         logo_alignment: 'left',
         text: mode === 'signup' ? 'signup_with' : 'continue_with',
@@ -203,24 +203,24 @@ export default function GoogleAuthButton({ mode, disabled = false, onCredential 
 
   return (
     <div className="space-y-2">
-      <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.06)]">
+      <div className="relative mx-auto flex w-fit items-center justify-center overflow-hidden rounded-full">
         {googleClientId ? (
           <motion.div
-            initial={minimalMotion ? false : { opacity: 0, y: 8 }}
+            initial={minimalMotion ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: minimalMotion ? 0.12 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: minimalMotion ? 0.12 : 0.2, ease: [0.22, 1, 0.36, 1] }}
             ref={containerRef}
-            className="flex min-h-[44px] items-center justify-center"
+            className="flex min-h-[36px] items-center justify-center"
           />
         ) : (
-          <div className="flex min-h-[44px] items-center justify-center rounded-xl border border-dashed border-red-200 bg-red-50/45 px-3 py-2 text-center text-xs font-semibold text-red-700">
-            {isResolvingClientId ? 'Resolving Google OAuth configuration...' : 'Google OAuth is not configured yet.'}
+          <div className="flex min-h-[36px] items-center justify-center rounded-full border border-dashed border-red-200 bg-red-50/45 px-4 py-2 text-center text-[11px] font-semibold text-red-700">
+            {isResolvingClientId ? 'Resolving Google OAuth...' : 'Google OAuth is not configured yet.'}
           </div>
         )}
 
         {(disabled || isProcessing || isResolvingClientId) ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-[1px]">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+          <div className="absolute inset-0 flex items-center justify-center rounded-full bg-white/85 backdrop-blur-[1px]">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
               Connecting...
             </span>

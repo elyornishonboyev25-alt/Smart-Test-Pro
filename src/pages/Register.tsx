@@ -102,7 +102,9 @@ export default function Register() {
         title: 'Account ready',
         message: 'Signed up with Google successfully.',
       })
-      navigate('/dashboard', { replace: true })
+      // Full reload guarantees the persisted session is hydrated before the
+      // dashboard renders (fixes the blank-until-refresh behaviour).
+      window.location.assign('/dashboard')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Google sign-up failed'
       pushToast({

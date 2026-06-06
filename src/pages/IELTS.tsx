@@ -1,6 +1,6 @@
-import { ArrowLeft, ArrowRight, BookOpen, Headphones, Mic2, PenSquare } from 'lucide-react'
+import { ArrowLeft, BookOpen, Headphones, Mic2, PenSquare } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AmbientBackdrop, BrandIcon, CountUp, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
+import { CountUp, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 
 const sections = [
   {
@@ -33,12 +33,6 @@ const sections = [
   },
 ] as const
 
-const heroMetrics = [
-  { label: 'IELTS Sections', value: 4, note: 'Independent premium pages' },
-  { label: 'Workflow', text: 'Exam', note: 'Reading to Speaking flow' },
-  { label: 'Coaching', text: 'AI', note: 'Per-section analysis' },
-] as const
-
 export default function IELTS() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -47,18 +41,27 @@ export default function IELTS() {
   const mockFrom = navigationState?.from ?? 'tests'
 
   return (
-    <div className="relative min-h-screen overflow-hidden px-4 py-8 sm:px-6 lg:px-10">
-      <AmbientBackdrop variant="red" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#fde8e8] via-[#fceaea] to-[#f9dede] px-4 py-8 sm:px-6 lg:px-10">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="ambient-mesh" />
+        <div className="ambient-grid" />
+        <div className="ambient-noise" />
+        <div className="absolute -left-16 top-10 h-72 w-72 rounded-full bg-red-200/45 blur-3xl" />
+        <div className="absolute bottom-[-8rem] right-0 h-96 w-96 rounded-full bg-rose-200/35 blur-3xl" />
+      </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-6">
-        {/* ── Hero ──────────────────────────────────────────── */}
         <Reveal>
           <section className="premium-hero p-6 sm:p-10">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <div className="premium-top-controls">
                   <button
-                    onClick={() => (fromMock ? navigate('/mock/ielts', { state: { from: mockFrom } }) : navigate('/tests'))}
+                    onClick={() =>
+                      fromMock
+                        ? navigate('/mock/ielts', { state: { from: mockFrom } })
+                        : navigate('/tests')
+                    }
                     className="premium-back-btn"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" />
@@ -75,60 +78,58 @@ export default function IELTS() {
               </div>
 
               <div className="grid gap-2 sm:grid-cols-3 xl:w-[31rem]">
-                {heroMetrics.map((metric) => (
-                  <div key={metric.label} className="hero-metric-card interactive-lift">
-                    <p className="hero-metric-label">{metric.label}</p>
-                    <p className={`hero-metric-value-sm ${'text' in metric ? 'hero-metric-value-compact' : ''}`}>
-                      {'value' in metric ? <CountUp value={metric.value} /> : metric.text}
-                    </p>
-                    <p className="hero-metric-note">{metric.note}</p>
-                  </div>
-                ))}
+                <div className="hero-metric-card interactive-lift">
+                  <p className="hero-metric-label">IELTS Sections</p>
+                  <p className="hero-metric-value-sm">
+                    <CountUp value={4} />
+                  </p>
+                  <p className="hero-metric-note">Independent premium pages</p>
+                </div>
+                <div className="hero-metric-card interactive-lift">
+                  <p className="hero-metric-label">Workflow</p>
+                  <p className="hero-metric-value-sm hero-metric-value-compact">Exam</p>
+                  <p className="hero-metric-note">Reading to Speaking flow</p>
+                </div>
+                <div className="hero-metric-card interactive-lift">
+                  <p className="hero-metric-label">Coaching</p>
+                  <p className="hero-metric-value-sm hero-metric-value-compact">AI</p>
+                  <p className="hero-metric-note">Per-section analysis</p>
+                </div>
               </div>
             </div>
           </section>
         </Reveal>
 
-        {/* ── Section cards ─────────────────────────────────── */}
         <Stagger className="grid gap-5 md:grid-cols-2">
           {sections.map((section) => {
             const Icon = section.icon
             return (
               <StaggerItem key={section.id} className="h-full">
-                <Tilt3D className="h-full rounded-[1.8rem]" max={7}>
+                <Tilt3D className="h-full rounded-[1.8rem]" max={6}>
                   <button
                     onClick={() =>
                       navigate(`/ielts/${section.id}`, {
-                        state: fromMock ? { entry: 'mock-ielts', from: mockFrom } : { entry: 'ielts-hub' },
+                        state: fromMock
+                          ? { entry: 'mock-ielts', from: mockFrom }
+                          : { entry: 'ielts-hub' },
                       })
                     }
-                    className="group relative h-full w-full overflow-hidden rounded-[1.8rem] border border-slate-100 bg-white p-6 text-left shadow-[0_16px_40px_rgba(15,23,42,0.06)] transition hover:border-red-200 hover:shadow-[0_26px_52px_rgba(220,38,38,0.13)]"
+                    className="interactive-lift group h-full w-full rounded-[1.8rem] border border-red-200 bg-gradient-to-br from-white via-rose-50 to-red-100/70 p-6 text-left shadow-[0_18px_36px_rgba(244,63,94,0.16)]"
                   >
-                    <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/55 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                    <span className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-red-100/0 blur-2xl transition-colors duration-300 group-hover:bg-red-100/60" />
-
-                    <div className="relative flex items-center justify-between">
-                      <BrandIcon icon={Icon} size="lg" soft />
-                      <span className="rounded-full border border-red-100 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-red-700">
-                        IELTS Section
-                      </span>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700">
+                      <Icon className="h-3.5 w-3.5" />
+                      IELTS Section
                     </div>
-
-                    <h2 className="relative mt-4 text-2xl font-black tracking-tight text-slate-900">{section.title}</h2>
-                    <p className="relative mt-2 text-sm leading-6 text-slate-600">{section.description}</p>
-
-                    <div className="relative mt-4 flex flex-wrap gap-2">
+                    <h2 className="mt-4 text-3xl font-black text-slate-900">{section.title}</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">{section.description}</p>
+                    <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
                       {section.chips.map((chip) => (
-                        <span key={chip} className="soft-chip">
+                        <span key={chip} className="rounded-full bg-white px-3 py-1 text-slate-700">
                           {chip}
                         </span>
                       ))}
                     </div>
-
-                    <span className="cta-sheen relative mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-4 py-2.5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(220,38,38,0.28)]">
-                      Start practice
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                    </span>
+                    <p className="mt-6 text-sm font-semibold text-red-700 transition group-hover:translate-x-1">Open {section.title} -&gt;</p>
                   </button>
                 </Tilt3D>
               </StaggerItem>

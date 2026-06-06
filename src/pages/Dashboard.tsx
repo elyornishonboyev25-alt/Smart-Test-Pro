@@ -29,36 +29,15 @@ import type { DashboardOverview } from '@/types/platform'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import WeeklyPlannerLab from '@/components/dashboard/WeeklyPlannerLab'
 import { MetricSkeletonGrid, Skeleton } from '@/components/common/Skeleton'
+import { BrandIcon, CountUp, Reveal, Stagger, StaggerItem, Tilt3D, Hero3DStage } from '@/components/fx'
+
+type BrandTone = 'red' | 'rose' | 'deep' | 'blue'
 
 const metricCardStyle = [
-  {
-    title: 'Total Tests',
-    icon: BarChart3,
-    key: 'totalTests',
-    gradient: 'from-[#DC2626] to-[#B91C1C]',
-    soft: 'from-red-50 to-rose-50/30',
-  },
-  {
-    title: 'Average Score',
-    icon: Target,
-    key: 'averageScore',
-    gradient: 'from-[#EF4444] to-[#DC2626]',
-    soft: 'from-orange-50 to-red-50/30',
-  },
-  {
-    title: 'Current Rank',
-    icon: Award,
-    key: 'currentRank',
-    gradient: 'from-[#F87171] to-[#DC2626]',
-    soft: 'from-amber-50 to-orange-50/30',
-  },
-  {
-    title: 'Current Streak',
-    icon: Flame,
-    key: 'currentStreak',
-    gradient: 'from-[#FB7185] to-[#DC2626]',
-    soft: 'from-rose-50 to-red-50/30',
-  },
+  { title: 'Total Tests', icon: BarChart3, key: 'totalTests', tone: 'red', soft: 'from-red-50 to-rose-50/40' },
+  { title: 'Average Score', icon: Target, key: 'averageScore', tone: 'rose', soft: 'from-rose-50 to-red-50/40' },
+  { title: 'Current Rank', icon: Award, key: 'currentRank', tone: 'deep', soft: 'from-red-50 to-orange-50/30' },
+  { title: 'Current Streak', icon: Flame, key: 'currentStreak', tone: 'rose', soft: 'from-rose-50 to-red-50/40' },
 ] as const
 
 const rightPanelSections = [
@@ -113,80 +92,33 @@ const rightPanelSections = [
 ] as const
 
 const specialModules = [
-  {
-    title: 'National Certificate',
-    subtitle: 'Official-style mock mode',
-    path: '/tests',
-    icon: Trophy,
-    iconGradient: 'from-amber-500 to-orange-600',
-  },
-  {
-    title: 'Mock Arena',
-    subtitle: 'IELTS + SAT full simulation',
-    path: '/mock',
-    icon: ShieldCheckIcon,
-    iconGradient: 'from-red-500 to-rose-600',
-  },
-  {
-    title: 'Writing Studio',
-    subtitle: 'Task 1 + Task 2 feedback',
-    path: '/ielts/writing',
-    icon: PenSquare,
-    iconGradient: 'from-violet-500 to-purple-600',
-  },
-  {
-    title: 'Speaking Studio',
-    subtitle: 'Band estimate + pronunciation',
-    path: '/ielts/speaking',
-    icon: Mic2,
-    iconGradient: 'from-emerald-500 to-green-600',
-  },
-  {
-    title: 'Speaking Community',
-    subtitle: 'Voice-only partner practice',
-    path: '/speaking-community',
-    icon: Headphones,
-    iconGradient: 'from-sky-500 to-blue-600',
-  },
+  { title: 'National Certificate', subtitle: 'Official-style mock mode', path: '/tests', icon: Trophy, tone: 'deep' },
+  { title: 'Mock Arena', subtitle: 'IELTS + SAT full simulation', path: '/mock', icon: ShieldCheckIcon, tone: 'red' },
+  { title: 'Writing Studio', subtitle: 'Task 1 + Task 2 feedback', path: '/ielts/writing', icon: PenSquare, tone: 'rose' },
+  { title: 'Speaking Studio', subtitle: 'Band estimate + pronunciation', path: '/ielts/speaking', icon: Mic2, tone: 'red' },
+  { title: 'Speaking Community', subtitle: 'Voice-only partner practice', path: '/speaking-community', icon: Headphones, tone: 'rose' },
 ] as const
-
-function formatMetric(key: string, value: number | null) {
-  if (value === null) return 'N/A'
-  if (key === 'averageScore') return `${value.toFixed(1)}%`
-  if (key === 'currentRank') return `#${value}`
-  return String(value)
-}
 
 const trackLaunches = [
-  {
-    title: 'IELTS Arena',
-    subtitle: 'Reading, Listening, Writing, Speaking',
-    path: '/ielts',
-    icon: BookOpen,
-    gradient: 'from-[#DC2626] to-[#B91C1C]',
-  },
-  {
-    title: 'SAT Arena',
-    subtitle: 'Math + Reading/Writing',
-    path: '/sat',
-    icon: Calculator,
-    gradient: 'from-[#EF4444] to-[#DC2626]',
-  },
-  {
-    title: 'Writing Studio',
-    subtitle: 'Shared with IELTS Writing',
-    path: '/ielts/writing',
-    icon: PenSquare,
-    gradient: 'from-violet-500 to-purple-600',
-  },
-  {
-    title: 'Speaking Studio',
-    subtitle: 'Shared with IELTS Speaking',
-    path: '/ielts/speaking',
-    icon: Mic2,
-    gradient: 'from-emerald-500 to-green-600',
-  },
+  { title: 'IELTS Arena', subtitle: 'Reading, Listening, Writing, Speaking', path: '/ielts', icon: BookOpen, tone: 'red' },
+  { title: 'SAT Arena', subtitle: 'Math + Reading/Writing', path: '/sat', icon: Calculator, tone: 'blue' },
+  { title: 'Writing Studio', subtitle: 'Shared with IELTS Writing', path: '/ielts/writing', icon: PenSquare, tone: 'rose' },
+  { title: 'Speaking Studio', subtitle: 'Shared with IELTS Speaking', path: '/ielts/speaking', icon: Mic2, tone: 'deep' },
 ] as const
+
+const aboutHighlights = [
+  { title: 'AI Study Coach', value: 'Smart', note: 'Personal roadmap, weak-point analysis, and instant feedback', icon: Bot, tone: 'red' },
+  { title: 'Gamified Learning', value: 'XP Level', note: 'Daily challenges, streaks, achievements, and leaderboards', icon: Flame, tone: 'rose' },
+  { title: 'Deep Analytics', value: 'Insight', note: 'Skill trends, focus recommendations, and performance maps', icon: BarChart3, tone: 'deep' },
+  { title: 'Target Scores', value: 'Results', note: 'Structured path to IELTS 6.5+ and SAT 1200+', icon: Target, tone: 'red' },
+] as const
+
+function MetricValue({ metricKey, value }: { metricKey: string; value: number | null }) {
+  if (value === null) return <>N/A</>
+  if (metricKey === 'averageScore') return <CountUp value={value} decimals={1} suffix="%" />
+  if (metricKey === 'currentRank') return <CountUp value={value} prefix="#" />
+  return <CountUp value={value} />
+}
 
 const guestDashboardOverview: DashboardOverview = {
   metrics: {
@@ -233,7 +165,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const location = useLocation()
   const user = useAuthStore((state: AuthState) => state.user)
-  const { reducedMotion, minimalMotion, allowHoverMotion } = useMotionPreferences()
+  const { reducedMotion, minimalMotion } = useMotionPreferences()
   const accentFullText = 'Exam Environment for SAT and IELTS'
 
   const { data, loading, error, refetch } = useAsyncData<DashboardOverview>(
@@ -253,10 +185,6 @@ export default function Dashboard() {
     return [...data.weeklyProgress].sort((left, right) => right.testsCompleted - left.testsCompleted)[0]
   }, [data?.weeklyProgress])
 
-  const hoverLiftProps = allowHoverMotion
-    ? { whileHover: { y: -4, scale: 1.015 }, transition: { duration: 0.2 } }
-    : {}
-
   useEffect(() => {
     if (location.pathname !== '/about') return
     const timeoutId = window.setTimeout(() => {
@@ -274,8 +202,9 @@ export default function Dashboard() {
         transition={minimalMotion ? { duration: 0.15 } : { duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
         className="premium-hero relative overflow-hidden p-6 sm:p-8"
       >
-        <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-red-400/20 to-orange-300/10 blur-3xl" />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-red-400/20 to-rose-300/10 blur-3xl" />
+        <Hero3DStage className="pointer-events-none absolute right-3 top-1 hidden h-44 w-44 lg:block xl:right-8 xl:h-56 xl:w-56" />
+        <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <span className="premium-top-chip inline-flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" />
@@ -335,37 +264,32 @@ export default function Dashboard() {
             </button>
           </div>
         ) : data ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Stagger className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {metricCardStyle.map((metric) => {
               const Icon = metric.icon
               const metricValue = data.metrics[metric.key]
 
               return (
-                <motion.article
-                  key={metric.key}
-                  className={`group interactive-lift relative overflow-hidden rounded-2xl border border-red-100/80 bg-gradient-to-br ${metric.soft} p-5 shadow-[0_16px_38px_rgba(220,38,38,0.09)]`}
-                  {...hoverLiftProps}
-                >
-                  <span
-                    className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${metric.gradient} opacity-[0.12] blur-2xl transition-opacity duration-300 group-hover:opacity-20`}
-                  />
-                  <div className="relative flex items-center justify-between">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#64748B]">{metric.title}</p>
-                    <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${metric.gradient} text-white shadow-[0_10px_22px_rgba(220,38,38,0.3)]`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                  </div>
-                  <p className="relative mt-4 text-[2rem] font-black leading-none tracking-tight text-[#1F2937]">
-                    {formatMetric(metric.key, metricValue)}
-                  </p>
-                  <div className="relative mt-2.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]" />
-                    Live update
-                  </div>
-                </motion.article>
+                <StaggerItem key={metric.key} className="h-full">
+                  <Tilt3D className="h-full rounded-2xl">
+                    <article className={`group relative h-full overflow-hidden rounded-2xl border border-red-100/80 bg-gradient-to-br ${metric.soft} p-5 shadow-[0_16px_38px_rgba(220,38,38,0.09)] transition-shadow duration-300 hover:shadow-[0_24px_50px_rgba(220,38,38,0.16)]`}>
+                      <div className="relative flex items-center justify-between">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#64748B]">{metric.title}</p>
+                        <BrandIcon icon={Icon} tone={metric.tone} />
+                      </div>
+                      <p className="relative mt-4 text-[2rem] font-black leading-none tracking-tight text-[#1F2937]">
+                        <MetricValue metricKey={metric.key} value={metricValue} />
+                      </p>
+                      <div className="relative mt-2.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-red-600">
+                        <span className="fx-pulse-dot h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_0_3px_rgba(220,38,38,0.12)]" />
+                        Live sync
+                      </div>
+                    </article>
+                  </Tilt3D>
+                </StaggerItem>
               )
             })}
-          </div>
+          </Stagger>
         ) : null}
       </section>
 
@@ -374,13 +298,11 @@ export default function Dashboard() {
         {/* Left column */}
         <div className="space-y-6 lg:col-span-3">
           {/* Leaderboard */}
-          <div className="panel-surface relative overflow-hidden p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+          <Reveal className="panel-surface relative overflow-hidden p-5">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/60 to-transparent" />
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-[0_8px_18px_rgba(245,158,11,0.35)]">
-                  <Trophy className="h-4 w-4" />
-                </span>
+                <BrandIcon icon={Trophy} size="sm" tone="deep" />
                 <h2 className="text-base font-black tracking-tight text-[#1F2937]">Leaderboard</h2>
               </div>
               <button onClick={() => navigate('/leaderboard')} className="text-[11px] font-bold text-red-600 hover:text-red-700">
@@ -406,11 +328,7 @@ export default function Dashboard() {
                     }`}
                   >
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-black text-slate-600">
-                      {idx < 3 ? (
-                        <Crown className={`h-4 w-4 ${MEDAL_STYLES[idx]}`} />
-                      ) : (
-                        `#${row.rank}`
-                      )}
+                      {idx < 3 ? <Crown className={`h-4 w-4 ${MEDAL_STYLES[idx]}`} /> : `#${row.rank}`}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold text-[#1F2937]">{row.fullName}</p>
@@ -423,53 +341,44 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : null}
-          </div>
+          </Reveal>
 
           {/* Special Modules */}
-          <div className="panel-surface relative overflow-hidden p-5">
+          <Reveal delay={0.08} className="panel-surface relative overflow-hidden p-5">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
             <div className="mb-4 flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_8px_18px_rgba(220,38,38,0.3)]">
-                <Zap className="h-4 w-4" />
-              </span>
+              <BrandIcon icon={Zap} size="sm" tone="red" />
               <h2 className="text-base font-black tracking-tight text-[#1F2937]">Special Modules</h2>
             </div>
             <div className="space-y-2">
-              {specialModules.map((item) => {
-                const Icon = item.icon
-                return (
-                  <button
-                    key={item.title}
-                    onClick={() => navigate(item.path)}
-                    className="interactive-lift group flex w-full items-center justify-between rounded-xl border border-red-100/70 bg-white px-3 py-2.5 text-left transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br ${item.iconGradient} text-white shadow-sm`}>
-                        <Icon className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-bold text-[#1F2937]">{item.title}</p>
-                        <p className="text-[11px] text-[#64748B]">{item.subtitle}</p>
-                      </div>
+              {specialModules.map((item) => (
+                <button
+                  key={item.title}
+                  onClick={() => navigate(item.path)}
+                  className="interactive-lift group flex w-full items-center justify-between rounded-xl border border-red-100/70 bg-white px-3 py-2.5 text-left transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <BrandIcon icon={item.icon} size="sm" tone={item.tone} />
+                    <div>
+                      <p className="text-sm font-bold text-[#1F2937]">{item.title}</p>
+                      <p className="text-[11px] text-[#64748B]">{item.subtitle}</p>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-slate-300 transition-colors group-hover:text-red-500" />
-                  </button>
-                )
-              })}
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-slate-300 transition-colors group-hover:text-red-500" />
+                </button>
+              ))}
             </div>
-          </div>
+          </Reveal>
         </div>
 
         {/* Right column */}
         <div className="lg:col-span-7">
           {/* Core Sections */}
-          <div className="panel-surface relative overflow-hidden p-5">
+          <Reveal delay={0.05} className="panel-surface relative overflow-hidden p-5">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#DC2626] to-[#B91C1C] text-white shadow-[0_8px_18px_rgba(220,38,38,0.3)]">
-                  <Target className="h-4 w-4" />
-                </span>
+                <BrandIcon icon={Target} size="sm" tone="red" />
                 <h2 className="text-base font-black tracking-tight text-[#1F2937]">Core Sections</h2>
               </div>
               <span className="rounded-full border border-red-100 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700">
@@ -477,48 +386,44 @@ export default function Dashboard() {
               </span>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <Stagger className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {rightPanelSections.map((section) => {
                 const Icon = section.icon
+                const tone: BrandTone = section.badge === 'SAT' ? 'blue' : 'red'
                 return (
-                  <motion.button
-                    key={section.title}
-                    onClick={() => navigate(section.path)}
-                    className="group interactive-lift relative overflow-hidden rounded-2xl border border-red-100/70 bg-white p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition hover:border-red-200 hover:shadow-[0_16px_36px_rgba(220,38,38,0.1)]"
-                    {...(allowHoverMotion ? { whileHover: { y: -3 } } : {})}
-                  >
-                    <span className="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full bg-red-100/40 blur-2xl transition-opacity group-hover:opacity-80" />
-                    <div className="relative mb-3 flex items-center justify-between">
-                      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-50 to-rose-50 text-red-600 shadow-sm transition group-hover:shadow-md">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${section.badgeColor}`}>
-                        {section.badge}
-                      </span>
-                    </div>
-                    <h3 className="relative text-sm font-bold text-[#1F2937]">{section.title}</h3>
-                    <p className="relative mt-1 text-[12px] leading-5 text-[#64748B]">{section.description}</p>
-                  </motion.button>
+                  <StaggerItem key={section.title} className="h-full">
+                    <Tilt3D className="h-full rounded-2xl" max={7}>
+                      <button
+                        onClick={() => navigate(section.path)}
+                        className="group relative h-full w-full overflow-hidden rounded-2xl border border-red-100/70 bg-white p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition hover:border-red-200 hover:shadow-[0_16px_36px_rgba(220,38,38,0.12)]"
+                      >
+                        <div className="relative mb-3 flex items-center justify-between">
+                          <BrandIcon icon={Icon} soft tone={tone} />
+                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${section.badgeColor}`}>{section.badge}</span>
+                        </div>
+                        <h3 className="relative text-sm font-bold text-[#1F2937]">{section.title}</h3>
+                        <p className="relative mt-1 text-[12px] leading-5 text-[#64748B]">{section.description}</p>
+                      </button>
+                    </Tilt3D>
+                  </StaggerItem>
                 )
               })}
-            </div>
-          </div>
+            </Stagger>
+          </Reveal>
 
           {/* Weekly Progress Chart */}
-          <div className="panel-surface relative mt-6 overflow-hidden p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+          <Reveal delay={0.1} className="panel-surface relative mt-6 overflow-hidden p-5">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-400/50 to-transparent" />
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-[0_8px_18px_rgba(16,185,129,0.3)]">
-                  <TrendingUp className="h-4 w-4" />
-                </span>
+                <BrandIcon icon={TrendingUp} size="sm" tone="rose" />
                 <div>
                   <h2 className="text-base font-black tracking-tight text-[#1F2937]">Weekly Progress</h2>
                   <p className="text-[11px] font-medium text-[#64748B]">7-day tests and activity</p>
                 </div>
               </div>
               {strongestDay ? (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-red-100 bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-700">
                   <Flame className="h-3 w-3" />
                   Best: {strongestDay.label}
                 </span>
@@ -544,9 +449,9 @@ export default function Dashboard() {
                           fontWeight: 600,
                         }}
                       />
-                      <Bar dataKey="testsCompleted" radius={[10, 10, 4, 4]} fill="url(#weeklyGradientRedBlue)" animationDuration={700} />
+                      <Bar dataKey="testsCompleted" radius={[10, 10, 4, 4]} fill="url(#weeklyGradientRed)" animationDuration={700} />
                       <defs>
-                        <linearGradient id="weeklyGradientRedBlue" x1="0" x2="0" y1="0" y2="1">
+                        <linearGradient id="weeklyGradientRed" x1="0" x2="0" y1="0" y2="1">
                           <stop offset="0%" stopColor="#EF4444" />
                           <stop offset="100%" stopColor="#B91C1C" />
                         </linearGradient>
@@ -562,7 +467,7 @@ export default function Dashboard() {
                 </p>
               </>
             ) : null}
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -573,13 +478,11 @@ export default function Dashboard() {
 
       {/* ── Track Launch Board + Recent Activity ──────────────── */}
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
-        <div className="panel-surface relative overflow-hidden p-5">
+        <Reveal className="panel-surface relative overflow-hidden p-5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#DC2626] to-[#B91C1C] text-white shadow-[0_8px_18px_rgba(220,38,38,0.3)]">
-                <Zap className="h-4 w-4" />
-              </span>
+              <BrandIcon icon={Zap} size="sm" tone="red" />
               <h2 className="text-base font-black tracking-tight text-[#1F2937]">Track Launch Board</h2>
             </div>
             <button className="text-[11px] font-bold text-red-600 hover:text-red-700" onClick={() => navigate('/tests')}>
@@ -595,42 +498,35 @@ export default function Dashboard() {
             </div>
           ) : (
             <div className="space-y-2.5">
-              {trackLaunches.map((track) => {
-                const TrackIcon = track.icon
-                return (
-                  <article
-                    key={track.title}
-                    className="group flex items-center justify-between gap-3 rounded-xl border border-red-100/70 bg-white p-3.5 transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${track.gradient} text-white shadow-sm`}>
-                        <TrackIcon className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-bold text-[#1F2937]">{track.title}</h3>
-                        <p className="text-[11px] text-[#64748B]">{track.subtitle}</p>
-                      </div>
+              {trackLaunches.map((track) => (
+                <article
+                  key={track.title}
+                  className="group flex items-center justify-between gap-3 rounded-xl border border-red-100/70 bg-white p-3.5 transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <BrandIcon icon={track.icon} size="sm" tone={track.tone} />
+                    <div>
+                      <h3 className="text-sm font-bold text-[#1F2937]">{track.title}</h3>
+                      <p className="text-[11px] text-[#64748B]">{track.subtitle}</p>
                     </div>
-                    <button
-                      className="interactive-lift rounded-lg bg-gradient-to-r from-[#DC2626] to-[#B91C1C] px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_6px_14px_rgba(220,38,38,0.25)] transition hover:shadow-[0_10px_20px_rgba(220,38,38,0.35)]"
-                      onClick={() => navigate(track.path)}
-                    >
-                      Open
-                    </button>
-                  </article>
-                )
-              })}
+                  </div>
+                  <button
+                    className="interactive-lift rounded-lg bg-gradient-to-r from-[#DC2626] to-[#B91C1C] px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_6px_14px_rgba(220,38,38,0.25)] transition hover:shadow-[0_10px_20px_rgba(220,38,38,0.35)]"
+                    onClick={() => navigate(track.path)}
+                  >
+                    Open
+                  </button>
+                </article>
+              ))}
             </div>
           )}
-        </div>
+        </Reveal>
 
-        <div className="panel-surface panel-recent-activity relative overflow-hidden p-5">
+        <Reveal delay={0.08} className="panel-surface panel-recent-activity relative overflow-hidden p-5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-400/50 to-transparent" />
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-[0_8px_18px_rgba(220,38,38,0.3)]">
-                <Clock3 className="h-4 w-4" />
-              </span>
+              <BrandIcon icon={Clock3} size="sm" tone="rose" />
               <h2 className="text-base font-black tracking-tight text-[#1F2937]">Recent Activity</h2>
             </div>
           </div>
@@ -659,13 +555,13 @@ export default function Dashboard() {
               ))}
             </ol>
           ) : null}
-        </div>
+        </Reveal>
       </section>
 
       {/* ── About ──────────────────────────────────────────────── */}
       <section id="about" className="premium-hero relative mt-8 overflow-hidden p-6 sm:p-8">
         <div className="pointer-events-none absolute -left-16 -top-16 h-52 w-52 rounded-full bg-red-400/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-orange-300/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-rose-300/15 blur-3xl" />
 
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -685,55 +581,20 @@ export default function Dashboard() {
           </span>
         </div>
 
-        <div className="relative mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {[
-            {
-              title: 'AI Study Coach',
-              value: 'Smart',
-              note: 'Personal roadmap, weak-point analysis, and instant feedback',
-              icon: Bot,
-              gradient: 'from-red-500 to-rose-600',
-            },
-            {
-              title: 'Gamified Learning',
-              value: 'XP Level',
-              note: 'Daily challenges, streaks, achievements, and leaderboards',
-              icon: Flame,
-              gradient: 'from-orange-500 to-amber-600',
-            },
-            {
-              title: 'Deep Analytics',
-              value: 'Insight',
-              note: 'Skill trends, focus recommendations, and performance maps',
-              icon: BarChart3,
-              gradient: 'from-violet-500 to-purple-600',
-            },
-            {
-              title: 'Target Scores',
-              value: 'Results',
-              note: 'Structured path to IELTS 6.5+ and SAT 1200+',
-              icon: Target,
-              gradient: 'from-emerald-500 to-green-600',
-            },
-          ].map((item) => {
-            const Icon = item.icon
-            return (
-              <motion.article
-                key={item.title}
-                className="group relative overflow-hidden rounded-2xl border border-red-100/80 bg-white p-5 shadow-[0_14px_28px_rgba(15,23,42,0.06)] transition hover:shadow-[0_18px_36px_rgba(220,38,38,0.1)]"
-                {...(allowHoverMotion ? { whileHover: { y: -3 } } : {})}
-              >
-                <span className={`pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-gradient-to-br ${item.gradient} opacity-[0.1] blur-2xl transition-opacity group-hover:opacity-20`} />
-                <span className={`relative inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${item.gradient} text-white shadow-[0_10px_22px_rgba(15,23,42,0.18)]`}>
-                  <Icon className="h-5 w-5" />
-                </span>
-                <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-red-700">{item.title}</p>
-                <p className="mt-1.5 text-2xl font-black leading-none text-slate-900">{item.value}</p>
-                <p className="mt-2 text-[12px] leading-5 text-slate-600">{item.note}</p>
-              </motion.article>
-            )
-          })}
-        </div>
+        <Stagger className="relative mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {aboutHighlights.map((item) => (
+            <StaggerItem key={item.title} className="h-full">
+              <Tilt3D className="h-full rounded-2xl" max={7}>
+                <article className="group relative h-full overflow-hidden rounded-2xl border border-red-100/80 bg-white p-5 shadow-[0_14px_28px_rgba(15,23,42,0.06)] transition hover:shadow-[0_18px_36px_rgba(220,38,38,0.12)]">
+                  <BrandIcon icon={item.icon} tone={item.tone} />
+                  <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-red-700">{item.title}</p>
+                  <p className="mt-1.5 text-2xl font-black leading-none text-slate-900">{item.value}</p>
+                  <p className="mt-2 text-[12px] leading-5 text-slate-600">{item.note}</p>
+                </article>
+              </Tilt3D>
+            </StaggerItem>
+          ))}
+        </Stagger>
       </section>
     </div>
   )

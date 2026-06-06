@@ -10,6 +10,7 @@ import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { BrandMark } from '@/components/brand/BrandLogo'
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
 
 const loginSchema = z.object({
   email: z
@@ -87,6 +88,32 @@ export default function Login() {
     }
   }
 
+  const handleGoogleCredential = async (idToken: string) => {
+    try {
+      const payload = await apiClient.post<AuthSessionPayload>(
+        '/auth/google',
+        { idToken },
+        { auth: false },
+      )
+
+      setSession(payload)
+      pushToast({
+        type: 'success',
+        title: 'Signed in with Google',
+        message: 'Welcome to SmartTest Pro.',
+      })
+      navigate(redirectPath, { replace: true })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Google sign-in failed'
+      pushToast({
+        type: 'error',
+        title: 'Google sign in failed',
+        message,
+      })
+      throw new Error(message)
+    }
+  }
+
   return (
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-12">
       <motion.div
@@ -154,6 +181,20 @@ export default function Login() {
             )}
           </motion.button>
         </form>
+
+        <div className="my-6 flex items-center gap-4">
+          <span className="h-px flex-1 bg-gradient-to-r from-transparent via-red-100 to-red-200/70" />
+          <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+            or continue with
+          </span>
+          <span className="h-px flex-1 bg-gradient-to-l from-transparent via-red-100 to-red-200/70" />
+        </div>
+
+        <GoogleAuthButton mode="signin" onCredential={handleGoogleCredential} />
+
+        <p className="mt-3 text-center text-[11px] leading-5 text-slate-400">
+          Use your existing Google account — no password needed.
+        </p>
 
         <p className="mt-6 text-center text-sm text-[#6B7280]">
           New account?{' '}

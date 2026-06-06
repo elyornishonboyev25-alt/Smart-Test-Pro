@@ -9,6 +9,7 @@ import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { BrandMark } from '@/components/brand/BrandLogo'
+import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
 
 const registerSchema = z
   .object({
@@ -84,6 +85,32 @@ export default function Register() {
         title: 'Registration failed',
         message: error instanceof Error ? error.message : 'Unable to create account',
       })
+    }
+  }
+
+  const handleGoogleCredential = async (idToken: string) => {
+    try {
+      const payload = await apiClient.post<AuthSessionPayload>(
+        '/auth/google',
+        { idToken },
+        { auth: false },
+      )
+
+      setSession(payload)
+      pushToast({
+        type: 'success',
+        title: 'Account ready',
+        message: 'Signed up with Google successfully.',
+      })
+      navigate('/dashboard', { replace: true })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Google sign-up failed'
+      pushToast({
+        type: 'error',
+        title: 'Google sign up failed',
+        message,
+      })
+      throw new Error(message)
     }
   }
 
@@ -223,6 +250,16 @@ export default function Register() {
               )}
             </motion.button>
           </form>
+
+          <div className="my-5 flex items-center gap-4">
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-red-100 to-red-200/70" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">
+              or sign up with
+            </span>
+            <span className="h-px flex-1 bg-gradient-to-l from-transparent via-red-100 to-red-200/70" />
+          </div>
+
+          <GoogleAuthButton mode="signup" onCredential={handleGoogleCredential} />
 
           <div className="mt-5 rounded-2xl border border-red-100 bg-red-50/60 px-4 py-3 text-xs text-slate-700">
             <p className="inline-flex items-center gap-1.5 font-black text-red-700">

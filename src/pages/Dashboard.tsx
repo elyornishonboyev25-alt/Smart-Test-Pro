@@ -32,24 +32,28 @@ const metricCardStyle = [
     icon: BarChart3,
     key: 'totalTests',
     gradient: 'from-[#DC2626] to-[#B91C1C]',
+    soft: 'from-red-50 to-rose-50/30',
   },
   {
     title: 'Average Score',
     icon: Target,
     key: 'averageScore',
     gradient: 'from-[#EF4444] to-[#DC2626]',
+    soft: 'from-orange-50 to-red-50/30',
   },
   {
     title: 'Current Rank',
     icon: Award,
     key: 'currentRank',
     gradient: 'from-[#F87171] to-[#DC2626]',
+    soft: 'from-amber-50 to-orange-50/30',
   },
   {
     title: 'Current Streak',
     icon: Flame,
     key: 'currentStreak',
     gradient: 'from-[#FB7185] to-[#DC2626]',
+    soft: 'from-rose-50 to-red-50/30',
   },
 ] as const
 
@@ -301,17 +305,25 @@ export default function Dashboard() {
               return (
                 <motion.article
                   key={metric.key}
-                  className="panel-soft interactive-lift p-5"
+                  className={`group interactive-lift relative overflow-hidden rounded-2xl border border-red-100/80 bg-gradient-to-br ${metric.soft} p-5 shadow-[0_16px_38px_rgba(220,38,38,0.09)]`}
                   {...hoverLiftProps}
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-[#64748B]">{metric.title}</p>
-                    <div className={`rounded-xl bg-gradient-to-r ${metric.gradient} p-2 text-white`}>
-                      <Icon className="h-4 w-4" />
+                  <span
+                    className={`pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br ${metric.gradient} opacity-[0.12] blur-2xl transition-opacity duration-300 group-hover:opacity-20`}
+                  />
+                  <div className="relative flex items-center justify-between">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#64748B]">{metric.title}</p>
+                    <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${metric.gradient} text-white shadow-[0_10px_22px_rgba(220,38,38,0.3)]`}>
+                      <Icon className="h-5 w-5" />
                     </div>
                   </div>
-                  <p className="mt-4 text-3xl font-bold text-[#1F2937]">{formatMetric(metric.key, metricValue)}</p>
-                  <p className="mt-2 text-xs text-[#64748B]">Live update</p>
+                  <p className="relative mt-4 text-[2rem] font-black leading-none tracking-tight text-[#1F2937]">
+                    {formatMetric(metric.key, metricValue)}
+                  </p>
+                  <div className="relative mt-2.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]" />
+                    Live update
+                  </div>
                 </motion.article>
               )
             })}

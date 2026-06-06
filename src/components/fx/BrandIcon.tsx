@@ -39,8 +39,14 @@ export default function BrandIcon({ icon: Icon, size = 'md', tone = 'red', soft 
   const s = sizes[size]
 
   if (soft) {
+    const softCls =
+      tone === 'blue'
+        ? 'from-white to-blue-50 text-blue-600 ring-blue-100'
+        : 'from-white to-red-50 text-red-600 ring-red-100'
     return (
-      <span className={`inline-flex items-center justify-center ${s.box} bg-gradient-to-br ${tone === 'blue' ? 'from-blue-50 to-indigo-50 text-blue-600' : 'from-red-50 to-rose-50 text-red-600'} shadow-sm ${className}`}>
+      <span
+        className={`inline-flex items-center justify-center ${s.box} bg-gradient-to-br ${softCls} ring-1 shadow-[0_6px_14px_rgba(15,23,42,0.06)] ${className}`}
+      >
         <Icon className={s.icon} />
       </span>
     )

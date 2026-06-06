@@ -29,15 +29,22 @@ import type { DashboardOverview } from '@/types/platform'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import WeeklyPlannerLab from '@/components/dashboard/WeeklyPlannerLab'
 import { MetricSkeletonGrid, Skeleton } from '@/components/common/Skeleton'
-import { BrandIcon, CountUp, Reveal, Stagger, StaggerItem, Tilt3D, Hero3DStage } from '@/components/fx'
+import { BrandIcon, CountUp, Reveal, Stagger, StaggerItem, Tilt3D, XPGem } from '@/components/fx'
 
 type BrandTone = 'red' | 'rose' | 'deep' | 'blue'
 
 const metricCardStyle = [
-  { title: 'Total Tests', icon: BarChart3, key: 'totalTests', tone: 'red', soft: 'from-red-50 to-rose-50/40' },
-  { title: 'Average Score', icon: Target, key: 'averageScore', tone: 'rose', soft: 'from-rose-50 to-red-50/40' },
-  { title: 'Current Rank', icon: Award, key: 'currentRank', tone: 'deep', soft: 'from-red-50 to-orange-50/30' },
-  { title: 'Current Streak', icon: Flame, key: 'currentStreak', tone: 'rose', soft: 'from-rose-50 to-red-50/40' },
+  { title: 'Total Tests', icon: BarChart3, key: 'totalTests', tone: 'red' },
+  { title: 'Average Score', icon: Target, key: 'averageScore', tone: 'red' },
+  { title: 'Current Rank', icon: Award, key: 'currentRank', tone: 'red' },
+  { title: 'Current Streak', icon: Flame, key: 'currentStreak', tone: 'red' },
+] as const
+
+const focusSkills = [
+  { label: 'Reading', icon: BookOpen, path: '/ielts/reading' },
+  { label: 'Listening', icon: Headphones, path: '/ielts/listening' },
+  { label: 'Writing', icon: PenSquare, path: '/ielts/writing' },
+  { label: 'Speaking', icon: Mic2, path: '/ielts/speaking' },
 ] as const
 
 const rightPanelSections = [
@@ -92,24 +99,24 @@ const rightPanelSections = [
 ] as const
 
 const specialModules = [
-  { title: 'National Certificate', subtitle: 'Official-style mock mode', path: '/tests', icon: Trophy, tone: 'deep' },
+  { title: 'National Certificate', subtitle: 'Official-style mock mode', path: '/tests', icon: Trophy, tone: 'red' },
   { title: 'Mock Arena', subtitle: 'IELTS + SAT full simulation', path: '/mock', icon: ShieldCheckIcon, tone: 'red' },
-  { title: 'Writing Studio', subtitle: 'Task 1 + Task 2 feedback', path: '/ielts/writing', icon: PenSquare, tone: 'rose' },
+  { title: 'Writing Studio', subtitle: 'Task 1 + Task 2 feedback', path: '/ielts/writing', icon: PenSquare, tone: 'red' },
   { title: 'Speaking Studio', subtitle: 'Band estimate + pronunciation', path: '/ielts/speaking', icon: Mic2, tone: 'red' },
-  { title: 'Speaking Community', subtitle: 'Voice-only partner practice', path: '/speaking-community', icon: Headphones, tone: 'rose' },
+  { title: 'Speaking Community', subtitle: 'Voice-only partner practice', path: '/speaking-community', icon: Headphones, tone: 'red' },
 ] as const
 
 const trackLaunches = [
   { title: 'IELTS Arena', subtitle: 'Reading, Listening, Writing, Speaking', path: '/ielts', icon: BookOpen, tone: 'red' },
   { title: 'SAT Arena', subtitle: 'Math + Reading/Writing', path: '/sat', icon: Calculator, tone: 'blue' },
-  { title: 'Writing Studio', subtitle: 'Shared with IELTS Writing', path: '/ielts/writing', icon: PenSquare, tone: 'rose' },
-  { title: 'Speaking Studio', subtitle: 'Shared with IELTS Speaking', path: '/ielts/speaking', icon: Mic2, tone: 'deep' },
+  { title: 'Writing Studio', subtitle: 'Shared with IELTS Writing', path: '/ielts/writing', icon: PenSquare, tone: 'red' },
+  { title: 'Speaking Studio', subtitle: 'Shared with IELTS Speaking', path: '/ielts/speaking', icon: Mic2, tone: 'red' },
 ] as const
 
 const aboutHighlights = [
   { title: 'AI Study Coach', value: 'Smart', note: 'Personal roadmap, weak-point analysis, and instant feedback', icon: Bot, tone: 'red' },
-  { title: 'Gamified Learning', value: 'XP Level', note: 'Daily challenges, streaks, achievements, and leaderboards', icon: Flame, tone: 'rose' },
-  { title: 'Deep Analytics', value: 'Insight', note: 'Skill trends, focus recommendations, and performance maps', icon: BarChart3, tone: 'deep' },
+  { title: 'Gamified Learning', value: 'XP Level', note: 'Daily challenges, streaks, achievements, and leaderboards', icon: Flame, tone: 'red' },
+  { title: 'Deep Analytics', value: 'Insight', note: 'Skill trends, focus recommendations, and performance maps', icon: BarChart3, tone: 'red' },
   { title: 'Target Scores', value: 'Results', note: 'Structured path to IELTS 6.5+ and SAT 1200+', icon: Target, tone: 'red' },
 ] as const
 
@@ -118,6 +125,43 @@ function MetricValue({ metricKey, value }: { metricKey: string; value: number | 
   if (metricKey === 'averageScore') return <CountUp value={value} decimals={1} suffix="%" />
   if (metricKey === 'currentRank') return <CountUp value={value} prefix="#" />
   return <CountUp value={value} />
+}
+
+function TodayFocusCard({ onNavigate, level, xp }: { onNavigate: (path: string) => void; level: number; xp: number }) {
+  return (
+    <Tilt3D className="rounded-3xl" max={6} lift={6}>
+      <div className="relative overflow-hidden rounded-3xl border border-red-100/70 bg-white/95 p-5 shadow-[0_18px_44px_rgba(15,23,42,0.08)]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/45 to-transparent" />
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-600">Today's Focus</p>
+            <p className="mt-1 text-base font-black tracking-tight text-slate-900">Jump back in</p>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-500">Pick a skill and keep your streak alive.</p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2 rounded-2xl border border-red-100/70 bg-gradient-to-br from-white to-red-50/60 px-2.5 py-1.5">
+            <XPGem size={34} />
+            <div className="leading-tight">
+              <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Level {level}</p>
+              <p className="text-sm font-black text-slate-900">{xp.toLocaleString('en-US')} XP</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2.5">
+          {focusSkills.map((skill) => (
+            <button
+              key={skill.label}
+              onClick={() => onNavigate(skill.path)}
+              className="group flex items-center gap-2.5 rounded-2xl border border-red-100/70 bg-gradient-to-br from-white to-red-50/35 px-3 py-2.5 text-left transition hover:border-red-200 hover:shadow-[0_8px_18px_rgba(220,38,38,0.1)]"
+            >
+              <BrandIcon icon={skill.icon} size="sm" soft />
+              <span className="text-xs font-bold text-slate-700 transition-colors group-hover:text-red-700">{skill.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </Tilt3D>
+  )
 }
 
 const guestDashboardOverview: DashboardOverview = {
@@ -202,9 +246,8 @@ export default function Dashboard() {
         transition={minimalMotion ? { duration: 0.15 } : { duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
         className="premium-hero relative overflow-hidden p-6 sm:p-8"
       >
-        <div className="pointer-events-none absolute -right-20 -top-20 h-60 w-60 rounded-full bg-gradient-to-br from-red-400/20 to-rose-300/10 blur-3xl" />
-        <Hero3DStage className="pointer-events-none absolute right-3 top-1 hidden h-44 w-44 lg:block xl:right-8 xl:h-56 xl:w-56" />
-        <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-60 w-60 rounded-full bg-gradient-to-br from-red-300/15 to-rose-200/10 blur-3xl" />
+        <div className="relative z-10 grid gap-6 lg:grid-cols-[1.55fr_1fr] lg:items-center">
           <div>
             <span className="premium-top-chip inline-flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" />
@@ -223,32 +266,36 @@ export default function Dashboard() {
                 initial={reducedMotion ? false : { clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
                 animate={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
                 transition={reducedMotion ? { duration: 0.01 } : { duration: 1.2, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                className="premium-title-accent dashboard-accent-reveal relative mt-3 inline-flex max-w-full whitespace-normal will-change-transform"
+                className="text-gradient-red dashboard-accent-reveal mt-2 inline-block will-change-transform"
               >
                 {accentFullText}
               </motion.span>
             </h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-[#475569]">
+            <p className="mt-3 max-w-2xl text-base leading-7 text-[#475569]">
               SmartTest combines SAT and IELTS preparation in one premium environment with realistic exam flow, live analytics, and competitive ranking.
             </p>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                onClick={() => navigate('/premium')}
+                className="interactive-lift inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-3 text-sm font-bold text-amber-700 shadow-sm transition hover:shadow-md"
+              >
+                <Crown className="h-4 w-4 text-amber-500" />
+                Go Premium
+              </button>
+              <button
+                onClick={() => navigate('/tests')}
+                className="cta-sheen interactive-lift inline-flex items-center rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-5 py-3 text-sm font-bold text-white shadow-[0_12px_30px_rgba(239,68,68,0.32)] hover:-translate-y-0.5"
+              >
+                Start Practicing
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => navigate('/premium')}
-              className="interactive-lift inline-flex items-center gap-2 rounded-xl border border-amber-300/60 bg-gradient-to-r from-amber-50 to-red-50 px-4 py-3 text-sm font-bold text-red-700 shadow-sm transition hover:shadow-md"
-            >
-              <Crown className="h-4 w-4 text-amber-500" />
-              Go Premium
-            </button>
-            <button
-              onClick={() => navigate('/tests')}
-              className="cta-sheen interactive-lift inline-flex items-center rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-5 py-3 text-sm font-bold text-white shadow-[0_12px_30px_rgba(239,68,68,0.35)] hover:-translate-y-0.5"
-            >
-              Start Practicing
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </button>
-          </div>
+          <Reveal delay={0.16} y={20} className="w-full">
+            <TodayFocusCard onNavigate={navigate} level={user?.level ?? 1} xp={user?.xp ?? 0} />
+          </Reveal>
         </div>
       </motion.section>
 
@@ -271,17 +318,18 @@ export default function Dashboard() {
 
               return (
                 <StaggerItem key={metric.key} className="h-full">
-                  <Tilt3D className="h-full rounded-2xl">
-                    <article className={`group relative h-full overflow-hidden rounded-2xl border border-red-100/80 bg-gradient-to-br ${metric.soft} p-5 shadow-[0_16px_38px_rgba(220,38,38,0.09)] transition-shadow duration-300 hover:shadow-[0_24px_50px_rgba(220,38,38,0.16)]`}>
-                      <div className="relative flex items-center justify-between">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#64748B]">{metric.title}</p>
-                        <BrandIcon icon={Icon} tone={metric.tone} />
+                  <Tilt3D className="h-full rounded-2xl" max={8}>
+                    <article className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.05)] transition-shadow duration-300 hover:shadow-[0_18px_40px_rgba(220,38,38,0.1)]">
+                      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-300/55 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">{metric.title}</p>
+                        <BrandIcon icon={Icon} soft tone={metric.tone} />
                       </div>
-                      <p className="relative mt-4 text-[2rem] font-black leading-none tracking-tight text-[#1F2937]">
+                      <p className="mt-4 text-[2rem] font-black leading-none tracking-tight text-slate-900">
                         <MetricValue metricKey={metric.key} value={metricValue} />
                       </p>
-                      <div className="relative mt-2.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-red-600">
-                        <span className="fx-pulse-dot h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_0_3px_rgba(220,38,38,0.12)]" />
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                        <span className="fx-pulse-dot h-1.5 w-1.5 rounded-full bg-red-400" />
                         Live sync
                       </div>
                     </article>
@@ -299,10 +347,10 @@ export default function Dashboard() {
         <div className="space-y-6 lg:col-span-3">
           {/* Leaderboard */}
           <Reveal className="panel-surface relative overflow-hidden p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/60 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-300/45 to-transparent" />
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <BrandIcon icon={Trophy} size="sm" tone="deep" />
+                <BrandIcon icon={Trophy} size="sm" soft />
                 <h2 className="text-base font-black tracking-tight text-[#1F2937]">Leaderboard</h2>
               </div>
               <button onClick={() => navigate('/leaderboard')} className="text-[11px] font-bold text-red-600 hover:text-red-700">
@@ -345,9 +393,9 @@ export default function Dashboard() {
 
           {/* Special Modules */}
           <Reveal delay={0.08} className="panel-surface relative overflow-hidden p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-300/45 to-transparent" />
             <div className="mb-4 flex items-center gap-2">
-              <BrandIcon icon={Zap} size="sm" tone="red" />
+              <BrandIcon icon={Zap} size="sm" soft />
               <h2 className="text-base font-black tracking-tight text-[#1F2937]">Special Modules</h2>
             </div>
             <div className="space-y-2">
@@ -355,10 +403,10 @@ export default function Dashboard() {
                 <button
                   key={item.title}
                   onClick={() => navigate(item.path)}
-                  className="interactive-lift group flex w-full items-center justify-between rounded-xl border border-red-100/70 bg-white px-3 py-2.5 text-left transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
+                  className="interactive-lift group flex w-full items-center justify-between rounded-xl border border-slate-100 bg-white px-3 py-2.5 text-left transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
                 >
                   <div className="flex items-center gap-2.5">
-                    <BrandIcon icon={item.icon} size="sm" tone={item.tone} />
+                    <BrandIcon icon={item.icon} size="sm" soft tone={item.tone} />
                     <div>
                       <p className="text-sm font-bold text-[#1F2937]">{item.title}</p>
                       <p className="text-[11px] text-[#64748B]">{item.subtitle}</p>
@@ -375,10 +423,10 @@ export default function Dashboard() {
         <div className="lg:col-span-7">
           {/* Core Sections */}
           <Reveal delay={0.05} className="panel-surface relative overflow-hidden p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/50 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-300/45 to-transparent" />
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <BrandIcon icon={Target} size="sm" tone="red" />
+                <BrandIcon icon={Target} size="sm" soft />
                 <h2 className="text-base font-black tracking-tight text-[#1F2937]">Core Sections</h2>
               </div>
               <span className="rounded-full border border-red-100 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700">
@@ -395,7 +443,7 @@ export default function Dashboard() {
                     <Tilt3D className="h-full rounded-2xl" max={7}>
                       <button
                         onClick={() => navigate(section.path)}
-                        className="group relative h-full w-full overflow-hidden rounded-2xl border border-red-100/70 bg-white p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition hover:border-red-200 hover:shadow-[0_16px_36px_rgba(220,38,38,0.12)]"
+                        className="group relative h-full w-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 text-left shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition hover:border-red-200 hover:shadow-[0_16px_36px_rgba(220,38,38,0.12)]"
                       >
                         <div className="relative mb-3 flex items-center justify-between">
                           <BrandIcon icon={Icon} soft tone={tone} />
@@ -413,10 +461,10 @@ export default function Dashboard() {
 
           {/* Weekly Progress Chart */}
           <Reveal delay={0.1} className="panel-surface relative mt-6 overflow-hidden p-5">
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-400/50 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-300/45 to-transparent" />
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <BrandIcon icon={TrendingUp} size="sm" tone="rose" />
+                <BrandIcon icon={TrendingUp} size="sm" soft />
                 <div>
                   <h2 className="text-base font-black tracking-tight text-[#1F2937]">Weekly Progress</h2>
                   <p className="text-[11px] font-medium text-[#64748B]">7-day tests and activity</p>
@@ -479,10 +527,10 @@ export default function Dashboard() {
       {/* ── Track Launch Board + Recent Activity ──────────────── */}
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
         <Reveal className="panel-surface relative overflow-hidden p-5">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/50 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-300/45 to-transparent" />
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BrandIcon icon={Zap} size="sm" tone="red" />
+              <BrandIcon icon={Zap} size="sm" soft />
               <h2 className="text-base font-black tracking-tight text-[#1F2937]">Track Launch Board</h2>
             </div>
             <button className="text-[11px] font-bold text-red-600 hover:text-red-700" onClick={() => navigate('/tests')}>
@@ -501,17 +549,17 @@ export default function Dashboard() {
               {trackLaunches.map((track) => (
                 <article
                   key={track.title}
-                  className="group flex items-center justify-between gap-3 rounded-xl border border-red-100/70 bg-white p-3.5 transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
+                  className="group flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white p-3.5 transition hover:border-red-200 hover:shadow-[0_8px_20px_rgba(220,38,38,0.08)]"
                 >
                   <div className="flex items-center gap-3">
-                    <BrandIcon icon={track.icon} size="sm" tone={track.tone} />
+                    <BrandIcon icon={track.icon} size="sm" soft tone={track.tone} />
                     <div>
                       <h3 className="text-sm font-bold text-[#1F2937]">{track.title}</h3>
                       <p className="text-[11px] text-[#64748B]">{track.subtitle}</p>
                     </div>
                   </div>
                   <button
-                    className="interactive-lift rounded-lg bg-gradient-to-r from-[#DC2626] to-[#B91C1C] px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_6px_14px_rgba(220,38,38,0.25)] transition hover:shadow-[0_10px_20px_rgba(220,38,38,0.35)]"
+                    className="interactive-lift rounded-lg bg-gradient-to-r from-[#DC2626] to-[#B91C1C] px-3.5 py-1.5 text-xs font-bold text-white shadow-[0_6px_14px_rgba(220,38,38,0.22)] transition hover:shadow-[0_10px_20px_rgba(220,38,38,0.32)]"
                     onClick={() => navigate(track.path)}
                   >
                     Open
@@ -523,10 +571,10 @@ export default function Dashboard() {
         </Reveal>
 
         <Reveal delay={0.08} className="panel-surface panel-recent-activity relative overflow-hidden p-5">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-400/50 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-300/45 to-transparent" />
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BrandIcon icon={Clock3} size="sm" tone="rose" />
+              <BrandIcon icon={Clock3} size="sm" soft />
               <h2 className="text-base font-black tracking-tight text-[#1F2937]">Recent Activity</h2>
             </div>
           </div>
@@ -540,7 +588,7 @@ export default function Dashboard() {
           ) : data ? (
             <ol className="space-y-2.5" aria-label="Recent activity timeline">
               {data.activityTimeline.slice(0, 6).map((entry) => (
-                <li key={entry.id} className="rounded-xl border border-red-100/60 bg-white px-3.5 py-3 transition hover:border-red-200 hover:shadow-sm">
+                <li key={entry.id} className="rounded-xl border border-slate-100 bg-white px-3.5 py-3 transition hover:border-red-200 hover:shadow-sm">
                   <p className="text-sm font-bold text-[#1F2937]">{entry.title}</p>
                   <p className="mt-0.5 text-[12px] text-[#64748B]">{entry.description}</p>
                   <p className="mt-1 text-[11px] font-medium text-slate-400">
@@ -560,8 +608,8 @@ export default function Dashboard() {
 
       {/* ── About ──────────────────────────────────────────────── */}
       <section id="about" className="premium-hero relative mt-8 overflow-hidden p-6 sm:p-8">
-        <div className="pointer-events-none absolute -left-16 -top-16 h-52 w-52 rounded-full bg-red-400/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-rose-300/15 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 -top-16 h-52 w-52 rounded-full bg-red-300/12 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-rose-200/12 blur-3xl" />
 
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -585,8 +633,8 @@ export default function Dashboard() {
           {aboutHighlights.map((item) => (
             <StaggerItem key={item.title} className="h-full">
               <Tilt3D className="h-full rounded-2xl" max={7}>
-                <article className="group relative h-full overflow-hidden rounded-2xl border border-red-100/80 bg-white p-5 shadow-[0_14px_28px_rgba(15,23,42,0.06)] transition hover:shadow-[0_18px_36px_rgba(220,38,38,0.12)]">
-                  <BrandIcon icon={item.icon} tone={item.tone} />
+                <article className="group relative h-full overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_14px_28px_rgba(15,23,42,0.06)] transition hover:shadow-[0_18px_36px_rgba(220,38,38,0.12)]">
+                  <BrandIcon icon={item.icon} soft tone={item.tone} />
                   <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-red-700">{item.title}</p>
                   <p className="mt-1.5 text-2xl font-black leading-none text-slate-900">{item.value}</p>
                   <p className="mt-2 text-[12px] leading-5 text-slate-600">{item.note}</p>

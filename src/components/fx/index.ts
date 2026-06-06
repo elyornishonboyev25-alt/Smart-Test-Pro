@@ -13,4 +13,7 @@ export { default as DifficultyBadge, type Difficulty } from './DifficultyBadge'
 export { default as XPBadge } from './XPBadge'
 export { default as CrownBadge } from './CrownBadge'
 export { default as Burst } from './Burst'
-export { default as Hero3DStage } from './Hero3DStage'
+export { default as XPGem } from './XPGem'
+// Hero3DStage (react-three-fiber) is available at '@/components/fx/Hero3DStage'
+// but intentionally not re-exported here so the heavy three.js bundle is only
+// pulled in if a page imports it directly.

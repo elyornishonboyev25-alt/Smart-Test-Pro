@@ -246,7 +246,7 @@ export function TopNavigation({ withSidebar = false }: { withSidebar?: boolean }
               </Button>
               <Button
                 variant="primary"
-                className="interactive-lift rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-4 py-2 text-white hover:opacity-95"
+                className="cta-sheen interactive-lift rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-4 py-2 text-white hover:opacity-95"
                 onClick={() => openRegisterModal()}
               >
                 Get Started

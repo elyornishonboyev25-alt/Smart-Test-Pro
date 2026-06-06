@@ -78,7 +78,7 @@ export function Sidebar() {
               className={cn(
                 'interactive-lift group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-3 py-2.5 text-sm font-semibold',
                 active
-                  ? 'border-red-300 bg-gradient-to-r from-red-200/80 to-rose-200/70 text-red-900 shadow-[0_12px_24px_rgba(185,28,28,0.2)]'
+                  ? 'glow-ring-red border-red-300 bg-gradient-to-r from-red-200/80 to-rose-200/70 text-red-900'
                   : 'border-red-100/40 bg-white/80 text-slate-800 hover:border-red-200 hover:bg-red-50 hover:text-slate-900',
               )}
               {...hoverMotionProps}
@@ -110,7 +110,7 @@ export function Sidebar() {
               className={cn(
                 'interactive-lift group relative flex w-full items-center gap-3 overflow-hidden rounded-xl border px-3 py-2.5 text-sm font-semibold',
                 active
-                  ? 'border-red-300 bg-gradient-to-r from-red-200/80 to-rose-200/70 text-red-900 shadow-[0_12px_24px_rgba(185,28,28,0.2)]'
+                  ? 'glow-ring-red border-red-300 bg-gradient-to-r from-red-200/80 to-rose-200/70 text-red-900'
                   : 'border-red-100/40 bg-white/80 text-slate-800 hover:border-red-200 hover:bg-red-50 hover:text-slate-900',
               )}
               {...hoverMotionProps}

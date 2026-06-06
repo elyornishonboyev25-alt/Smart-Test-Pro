@@ -1,8 +1,7 @@
-﻿import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { ArrowLeft, BookOpen, CheckCircle2, Headphones, Mic2, PenSquare, ShieldCheck, Timer } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 
 const examSections = [
   {
@@ -75,7 +74,6 @@ function ModeToggle({
 export default function MockIELTS() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { minimalMotion, allowHoverMotion } = useMotionPreferences()
   const from = (location.state as { from?: string } | null)?.from
   const [strictTimer, setStrictTimer] = useState(true)
   const [autoSubmit, setAutoSubmit] = useState(true)
@@ -92,68 +90,65 @@ export default function MockIELTS() {
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-6">
-        <motion.section
-          initial={minimalMotion ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-          className="premium-hero p-6 sm:p-10"
-        >
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="premium-top-controls">
-                <button
-                  onClick={() => navigate('/mock', { state: { from: from ?? 'home' } })}
-                  className="premium-back-btn"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Back
-                </button>
-                <span className="premium-top-chip">IELTS Mock Suite</span>
+        <Reveal>
+          <section className="premium-hero p-6 sm:p-10">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <div className="premium-top-controls">
+                  <button
+                    onClick={() => navigate('/mock', { state: { from: from ?? 'home' } })}
+                    className="premium-back-btn"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    Back
+                  </button>
+                  <span className="premium-top-chip">IELTS Mock Suite</span>
+                </div>
+                <h1 className="premium-section-title mt-4">
+                  Real <span className="arena-title-accent-red">IELTS Exam Mode</span>
+                </h1>
+                <p className="premium-section-subtitle max-w-3xl">
+                  Full-sequence IELTS simulation with timer discipline and section-by-section pressure control.
+                </p>
               </div>
-              <h1 className="premium-section-title mt-4">
-                Real <span className="arena-title-accent-red">IELTS Exam Mode</span>
-              </h1>
-              <p className="premium-section-subtitle max-w-3xl">
-                Full-sequence IELTS simulation with timer discipline and section-by-section pressure control.
-              </p>
-            </div>
 
-            <div className="premium-stat rounded-3xl bg-gradient-to-br from-white via-rose-50/70 to-red-100/65 px-5 py-4 text-right">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Total Session</p>
-              <p className="mt-1 text-4xl font-black text-slate-900">2h 45m</p>
-              <p className="mt-2 text-xs font-semibold text-red-700">4 connected sections</p>
+              <div className="premium-stat rounded-3xl bg-gradient-to-br from-white via-rose-50/70 to-red-100/65 px-5 py-4 text-right">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Total Session</p>
+                <p className="mt-1 text-4xl font-black text-slate-900">2h 45m</p>
+                <p className="mt-2 text-xs font-semibold text-red-700">4 connected sections</p>
+              </div>
             </div>
-          </div>
-        </motion.section>
+          </section>
+        </Reveal>
 
         <section className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <Stagger className="grid gap-4 sm:grid-cols-2">
             {examSections.map((section) => {
               const Icon = section.icon
               return (
-                <motion.article
-                  key={section.id}
-                  whileHover={allowHoverMotion ? { y: -4, scale: 1.01 } : undefined}
-                  className="surface-card p-5"
-                >
-                  <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
-                    <Icon className="h-3.5 w-3.5" />
-                    {section.duration}
-                  </div>
-                  <h2 className="mt-3 text-2xl font-black text-slate-900">{section.title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{section.detail}</p>
-                  <button
-                    onClick={() => navigate(section.path, { state: { entry: 'mock-ielts', from: from ?? 'tests' } })}
-                    className="arena-primary-btn mt-4"
-                  >
-                    Start Section
-                  </button>
-                </motion.article>
+                <StaggerItem key={section.id} className="h-full">
+                  <Tilt3D className="h-full rounded-3xl" max={6}>
+                    <article className="surface-card h-full p-5">
+                      <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                        <Icon className="h-3.5 w-3.5" />
+                        {section.duration}
+                      </div>
+                      <h2 className="mt-3 text-2xl font-black text-slate-900">{section.title}</h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{section.detail}</p>
+                      <button
+                        onClick={() => navigate(section.path, { state: { entry: 'mock-ielts', from: from ?? 'tests' } })}
+                        className="arena-primary-btn cta-sheen mt-4"
+                      >
+                        Start Section
+                      </button>
+                    </article>
+                  </Tilt3D>
+                </StaggerItem>
               )
             })}
-          </div>
+          </Stagger>
 
-          <div className="space-y-4">
+          <Reveal delay={0.1} className="space-y-4">
             <article className="surface-card p-5">
               <p className="inline-flex items-center gap-2 text-sm font-semibold text-red-700">
                 <ShieldCheck className="h-4 w-4" />
@@ -191,7 +186,7 @@ export default function MockIELTS() {
               </p>
               <button
                 onClick={() => navigate('/ielts', { state: { entry: 'mock-ielts', from: from ?? 'tests' } })}
-                className="arena-primary-btn mt-4"
+                className="arena-primary-btn cta-sheen mt-4"
               >
                 Launch Full IELTS Mock
               </button>
@@ -200,10 +195,9 @@ export default function MockIELTS() {
                 Recommended: keep strict timer ON for realistic training.
               </p>
             </article>
-          </div>
+          </Reveal>
         </section>
       </div>
     </div>
   )
 }
-

@@ -140,6 +140,7 @@ export default function Register() {
         transition={{ duration: minimalMotion ? 0.14 : 0.45, ease: [0.22, 1, 0.36, 1] }}
         className="panel-surface relative grid w-full max-w-5xl overflow-hidden rounded-[2.2rem] border border-red-100/90 bg-white/95 shadow-[0_30px_90px_rgba(127,29,29,0.18)] lg:grid-cols-[0.92fr_1.08fr]"
       >
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[3px] bg-gradient-to-r from-transparent via-red-500/70 to-transparent" />
         <div className="relative hidden min-h-[520px] overflow-hidden bg-gradient-to-br from-red-600 via-rose-600 to-red-800 p-8 text-white lg:block">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(255,255,255,0.26),transparent_32%),radial-gradient(circle_at_82%_76%,rgba(255,255,255,0.18),transparent_36%)]" />
           <motion.div
@@ -152,19 +153,19 @@ export default function Register() {
               <BrandMark size={58} className="shadow-[0_18px_34px_rgba(127,29,29,0.35)]" />
               <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white/90 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5" />
-                SmartTest Account
+                AI-powered prep
               </p>
               <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight">
-                Save your IELTS and SAT progress in one clean workspace.
+                Where studying levels up like a game.
               </h1>
               <p className="mt-4 text-sm leading-7 text-red-50/90">
-                Create your account with Gmail and password. We will keep your test attempts,
-                planner, XP, and streak connected to this account.
+                Join SmartTest and turn IELTS &amp; SAT prep into a daily streak. Earn XP, unlock
+                achievements, and let your AI coach build the roadmap to your target score.
               </p>
             </div>
 
             <div className="space-y-3">
-              {['Daily plan saved after login', 'Reading answers stay untouched', 'Secure password session'].map((item) => (
+              {['AI study coach & instant feedback', 'Daily challenges, streaks & XP', 'Day-by-day roadmap to IELTS 6.5+ / SAT 1200+'].map((item) => (
                 <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-md">
                   <CheckCircle2 className="h-5 w-5 text-white" />
                   <span className="text-sm font-semibold text-white/90">{item}</span>

@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/apiClient'
 import type { SubmitAttemptResponse, TestDetails } from '@/types/platform'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useAuthStore, type AuthState } from '@/store/authStore'
+import { useTestAttempts } from '@/hooks/useTestAttempts'
 import { Skeleton } from '@/components/common/Skeleton'
 
 function formatClock(totalSeconds: number) {
@@ -48,6 +49,7 @@ export default function TestRunner() {
   const pushToast = useToastStore((state: ToastState) => state.pushToast)
   const authUser = useAuthStore((state: AuthState) => state.user)
   const updateUserProgress = useAuthStore((state: AuthState) => state.updateUserProgress)
+  const { increment: recordAttempt } = useTestAttempts()
 
   const [test, setTest] = useState<TestDetails | null>(null)
   const [loading, setLoading] = useState(true)
@@ -139,6 +141,7 @@ export default function TestRunner() {
       })
 
       setResult(payload)
+      recordAttempt()
       updateUserProgress({
         xp: payload.totalXp ?? Math.max(0, (authUser?.xp ?? 0) + payload.xpEarned),
         level: payload.levelAfter,

@@ -4,6 +4,9 @@ import { motion } from 'framer-motion'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useRegisterModalStore, type RegisterModalState } from '@/store/registerModalStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { useTestAttempts } from '@/hooks/useTestAttempts'
+import { ENFORCE_PREMIUM, hasPremiumAccess } from '@/utils/premiumAccess'
+import UpgradeOverlay from '@/components/premium/UpgradeOverlay'
 
 type PremiumRouteProps = {
   children: React.ReactNode
@@ -15,6 +18,20 @@ export default function PremiumRoute({ children, showGuestBanner = false }: Prem
   const { minimalMotion } = useMotionPreferences()
   const user = useAuthStore((state: AuthState) => state.user)
   const openRegisterModal = useRegisterModalStore((state: RegisterModalState) => state.openRegisterModal)
+  const { info } = useTestAttempts()
+
+  // Dormant while ENFORCE_PREMIUM is false — always evaluates to `false`, so
+  // nothing is ever gated in the current open product state.
+  const showUpgrade = ENFORCE_PREMIUM && !!user && !hasPremiumAccess(user) && info.reached
+
+  if (showUpgrade) {
+    return (
+      <div className="relative">
+        {children}
+        <UpgradeOverlay used={info.used} />
+      </div>
+    )
+  }
 
   if (!user && showGuestBanner) {
     return (

@@ -1,11 +1,62 @@
-﻿const PREMIUM_EMAIL_ALLOWLIST = new Set<string>([
-  'elyornishonboyev000@gmail.com',
-])
+/**
+ * Premium access model.
+ *
+ * IMPORTANT: `ENFORCE_PREMIUM` is the master switch. While it is `false`,
+ * every feature stays fully open for ALL users (current product state) —
+ * nothing is ever locked, so no one can be accidentally shut out. The tier
+ * logic, free-attempt counter and upgrade overlay are all wired and ready,
+ * but stay dormant until paid tiers are connected on the backend and this
+ * flag is flipped to `true`.
+ */
+export const ENFORCE_PREMIUM = false
 
-export function hasPremiumAccess(input?: { email?: string | null; premium?: boolean | null } | null) {
-  void PREMIUM_EMAIL_ALLOWLIST
-  void input
-  // Premium plan is removed from product flow.
-  return true
+/** Free users get this many test attempts before the upgrade prompt appears. */
+export const FREE_ATTEMPT_LIMIT = 4
+
+export type PremiumTier = 'FREE' | 'BASIC' | 'STANDARD' | 'PRO' | 'UNLIMITED'
+
+const PREMIUM_EMAIL_ALLOWLIST = new Set<string>(['elyornishonboyev000@gmail.com'])
+
+type PremiumInput = { email?: string | null; premium?: boolean | null; role?: string | null } | null | undefined
+
+/**
+ * Whether the account is a genuine premium owner (allowlist or admin).
+ * Used for the Crown badge — independent of the global feature gate, so it
+ * does NOT light up for every user just because features are currently open.
+ */
+export function isPremiumUser(input?: PremiumInput) {
+  if (!input) return false
+  if (input.role === 'ADMIN') return true
+  if (input.email && PREMIUM_EMAIL_ALLOWLIST.has(input.email.toLowerCase())) return true
+  return false
 }
 
+/**
+ * Whether the user can access premium-gated features. AI stays unlimited for
+ * everyone. While `ENFORCE_PREMIUM` is false this is always `true`.
+ */
+export function hasPremiumAccess(input?: PremiumInput) {
+  if (!ENFORCE_PREMIUM) return true
+  return isPremiumUser(input)
+}
+
+export type FreeAttemptInfo = {
+  used: number
+  limit: number
+  remaining: number
+  reached: boolean
+  unlimited: boolean
+}
+
+/** Derive the free-attempt status for a given used-count and user. */
+export function getFreeAttemptInfo(used: number, input?: PremiumInput): FreeAttemptInfo {
+  const unlimited = !ENFORCE_PREMIUM || isPremiumUser(input)
+  const safeUsed = Math.max(0, Math.floor(Number.isFinite(used) ? used : 0))
+  return {
+    used: safeUsed,
+    limit: FREE_ATTEMPT_LIMIT,
+    remaining: unlimited ? Number.POSITIVE_INFINITY : Math.max(0, FREE_ATTEMPT_LIMIT - safeUsed),
+    reached: unlimited ? false : safeUsed >= FREE_ATTEMPT_LIMIT,
+    unlimited,
+  }
+}

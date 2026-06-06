@@ -13,7 +13,8 @@ import { apiClient } from '@/lib/apiClient'
 import type { LeaderboardResponse, LeaderboardRow, TestCategory } from '@/types/platform'
 import { Skeleton } from '@/components/common/Skeleton'
 import { useAuthStore, type AuthState } from '@/store/authStore'
-import { CountUp, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
+import { isPremiumUser } from '@/utils/premiumAccess'
+import { CountUp, CrownBadge, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 
 type PeriodValue = 'today' | 'week' | 'month'
 
@@ -148,10 +149,13 @@ export default function Leaderboard() {
         <section className="relative overflow-hidden rounded-[2rem] border border-red-100 bg-[radial-gradient(circle_at_8%_12%,rgba(252,165,165,0.35),transparent_38%),radial-gradient(circle_at_90%_10%,rgba(251,113,133,0.25),transparent_42%),linear-gradient(150deg,#fff,#fff5f5)] p-6 shadow-[0_28px_70px_rgba(15,23,42,0.16)] sm:p-8">
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700">
-              <Sparkles className="h-3.5 w-3.5" />
-              Premium Ranking Board
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700">
+                <Sparkles className="h-3.5 w-3.5" />
+                Premium Ranking Board
+              </p>
+              {isPremiumUser(user) ? <CrownBadge size="sm" /> : null}
+            </div>
             <h1 className="mt-3 text-3xl font-black text-slate-900 sm:text-4xl">Global Leaderboard</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               Verified SAT + IELTS performance standings with integrity checks, live point race, and consistency metrics.

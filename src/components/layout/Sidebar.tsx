@@ -4,11 +4,16 @@ import { motion } from 'framer-motion'
 import { cn } from '../ui/utils'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { BrandLockup } from '@/components/brand/BrandLogo'
+import { useAuthStore, type AuthState } from '@/store/authStore'
+import { isPremiumUser } from '@/utils/premiumAccess'
+import { CrownBadge } from '@/components/fx'
 
 export function Sidebar() {
   const navigate = useNavigate()
   const location = useLocation()
   const { minimalMotion, allowHoverMotion } = useMotionPreferences()
+  const user = useAuthStore((state: AuthState) => state.user)
+  const premium = isPremiumUser(user)
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
@@ -60,6 +65,11 @@ export function Sidebar() {
           titleClassName="text-sm font-bold tracking-tight text-slate-900"
           subtitleClassName="text-[11px] font-medium text-slate-600"
         />
+        {premium ? (
+          <div className="relative z-10 mt-2.5">
+            <CrownBadge size="sm" />
+          </div>
+        ) : null}
       </div>
 
       <div className="sidebar-heading-chip">Main Navigation</div>

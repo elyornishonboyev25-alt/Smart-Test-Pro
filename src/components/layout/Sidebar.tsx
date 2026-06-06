@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { BarChart3, BookMarked, BookOpen, Crown, GraduationCap, Headset, Home, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
+import { AudioLines, BarChart3, BookMarked, BookOpen, Crown, FileText, GraduationCap, Headset, Home, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../ui/utils'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -23,12 +23,14 @@ export function Sidebar() {
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, path: '/leaderboard' },
     { id: 'sat', label: 'SAT Prep', icon: GraduationCap, path: '/sat' },
     { id: 'ielts', label: 'IELTS Prep', icon: BookOpen, path: '/ielts' },
+    { id: 'articles', label: 'Articles', icon: FileText, path: '/articles' },
   ]
 
   const labItems = [
     { id: 'vocabulary', label: 'Vocabulary Lab', icon: BookMarked, path: '/vocabulary' },
     { id: 'mock', label: 'Mock Arena', icon: ShieldCheck, path: '/mock' },
     { id: 'speaking-community', label: 'Speaking Community', icon: Headset, path: '/speaking-community' },
+    { id: 'shadowing', label: 'Shadowing Lab', icon: AudioLines, path: '/shadowing-lab' },
   ]
 
   const handleNavigate = (path: string) => {

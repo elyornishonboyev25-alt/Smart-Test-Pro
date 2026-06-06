@@ -42,6 +42,8 @@ const Register = lazy(() => import('@/pages/Register'))
 const Premium = lazy(() => import('@/pages/Premium'))
 const Leaderboard = lazy(() => import('@/pages/Leaderboard'))
 const TestRunner = lazy(() => import('@/pages/TestRunner'))
+const Articles = lazy(() => import('@/pages/Articles'))
+const ShadowingLab = lazy(() => import('@/pages/ShadowingLab'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 const prefetchHighTrafficRoutes = () =>
@@ -110,7 +112,9 @@ function App() {
     pathname.startsWith('/sat') ||
     pathname.startsWith('/ielts') ||
     pathname === '/writing-lab' ||
-    pathname === '/speaking-lab'
+    pathname === '/speaking-lab' ||
+    pathname === '/shadowing-lab' ||
+    pathname === '/articles'
   const isCustomTestMode = /^\/tests\/[^/]+\/attempt$/.test(pathname)
   const isClassicTestMode = pathname.startsWith('/test/') || pathname.startsWith('/results/')
   const isTestMode = isCustomTestMode || isClassicTestMode
@@ -384,6 +388,8 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
+                      <Route path="/articles" element={<AnimatedRoute><Articles /></AnimatedRoute>} />
+                      <Route path="/shadowing-lab" element={<AnimatedRoute><ShadowingLab /></AnimatedRoute>} />
                       <Route path="/premium" element={<AnimatedRoute><Premium /></AnimatedRoute>} />
                       <Route path="/login" element={<AnimatedRoute><Login /></AnimatedRoute>} />
                       <Route path="/register" element={<AnimatedRoute><Register /></AnimatedRoute>} />

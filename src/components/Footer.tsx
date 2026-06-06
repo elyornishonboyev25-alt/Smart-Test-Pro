@@ -50,8 +50,9 @@ export default function Footer() {
               <li><Link to="/tests" className="transition-colors hover:text-red-700">Practice Tests</Link></li>
               <li><Link to="/mock" className="transition-colors hover:text-red-700">Mock Arena</Link></li>
               <li><Link to="/speaking-community" className="transition-colors hover:text-red-700">Speaking Community</Link></li>
+              <li><Link to="/shadowing-lab" className="transition-colors hover:text-red-700">Shadowing Lab</Link></li>
+              <li><Link to="/articles" className="transition-colors hover:text-red-700">Articles</Link></li>
               <li><Link to="/profile" className="transition-colors hover:text-red-700">Performance</Link></li>
-              <li><Link to="/account" className="transition-colors hover:text-red-700">Profile Center</Link></li>
               <li><Link to="/ielts" className="transition-colors hover:text-red-700">IELTS Modules</Link></li>
             </ul>
           </div>

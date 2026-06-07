@@ -2492,7 +2492,7 @@ export default function IELTSReadingInterface({
             Academic Reading Test
           </h1>
           <p className="text-slate-600 text-lg font-light max-w-2xl mx-auto italic">
-            Experience the authentic IELTS Computer-Delivered environment with ProfAI precision.
+            Experience the authentic IELTS Computer-Delivered environment with SmartTest Pro precision.
           </p>
         </motion.div>
 
@@ -2552,64 +2552,12 @@ export default function IELTSReadingInterface({
 
         <motion.div className="mt-16 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           <button type="button" onClick={onExit} className="text-sm text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2 mx-auto px-6 py-2 rounded-full border border-white/5 hover:bg-white/5">
-            <ArrowLeftIcon className="w-4 h-4" /> Return to ProfAI Dashboard
+            <ArrowLeftIcon className="w-4 h-4" /> Return to SmartTest Dashboard
           </button>
         </motion.div>
       </div>
     </div>
   )
-
-  // Inline answer-location highlight: in review mode, wrap each question's evidence
-  // quote inside the passage with a yellow mark prefixed by a small Q(n) badge.
-  const renderPassageContent = (content: string) => {
-    if (!isReviewMode || !reviewShowCorrectAnswers || !currentSection?.questions) {
-      return content
-    }
-    const matches: { start: number; end: number; number: number }[] = []
-    for (const question of currentSection.questions) {
-      const quote = typeof question.evidence === 'string' ? question.evidence.trim() : ''
-      if (!quote) continue
-      const start = content.indexOf(quote)
-      if (start >= 0) matches.push({ start, end: start + quote.length, number: question.number })
-    }
-    if (matches.length === 0) return content
-    matches.sort((a, b) => a.start - b.start)
-    const nodes: Array<string | JSX.Element> = []
-    let cursor = 0
-    matches.forEach((match, index) => {
-      if (match.start < cursor) return
-      if (match.start > cursor) nodes.push(content.slice(cursor, match.start))
-      nodes.push(
-        <mark
-          key={`evidence-${match.number}-${index}`}
-          style={{
-            background: 'linear-gradient(180deg,#fff7cc 0%,#fde68a 100%)',
-            color: 'inherit',
-            borderRadius: '0.25rem',
-            padding: '0.05em 0.15em',
-          }}
-        >
-          <sup
-            style={{
-              marginRight: '0.25rem',
-              padding: '0 0.3rem',
-              fontSize: '0.65em',
-              fontWeight: 800,
-              color: '#ffffff',
-              background: '#dc2626',
-              borderRadius: '0.3rem',
-            }}
-          >
-            Q{match.number}
-          </sup>
-          {content.slice(match.start, match.end)}
-        </mark>,
-      )
-      cursor = match.end
-    })
-    if (cursor < content.length) nodes.push(content.slice(cursor))
-    return nodes
-  }
 
   const renderLeftPanel = () => (
     <div className="relative h-full">
@@ -2710,7 +2658,7 @@ export default function IELTSReadingInterface({
                       {para.label && /^[A-Z]$/.test(para.label) && showLabels && (
                         <span className="mr-2 inline-block font-black text-slate-900">{para.label}</span>
                       )}
-                      {renderPassageContent(para.content)}
+                      {para.content}
                     </p>
                   </div>
                 ))}
@@ -3515,104 +3463,6 @@ export default function IELTSReadingInterface({
               )
             }
             if (q.number > 8 && q.number <= 13) return null
-          }
-
-          if (currentSection?.id === 'day25-dingo-debate-p2') {
-            if (q.number === 1) {
-              return (
-                <div key="day25-dingo-matching-group">
-                  {renderMatchingSelectGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 7),
-                    'Questions 1-7',
-                    'Reading Passage has eight sections, A-H. Which section contains the following information? Write the correct letter, A-H. NB You may use any letter more than once.',
-                    'Sections A-H',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 1 && q.number <= 7) return null
-            if (q.number === 8) {
-              return (
-                <div key="day25-dingo-people-group">
-                  {renderMatchingSelectGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 8 && entry.number <= 10),
-                    'Questions 8-10',
-                    'Look at the following statements (Questions 8-10) and the list of people below. Match each statement with the correct person, A, B, C or D.',
-                    'List of People',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 8 && q.number <= 10) return null
-            if (q.number === 11) {
-              return (
-                <div key="day25-dingo-sentences-group">
-                  {renderSentenceCompletionGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 11 && entry.number <= 13),
-                    'Questions 11-13',
-                    'Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 11 && q.number <= 13) return null
-          }
-
-          if (currentSection?.id === 'day10-importance-of-law-mp1') {
-            if (q.number === 1) {
-              return (
-                <div key="day10-law-headings-group">
-                  {renderMatchingSelectGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 6),
-                    'Questions 1-6',
-                    'Reading Passage 1 has six paragraphs, A-F. Choose the correct heading for each paragraph from the list of headings below.',
-                    'List of Headings',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 1 && q.number <= 6) return null
-            if (q.number === 9) {
-              return (
-                <div key="day10-law-summary-group">
-                  {renderSentenceCompletionGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 9 && entry.number <= 13),
-                    'Questions 9-13',
-                    'Complete the summary below. Choose ONE WORD ONLY from the passage for each answer.',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 9 && q.number <= 13) return null
-          }
-
-          if (currentSection?.id === 'day10-william-gilbert-mp2') {
-            if (q.number === 14) {
-              return (
-                <div key="day10-gilbert-headings-group">
-                  {renderMatchingSelectGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 14 && entry.number <= 20),
-                    'Questions 14-20',
-                    'Reading Passage 2 has seven paragraphs, A-G. Choose the correct heading for each paragraph from the list of headings below.',
-                    'List of Headings',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 14 && q.number <= 20) return null
-            if (q.number === 21) {
-              return (
-                <div key="day10-gilbert-tfng-group">
-                  {renderStatementChoiceGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 21 && entry.number <= 23),
-                    'Questions 21-23',
-                    'Do the following statements agree with the information given in Reading Passage 2? Write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
-                    ['TRUE', 'FALSE', 'NOT GIVEN'],
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 21 && q.number <= 23) return null
           }
 
           if (currentSection?.id === 'metropolis-p3') {

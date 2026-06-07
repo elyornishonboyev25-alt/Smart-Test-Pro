@@ -19,7 +19,6 @@ export interface Question {
     correctAnswer: string | string[] // string[] for multi-slot questions
     explanation?: string
     location?: string // For Reading/Listening (paragraph or timestamp)
-    evidence?: string // Exact verbatim quote from the passage that justifies the answer (for inline Q(n) answer-location highlighting in review mode)
     userAnswer?: string | string[]
     groupTitle?: string // e.g., "Questions 1-4"
     instruction?: string // e.g., "Which paragraph contains..."

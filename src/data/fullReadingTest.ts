@@ -552,14 +552,14 @@ export const fullReadingTests = [
   },
   {
     id: 3,
-    title: 'IELTS Reading Full Test 3 - Manatees, Procrastination, Invasion of the Robot Umpires',
-    description: 'Official 3-passage full IELTS reading set with 40 questions and answer mapping.',
+    title: 'IELTS Academic Reading: Money Transfers & Social Impact',
+    description: 'Full 3-passage test on fintech, road policy, and rural lighting.',
     level: 'HARD',
     duration: '60 minutes',
     questions: 40,
-    rating: 5.0,
+    rating: 4.9,
     year: 2026,
-    tags: ['ACADEMIC', 'FULL MOCK', 'PASSAGE 1-2-3'],
+    tags: ['ACADEMIC', 'FULL TEST'],
   },
   {
     id: 4,

@@ -112,11 +112,6 @@ type UserAggregateRow = {
 }
 
 const LEADERBOARD_CACHE_TTL_MS = 45_000
-const LEADERBOARD_FULL_TEST_QUESTION_THRESHOLD = 27
-const LEADERBOARD_PASSAGE_MAX_POINTS = 10
-const LEADERBOARD_FULL_TEST_MAX_POINTS = 30
-const LEADERBOARD_PASSAGE_MIN_TIME_MINUTES = 10
-const LEADERBOARD_FULL_TEST_MIN_TIME_MINUTES = 30
 
 const leaderboardCache = new Map<string, LeaderboardCacheEntry>()
 
@@ -320,26 +315,12 @@ function resolveWeeklyPerformanceBoard(period: PeriodInput, rows: LeaderboardRow
 
 function resolveAntiCheatRules() {
   return [
-    'Only one validated attempt per test is counted in each leaderboard period.',
-    `Single-passage attempts require at least ${LEADERBOARD_PASSAGE_MIN_TIME_MINUTES} minutes and can earn up to ${LEADERBOARD_PASSAGE_MAX_POINTS} points.`,
-    `Full tests require at least ${LEADERBOARD_FULL_TEST_MIN_TIME_MINUTES} minutes and can earn up to ${LEADERBOARD_FULL_TEST_MAX_POINTS} points.`,
-    'Ranking is based on accumulated board points, accuracy, and consistency so regular high-quality practice ranks higher.',
+    'Ranking is the sum of XP earned across all tests — higher scores on harder tests rank higher.',
+    'Only one validated attempt per test counts in each leaderboard period — repeats are discarded.',
+    'XP per attempt = max XP for the difficulty × (score%)² + small streak/perfect bonuses.',
+    'Difficulty caps: Easy 40 XP · Medium 70 XP · Hard 100 XP · Olympiad 150 XP.',
+    'Ties are broken first by average accuracy, then by attempts completed.',
   ]
-}
-
-function resolveAttemptMaxPoints(totalQuestions: number) {
-  return totalQuestions >= LEADERBOARD_FULL_TEST_QUESTION_THRESHOLD
-    ? LEADERBOARD_FULL_TEST_MAX_POINTS
-    : LEADERBOARD_PASSAGE_MAX_POINTS
-}
-
-function calculateLeaderboardAttemptPoints(attempt: UserAttemptSnapshot) {
-  const safeTotalQuestions = Math.max(1, attempt.totalQuestions)
-  const safeCorrectAnswers = clamp(attempt.correctAnswers, 0, safeTotalQuestions)
-  const maxPoints = resolveAttemptMaxPoints(safeTotalQuestions)
-  const accuracyRatio = safeCorrectAnswers / safeTotalQuestions
-
-  return Number((maxPoints * accuracyRatio).toFixed(2))
 }
 
 function readCache(period: PeriodInput, category?: TestCategory) {
@@ -429,7 +410,9 @@ function buildUserAggregates(params: {
     let consistencyTotal = 0
     let improvementTotal = 0
     let difficultyTotal = 0
-    let leaderboardPointsTotal = 0
+    // XP sum is now the single source of truth for ranking.
+    // We still aggregate the analytics signals below for the breakdown drawer.
+    let xpTotal = 0
 
     for (let index = 0; index < validatedAttempts.length; index += 1) {
       const attempt = validatedAttempts[index]
@@ -446,28 +429,30 @@ function buildUserAggregates(params: {
       consistencyTotal += consistencyScore
       improvementTotal += improvementDelta
       difficultyTotal += difficultyMultiplier
-      leaderboardPointsTotal += calculateLeaderboardAttemptPoints(attempt)
+      xpTotal += Math.max(0, attempt.xpEarned)
 
       rollingScores.push(attempt.finalScore)
     }
 
     const testsCompleted = validatedAttempts.length
     const integrityScore = clamp((testsCompleted / Math.max(1, userAttempts.length)) * 100, 0, 100)
-    const integrityWeight = clamp(0.35 + (integrityScore / 100) * 0.65, 0.35, 1)
-    const rankingScore = leaderboardPointsTotal * integrityWeight
+    // Ranking is now driven by pure earned XP. The integrity score still feeds
+    // the breakdown drawer so reviewers can audit a row, but it no longer
+    // multiplies the visible ranking number.
+    const rankingScore = xpTotal
     const avgAccuracy = accuracyTotal / testsCompleted
     const avgSpeed = speedTotal / testsCompleted
     const avgConsistency = consistencyTotal / testsCompleted
     const avgImprovement = improvementTotal / testsCompleted
     const avgDifficulty = difficultyTotal / testsCompleted
     const avgEngagement = engagementScore
-    const division = resolveDivision(rankingScore)
+    const division = resolveDivision(avgAccuracy)
 
     rows.push({
       userId,
       fullName: user.fullName,
       avatarUrl: user.avatarUrl,
-      totalXp: Math.round(leaderboardPointsTotal),
+      totalXp: Math.round(xpTotal),
       testsCompleted,
       accuracy: Number(avgAccuracy.toFixed(2)),
       streak: user.currentStreak,
@@ -504,11 +489,11 @@ function buildUserAggregates(params: {
     })
   }
 
+  // Pure XP ranking — user request. Ties broken by accuracy then attempts.
   rows.sort((left, right) => {
-    if (right.rankingScore !== left.rankingScore) return right.rankingScore - left.rankingScore
+    if (right.totalXp !== left.totalXp) return right.totalXp - left.totalXp
     if (right.accuracy !== left.accuracy) return right.accuracy - left.accuracy
-    if (right.testsCompleted !== left.testsCompleted) return right.testsCompleted - left.testsCompleted
-    return right.totalXp - left.totalXp
+    return right.testsCompleted - left.testsCompleted
   })
 
   return rows

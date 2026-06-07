@@ -9,6 +9,7 @@ import { fullReadingTest8 } from '@/data/fullReadingTest8'
 import { fullReadingTest9 } from '@/data/fullReadingTest9'
 import { fullReadingTest10 } from '@/data/fullReadingTest10'
 import { readingDaySections } from '@/data/readingDaySections'
+import { readingMockDaySections } from '@/data/readingMockDaySections'
 import { mockListeningTests } from '@/data/listeningPassages'
 import type { IELTSTest, Section } from '@/types/ieltsTypes'
 
@@ -30,6 +31,35 @@ function cloneSection(section: Section): Section {
 export function buildReadingDayTest(day: number): IELTSTest {
   const normalizedDay = Math.max(1, day)
   const isMockDay = MOCK_READING_DAYS.has(normalizedDay)
+
+  // Milestone days (10, 20, 30) are full 3-passage mock tests when seeded.
+  const mockSections = isMockDay ? readingMockDaySections[normalizedDay] : undefined
+  if (mockSections && mockSections.length > 0) {
+    const sections = mockSections.map((section) => cloneSection(section))
+    const totalQuestions = sections.reduce(
+      (total, section) =>
+        total +
+        section.questions.reduce(
+          (sum, question) =>
+            sum +
+            ((question.type === 'five-true-statements' || question.type === 'drag-drop-summary') &&
+            Array.isArray(question.correctAnswer)
+              ? Math.max(1, question.correctAnswer.length)
+              : 1),
+          0,
+        ),
+      0,
+    )
+    return {
+      ...fullReadingTest,
+      id: `reading-day-${normalizedDay}`,
+      title: `IELTS Reading Day ${normalizedDay} (Mock)`,
+      duration: 60,
+      sections,
+      totalQuestions,
+    }
+  }
+
   const seededDaySection = readingDaySections[normalizedDay]
   const section = seededDaySection
     ? cloneSection(seededDaySection)

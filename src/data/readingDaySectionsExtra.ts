@@ -1,5 +1,6 @@
 import type { Question, Section } from '../types/ieltsTypes'
 import { readingDaySectionDay24 } from './readingDaySectionDay24'
+import { readingDaySectionDay25 } from './readingDaySectionDay25'
 import { readingDaySectionsDay14To23 } from './readingDaySectionsDay14To23'
 
 const paragraphOptionsAtoG = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
@@ -1066,4 +1067,5 @@ export const readingDaySectionsExtra: Record<number, Section> = {
   13: day13Section,
   ...readingDaySectionsDay14To23,
   24: readingDaySectionDay24,
+  25: readingDaySectionDay25,
 }

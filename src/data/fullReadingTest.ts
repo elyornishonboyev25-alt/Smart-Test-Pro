@@ -552,14 +552,14 @@ export const fullReadingTests = [
   },
   {
     id: 3,
-    title: 'IELTS Academic Reading: Money Transfers & Social Impact',
-    description: 'Full 3-passage test on fintech, road policy, and rural lighting.',
+    title: 'IELTS Reading Full Test 3 - Manatees, Procrastination, Invasion of the Robot Umpires',
+    description: 'Official 3-passage full IELTS reading set with 40 questions and answer mapping.',
     level: 'HARD',
     duration: '60 minutes',
     questions: 40,
-    rating: 4.9,
+    rating: 5.0,
     year: 2026,
-    tags: ['ACADEMIC', 'FULL TEST'],
+    tags: ['ACADEMIC', 'FULL MOCK', 'PASSAGE 1-2-3'],
   },
   {
     id: 4,

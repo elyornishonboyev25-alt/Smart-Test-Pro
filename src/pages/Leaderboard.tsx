@@ -2,19 +2,22 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowDownRight,
   ArrowUpRight,
+  Crown,
   Flame,
+  Medal,
   Minus,
-  ShieldAlert,
-  ShieldCheck,
+  Shield,
   Sparkles,
   Trophy,
+  Users,
+  Zap,
 } from 'lucide-react'
 import { apiClient } from '@/lib/apiClient'
 import type { LeaderboardResponse, LeaderboardRow, TestCategory } from '@/types/platform'
 import { Skeleton } from '@/components/common/Skeleton'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { isPremiumUser } from '@/utils/premiumAccess'
-import { CountUp, CrownBadge, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
+import { CountUp, CrownBadge, Reveal, Stagger, StaggerItem, Tilt3D, XPGem } from '@/components/fx'
 
 type PeriodValue = 'today' | 'week' | 'month'
 
@@ -45,7 +48,6 @@ function getMovement(row: LeaderboardRow) {
       className: 'border-slate-200 bg-white text-slate-500',
     }
   }
-
   const up = row.rankTrend === 'up'
   return {
     icon: up ? ArrowUpRight : ArrowDownRight,
@@ -56,22 +58,45 @@ function getMovement(row: LeaderboardRow) {
   }
 }
 
-function integrityPill(score: number) {
-  const verified = score >= 70
-  return {
-    verified,
-    label: verified ? 'Verified' : 'Review',
-    icon: verified ? ShieldCheck : ShieldAlert,
-    className: verified
-      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-      : 'border-amber-200 bg-amber-50 text-amber-700',
+/** Podium card styling per rank — gold / silver / bronze. */
+function podiumTheme(rank: number) {
+  if (rank === 1) {
+    return {
+      cardBg: 'from-amber-100 via-amber-50/40 to-orange-100/60',
+      cardBorder: 'border-amber-300/80',
+      cardShadow: 'shadow-[0_24px_50px_rgba(245,158,11,0.25)]',
+      ringFrom: '#FBBF24',
+      ringTo: '#D97706',
+      crown: 'text-amber-500',
+      label: 'Gold',
+      labelBg: 'bg-gradient-to-r from-amber-400 to-orange-500',
+      barH: 'h-32',
+    }
   }
-}
-
-function podiumTone(rank: number) {
-  if (rank === 1) return 'from-amber-100 via-white to-red-100 border-amber-200'
-  if (rank === 2) return 'from-slate-100 via-white to-rose-100 border-slate-200'
-  return 'from-orange-100 via-white to-red-100 border-orange-200'
+  if (rank === 2) {
+    return {
+      cardBg: 'from-slate-100 via-slate-50/40 to-zinc-100/60',
+      cardBorder: 'border-slate-300/80',
+      cardShadow: 'shadow-[0_22px_44px_rgba(100,116,139,0.22)]',
+      ringFrom: '#CBD5E1',
+      ringTo: '#64748B',
+      crown: 'text-slate-400',
+      label: 'Silver',
+      labelBg: 'bg-gradient-to-r from-slate-300 to-slate-500',
+      barH: 'h-24',
+    }
+  }
+  return {
+    cardBg: 'from-orange-100 via-orange-50/40 to-red-100/60',
+    cardBorder: 'border-orange-300/70',
+    cardShadow: 'shadow-[0_22px_44px_rgba(234,88,12,0.22)]',
+    ringFrom: '#FB923C',
+    ringTo: '#C2410C',
+    crown: 'text-orange-600',
+    label: 'Bronze',
+    labelBg: 'bg-gradient-to-r from-orange-400 to-red-500',
+    barH: 'h-20',
+  }
 }
 
 export default function Leaderboard() {
@@ -90,7 +115,7 @@ export default function Leaderboard() {
       if (!user) {
         setLoading(false)
         setData(null)
-        setError('Sign in required to view leaderboard.')
+        setError('Sign in required to view the leaderboard.')
         return
       }
 
@@ -113,7 +138,6 @@ export default function Leaderboard() {
     }
 
     void fetchData()
-
     return () => {
       active = false
     }
@@ -128,101 +152,108 @@ export default function Leaderboard() {
 
   const summary = useMemo(() => {
     if (rows.length === 0) return null
-    const totalPoints = rows.reduce((sum, row) => sum + row.totalXp, 0)
+    const totalXp = rows.reduce((sum, row) => sum + row.totalXp, 0)
     const avgAccuracy = rows.reduce((sum, row) => sum + row.accuracy, 0) / rows.length
-    const avgConsistency = rows.reduce((sum, row) => sum + row.consistencyScore, 0) / rows.length
-    const verifiedCount = rows.filter((row) => row.integrityScore >= 70).length
-
-    return {
-      totalPoints,
-      avgAccuracy,
-      avgConsistency,
-      verifiedCount,
-    }
+    return { totalXp, avgAccuracy, players: rows.length }
   }, [rows])
 
   const topTen = rows.slice(0, 10)
 
+  // Re-order podium so #1 is in the middle: [#2, #1, #3]
+  const visualPodium = useMemo(() => {
+    if (podiumRows.length < 3) return podiumRows
+    return [podiumRows[1], podiumRows[0], podiumRows[2]]
+  }, [podiumRows])
+
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* ── Hero ──────────────────────────────────────────────── */}
       <Reveal>
         <section className="relative overflow-hidden rounded-[2rem] border border-red-100 bg-[radial-gradient(circle_at_8%_12%,rgba(252,165,165,0.35),transparent_38%),radial-gradient(circle_at_90%_10%,rgba(251,113,133,0.25),transparent_42%),linear-gradient(150deg,#fff,#fff5f5)] p-6 shadow-[0_28px_70px_rgba(15,23,42,0.16)] sm:p-8">
-        <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700">
-                <Sparkles className="h-3.5 w-3.5" />
-                Premium Ranking Board
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-amber-200/30 to-orange-300/15 blur-3xl" />
+          <div className="pointer-events-none absolute -left-16 bottom-0 h-60 w-60 rounded-full bg-rose-200/25 blur-3xl" />
+
+          <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  XP Ranking Board
+                </p>
+                {isPremiumUser(user) ? <CrownBadge size="sm" /> : null}
+              </div>
+              <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                Global <span className="arena-title-accent-red">Leaderboard</span>
+              </h1>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                Pure XP ranking — earn more XP on harder tests to climb. Ties broken by accuracy then attempts.
               </p>
-              {isPremiumUser(user) ? <CrownBadge size="sm" /> : null}
             </div>
-            <h1 className="mt-3 text-3xl font-black text-slate-900 sm:text-4xl">Global Leaderboard</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              Verified SAT + IELTS performance standings with integrity checks, live point race, and consistency metrics.
-            </p>
+
+            <Tilt3D className="w-full rounded-3xl sm:w-auto" max={5}>
+              <div className="relative overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-br from-white via-amber-50/40 to-orange-50/60 px-5 py-4 shadow-[0_18px_44px_rgba(245,158,11,0.18)] sm:min-w-[18rem]">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/70 to-transparent" />
+                <div className="flex items-center gap-4">
+                  <XPGem size={56} />
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">Your XP</p>
+                    <p className="text-3xl font-black tracking-tight text-slate-900">
+                      <CountUp value={currentUserRow ? currentUserRow.totalXp : user?.xp ?? 0} />
+                    </p>
+                    <p className="mt-0.5 text-[11px] font-semibold text-slate-600">
+                      Rank{' '}
+                      <span className="text-red-700">
+                        #{data?.currentUserRank ?? '--'}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Tilt3D>
           </div>
 
-          <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-red-200 bg-white px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Your Rank</p>
-              <p className="mt-1 text-lg font-bold text-slate-900">{data?.currentUserRank ? `#${data.currentUserRank}` : '--'}</p>
+          {/* Filters */}
+          <div className="relative z-10 mt-6 grid gap-3 lg:grid-cols-2">
+            <div className="rounded-2xl border border-red-100 bg-white p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Period</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {periods.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setPeriod(item.value)}
+                    className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                      period === item.value
+                        ? 'cta-sheen bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.28)]'
+                        : 'border border-red-100 bg-white text-slate-600 hover:text-red-700'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="rounded-xl border border-red-200 bg-white px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Your Points</p>
-              <p className="mt-1 text-lg font-bold text-slate-900">{currentUserRow ? currentUserRow.totalXp.toLocaleString() : '--'}</p>
-            </div>
-            <div className="rounded-xl border border-red-200 bg-white px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Avg Accuracy</p>
-              <p className="mt-1 text-lg font-bold text-slate-900">{summary ? `${summary.avgAccuracy.toFixed(1)}%` : '--'}</p>
-            </div>
-            <div className="rounded-xl border border-red-200 bg-white px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Verified Users</p>
-              <p className="mt-1 text-lg font-bold text-slate-900">{summary ? <CountUp value={summary.verifiedCount} /> : '--'}</p>
-            </div>
-          </div>
-        </div>
 
-        <div className="relative z-10 mt-5 grid gap-3 lg:grid-cols-2">
-          <div className="rounded-2xl border border-red-100 bg-white p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Period</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {periods.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() => setPeriod(item.value)}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    period === item.value
-                      ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.28)]'
-                      : 'border border-red-100 bg-white text-slate-600 hover:text-red-700'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
+            <div className="rounded-2xl border border-red-100 bg-white p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Track</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {categories.map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setCategory(item.value)}
+                    className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                      category === item.value
+                        ? 'cta-sheen bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.28)]'
+                        : 'border border-red-100 bg-white text-slate-600 hover:text-red-700'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-
-          <div className="rounded-2xl border border-red-100 bg-white p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Track</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {categories.map((item) => (
-                <button
-                  key={item.value}
-                  type="button"
-                  onClick={() => setCategory(item.value)}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                    category === item.value
-                      ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.28)]'
-                      : 'border border-red-100 bg-white text-slate-600 hover:text-red-700'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
         </section>
       </Reveal>
 
@@ -230,178 +261,324 @@ export default function Leaderboard() {
         <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
       ) : null}
 
-      <section className="mt-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-red-600">Podium</h2>
-        <Stagger className="grid gap-3 lg:grid-cols-3">
-          {loading
-            ? Array.from({ length: 3 }).map((_, index) => <Skeleton key={`podium_${index}`} className="h-56 w-full rounded-2xl" />)
-            : podiumRows.map((row) => {
-                const integrity = integrityPill(row.integrityScore)
-                const IntegrityIcon = integrity.icon
-                const movement = getMovement(row)
-                const MovementIcon = movement.icon
+      {/* ── Podium ────────────────────────────────────────────── */}
+      <Reveal delay={0.05} className="mt-8">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-[0_10px_22px_rgba(245,158,11,0.32)]">
+            <Trophy className="h-4 w-4" />
+          </span>
+          <h2 className="text-lg font-black tracking-tight text-slate-900">Podium · Top 3</h2>
+        </div>
+        {loading ? (
+          <div className="grid gap-3 lg:grid-cols-3">
+            <Skeleton className="h-72 w-full rounded-3xl" />
+            <Skeleton className="h-72 w-full rounded-3xl" />
+            <Skeleton className="h-72 w-full rounded-3xl" />
+          </div>
+        ) : visualPodium.length === 0 ? (
+          <div className="rounded-2xl border border-red-100 bg-white p-6 text-sm text-slate-600">
+            Be the first to complete a test and claim the top spot.
+          </div>
+        ) : (
+          <div className="grid items-end gap-4 lg:grid-cols-3">
+            {visualPodium.map((row) => {
+              if (!row) return null
+              const theme = podiumTheme(row.rank)
+              const movement = getMovement(row)
+              const MovementIcon = movement.icon
+              const isFirst = row.rank === 1
 
-                return (
-                  <StaggerItem key={row.userId} className="h-full">
-                  <Tilt3D className="h-full rounded-2xl" max={6}>
+              return (
+                <Tilt3D
+                  key={row.userId}
+                  className={`rounded-3xl ${isFirst ? 'lg:-translate-y-3' : ''}`}
+                  max={5}
+                >
                   <article
-                    className={`fx-medal-shine relative h-full rounded-2xl border bg-gradient-to-br p-4 shadow-[0_14px_28px_rgba(15,23,42,0.1)] ${podiumTone(row.rank)}`}
+                    className={`fx-medal-shine relative overflow-hidden rounded-3xl border bg-gradient-to-br ${theme.cardBg} ${theme.cardBorder} ${theme.cardShadow} p-5`}
                   >
+                    {/* Rank ribbon */}
                     <div className="flex items-center justify-between">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-white px-2.5 py-1 text-xs font-semibold text-red-700">
-                        <Trophy className="h-3.5 w-3.5" />
-                        Rank #{row.rank}
+                      <span className={`inline-flex items-center gap-1 rounded-full ${theme.labelBg} px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-sm`}>
+                        <Crown className="h-3 w-3" />
+                        {theme.label} · #{row.rank}
                       </span>
-                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${movement.className}`}>
-                        <MovementIcon className="h-3.5 w-3.5" />
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${movement.className}`}>
+                        <MovementIcon className="h-3 w-3" />
                         {movement.label}
                       </span>
                     </div>
 
-                    <div className="mt-4 flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full border border-red-200 bg-white text-sm font-bold text-red-700">
-                        {getInitials(row.fullName)}
+                    {/* Avatar + crown */}
+                    <div className="mt-4 flex flex-col items-center text-center">
+                      <div className="relative">
+                        <div
+                          className="flex h-20 w-20 items-center justify-center rounded-full border-4 border-white text-xl font-black text-slate-700 shadow-lg"
+                          style={{
+                            background: `linear-gradient(135deg, ${theme.ringFrom}, ${theme.ringTo})`,
+                            color: 'white',
+                          }}
+                        >
+                          {getInitials(row.fullName)}
+                        </div>
+                        {isFirst ? (
+                          <Crown
+                            className={`absolute -top-5 left-1/2 h-7 w-7 -translate-x-1/2 ${theme.crown} drop-shadow-md`}
+                          />
+                        ) : null}
                       </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-base font-bold text-slate-900">{row.fullName}</p>
-                        <p className="text-xs text-slate-600">{row.totalXp.toLocaleString()} pts</p>
+                      <p className="mt-3 truncate text-base font-black text-slate-900">{row.fullName}</p>
+                      <div className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold text-slate-600">
+                        <Zap className="h-3 w-3 fill-amber-400 text-amber-500" />
+                        <CountUp value={row.totalXp} /> XP
                       </div>
                     </div>
 
+                    {/* XP bar visual */}
+                    <div
+                      className={`mt-4 w-full rounded-t-xl ${theme.barH}`}
+                      style={{
+                        background: `linear-gradient(180deg, ${theme.ringFrom}, ${theme.ringTo})`,
+                        boxShadow: `inset 0 8px 16px rgba(255,255,255,0.35)`,
+                      }}
+                    />
+
+                    {/* Quick stats */}
                     <div className="mt-3 grid grid-cols-2 gap-2">
-                      <div className="rounded-xl border border-red-100 bg-white px-3 py-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-red-600">Accuracy</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-900">{row.accuracy.toFixed(1)}%</p>
+                      <div className="rounded-xl border border-white/50 bg-white/70 px-2.5 py-1.5 text-center backdrop-blur">
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Accuracy</p>
+                        <p className="mt-0.5 text-xs font-black text-slate-900">{row.accuracy.toFixed(1)}%</p>
                       </div>
-                      <div className="rounded-xl border border-red-100 bg-white px-3 py-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-red-600">Consistency</p>
-                        <p className="mt-1 text-sm font-semibold text-slate-900">{row.consistencyScore.toFixed(1)}</p>
+                      <div className="rounded-xl border border-white/50 bg-white/70 px-2.5 py-1.5 text-center backdrop-blur">
+                        <p className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Tests</p>
+                        <p className="mt-0.5 text-xs font-black text-slate-900">{row.testsCompleted}</p>
                       </div>
                     </div>
 
-                    <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
-                        <Flame className="h-3.5 w-3.5" />
+                    {row.streak > 0 ? (
+                      <div className="mt-3 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50/85 px-2.5 py-1 text-[10px] font-bold text-amber-700">
+                        <Flame className="h-3 w-3" />
                         {row.streak} day streak
-                      </span>
-                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold ${integrity.className}`}>
-                        <IntegrityIcon className="h-3.5 w-3.5" />
-                        {integrity.label}
-                      </span>
-                    </div>
-                  </article>
-                  </Tilt3D>
-                  </StaggerItem>
-                )
-              })}
-        </Stagger>
-      </section>
-
-      <section className="mt-6 grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
-        <div className="rounded-2xl border border-red-100 bg-white p-4 shadow-[0_16px_32px_rgba(15,23,42,0.09)] sm:p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-xl font-black text-slate-900">Top 10 Verified Rankings</h3>
-            {summary ? (
-              <span className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
-                Total board points: {summary.totalPoints.toLocaleString()}
-              </span>
-            ) : null}
-          </div>
-
-          {loading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 10 }).map((_, index) => (
-                <Skeleton key={`row_loader_${index}`} className="h-16 w-full rounded-xl" />
-              ))}
-            </div>
-          ) : topTen.length > 0 ? (
-            <div className="overflow-hidden rounded-xl border border-red-100">
-              <div className="grid grid-cols-[74px_minmax(0,1.2fr)_0.8fr_0.7fr_0.7fr_0.7fr_0.7fr] bg-red-50/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-red-700">
-                <p>Rank</p>
-                <p>Player</p>
-                <p>Points</p>
-                <p>Tests</p>
-                <p>Accuracy</p>
-                <p>Consist.</p>
-                <p>Trend</p>
-              </div>
-
-              {topTen.map((row) => {
-                const movement = getMovement(row)
-                const MovementIcon = movement.icon
-
-                return (
-                  <div
-                    key={row.userId}
-                    className={`grid grid-cols-[74px_minmax(0,1.2fr)_0.8fr_0.7fr_0.7fr_0.7fr_0.7fr] items-center gap-2 border-t border-red-100 px-3 py-2.5 text-sm ${
-                      row.isCurrentUser ? 'bg-red-50/55' : 'bg-white'
-                    }`}
-                  >
-                    <p className="font-semibold text-slate-900">#{row.rank}</p>
-                    <div className="flex min-w-0 items-center gap-2">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-red-200 bg-red-50 text-[11px] font-semibold text-red-700">
-                        {getInitials(row.fullName)}
                       </div>
-                      <p className="truncate font-semibold text-slate-900">{row.fullName}</p>
-                    </div>
-                    <p className="font-semibold text-slate-800">{row.totalXp.toLocaleString()}</p>
-                    <p className="text-slate-700">{row.testsCompleted}</p>
-                    <p className="font-semibold text-slate-800">{row.accuracy.toFixed(1)}%</p>
-                    <p className="text-slate-700">{row.consistencyScore.toFixed(1)}</p>
-                    <span className={`inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${movement.className}`}>
-                      <MovementIcon className="h-3 w-3" />
-                      {movement.label}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-red-100 bg-white px-4 py-6 text-sm text-slate-600">
-              No verified scores found for this filter.
-            </div>
-          )}
-        </div>
+                    ) : null}
+                  </article>
+                </Tilt3D>
+              )
+            })}
+          </div>
+        )}
+      </Reveal>
 
-        <div className="space-y-4">
-          <article className="rounded-2xl border border-red-100 bg-white p-4 shadow-[0_14px_30px_rgba(15,23,42,0.09)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Weekly Winner</p>
-            {data?.weeklyPremiumWinner ? (
-              <div className="mt-2">
-                <p className="text-lg font-black text-slate-900">{data.weeklyPremiumWinner.fullName}</p>
-                <p className="mt-1 text-sm text-slate-600">
-                  {data.weeklyPremiumWinner.testsCompleted} tests | Score {data.weeklyPremiumWinner.rankingScore.toFixed(2)}
-                </p>
+      {/* ── Top 10 leaderboard + side rail ────────────────────── */}
+      <section className="mt-8 grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
+        <Reveal>
+          <article className="surface-card relative overflow-hidden p-5 sm:p-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/55 to-transparent" />
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                  <Medal className="h-4 w-4" />
+                </span>
+                <h3 className="text-lg font-black tracking-tight text-slate-900">Top 10 · Pure XP</h3>
               </div>
+              {summary ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">
+                  <Zap className="h-3 w-3 fill-amber-400 text-amber-500" />
+                  Total <CountUp value={summary.totalXp} /> XP
+                </span>
+              ) : null}
+            </div>
+
+            {loading ? (
+              <div className="space-y-2.5">
+                {Array.from({ length: 10 }).map((_, index) => (
+                  <Skeleton key={index} className="h-14 w-full rounded-xl" />
+                ))}
+              </div>
+            ) : topTen.length > 0 ? (
+              <Stagger className="space-y-2">
+                {topTen.map((row) => {
+                  const movement = getMovement(row)
+                  const MovementIcon = movement.icon
+                  const isTopThree = row.rank <= 3
+                  const medalColor =
+                    row.rank === 1
+                      ? 'text-amber-500'
+                      : row.rank === 2
+                      ? 'text-slate-400'
+                      : 'text-orange-600'
+
+                  return (
+                    <StaggerItem key={row.userId}>
+                      <div
+                        className={`group grid grid-cols-[40px_minmax(0,1.5fr)_0.6fr_0.6fr_0.5fr] items-center gap-3 rounded-xl border px-3 py-2.5 transition ${
+                          row.isCurrentUser
+                            ? 'border-red-300 bg-gradient-to-r from-red-50/70 to-rose-50/40 shadow-[0_8px_18px_rgba(220,38,38,0.1)]'
+                            : 'border-slate-100 bg-white hover:border-red-200 hover:bg-red-50/30'
+                        }`}
+                      >
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-xs font-black text-slate-600">
+                          {isTopThree ? <Crown className={`h-4 w-4 ${medalColor}`} /> : `#${row.rank}`}
+                        </span>
+                        <div className="flex min-w-0 items-center gap-2.5">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-100 bg-gradient-to-br from-red-50 to-rose-50 text-[11px] font-bold text-red-700">
+                            {getInitials(row.fullName)}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-900">
+                              {row.fullName}
+                              {row.isCurrentUser ? (
+                                <span className="ml-2 inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[9px] font-bold text-red-700">YOU</span>
+                              ) : null}
+                            </p>
+                            <p className="text-[10px] font-medium text-slate-500">{row.testsCompleted} tests · {row.accuracy.toFixed(0)}% acc</p>
+                          </div>
+                        </div>
+                        <p className="inline-flex items-center gap-1 text-sm font-black text-slate-900">
+                          <Zap className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+                          <CountUp value={row.totalXp} />
+                        </p>
+                        <p className="text-xs font-semibold text-slate-700">
+                          {row.streak > 0 ? (
+                            <span className="inline-flex items-center gap-0.5">
+                              <Flame className="h-3 w-3 text-amber-500" />
+                              {row.streak}d
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </p>
+                        <span
+                          className={`inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${movement.className}`}
+                        >
+                          <MovementIcon className="h-3 w-3" />
+                          {movement.label}
+                        </span>
+                      </div>
+                    </StaggerItem>
+                  )
+                })}
+              </Stagger>
             ) : (
-              <p className="mt-2 text-sm text-slate-600">No winner data available yet.</p>
+              <div className="rounded-xl border border-red-100 bg-red-50/30 p-5 text-sm text-slate-600">
+                No verified rankings yet for this filter. Be the first to climb!
+              </div>
             )}
           </article>
+        </Reveal>
 
-          <article className="rounded-2xl border border-red-100 bg-white p-4 shadow-[0_14px_30px_rgba(15,23,42,0.09)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Integrity Rules</p>
-            <div className="mt-2 space-y-2">
-              {(data?.antiCheatRules ?? []).slice(0, 5).map((rule) => (
-                <p key={rule} className="rounded-xl border border-red-100 bg-red-50/45 px-3 py-2 text-xs leading-5 text-slate-700">
-                  {rule}
-                </p>
-              ))}
-            </div>
-          </article>
+        <div className="space-y-4">
+          {/* XP formula explainer */}
+          <Reveal>
+            <article className="surface-card relative overflow-hidden p-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/55 to-transparent" />
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-[0_10px_22px_rgba(245,158,11,0.32)]">
+                  <Zap className="h-4 w-4" />
+                </span>
+                <h3 className="text-base font-black tracking-tight text-slate-900">How XP Works</h3>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-slate-600">
+                Each attempt awards XP based on how much you scored. The formula is fully transparent:
+              </p>
+              <div className="mt-3 rounded-xl border border-amber-100 bg-amber-50/40 px-3 py-2 text-[11px] font-bold text-amber-900">
+                XP = max(difficulty) × score%²
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                <div className="rounded-lg border border-emerald-100 bg-emerald-50/50 px-2 py-1.5">
+                  <p className="font-bold text-emerald-700">Easy</p>
+                  <p className="text-emerald-900">up to 40 XP</p>
+                </div>
+                <div className="rounded-lg border border-amber-100 bg-amber-50/50 px-2 py-1.5">
+                  <p className="font-bold text-amber-700">Medium</p>
+                  <p className="text-amber-900">up to 70 XP</p>
+                </div>
+                <div className="rounded-lg border border-red-100 bg-red-50/50 px-2 py-1.5">
+                  <p className="font-bold text-red-700">Hard</p>
+                  <p className="text-red-900">up to 100 XP</p>
+                </div>
+                <div className="rounded-lg border border-violet-100 bg-violet-50/50 px-2 py-1.5">
+                  <p className="font-bold text-violet-700">Olympiad</p>
+                  <p className="text-violet-900">up to 150 XP</p>
+                </div>
+              </div>
+              <p className="mt-3 text-[11px] text-slate-500">
+                100% score = full XP. 70% score = 49% XP. Daily streak adds up to +20% bonus.
+              </p>
+            </article>
+          </Reveal>
 
-          <article className="rounded-2xl border border-red-100 bg-white p-4 shadow-[0_14px_30px_rgba(15,23,42,0.09)]">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-600">Board Snapshot</p>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-              <div className="rounded-xl border border-red-100 bg-red-50/45 px-3 py-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-red-600">Average Accuracy</p>
-                <p className="mt-1 font-bold text-slate-900">{summary ? `${summary.avgAccuracy.toFixed(1)}%` : '--'}</p>
+          {/* Weekly winner */}
+          <Reveal delay={0.06}>
+            <article className="surface-card relative overflow-hidden p-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-400/55 to-transparent" />
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                  <Trophy className="h-4 w-4" />
+                </span>
+                <h3 className="text-base font-black tracking-tight text-slate-900">Weekly Champion</h3>
               </div>
-              <div className="rounded-xl border border-red-100 bg-red-50/45 px-3 py-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-red-600">Avg Consistency</p>
-                <p className="mt-1 font-bold text-slate-900">{summary ? summary.avgConsistency.toFixed(1) : '--'}</p>
+              {data?.weeklyPremiumWinner ? (
+                <div className="mt-3">
+                  <p className="text-lg font-black text-slate-900">{data.weeklyPremiumWinner.fullName}</p>
+                  <p className="mt-1 text-xs font-medium text-slate-600">
+                    {data.weeklyPremiumWinner.testsCompleted} tests · Score {data.weeklyPremiumWinner.rankingScore.toFixed(0)} XP
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-slate-500">No champion yet this week.</p>
+              )}
+            </article>
+          </Reveal>
+
+          {/* Stats snapshot */}
+          {summary ? (
+            <Reveal delay={0.1}>
+              <article className="surface-card relative overflow-hidden p-5">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/55 to-transparent" />
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                    <Users className="h-4 w-4" />
+                  </span>
+                  <h3 className="text-base font-black tracking-tight text-slate-900">Board Snapshot</h3>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <div className="rounded-xl border border-red-100 bg-red-50/40 px-3 py-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-red-600">Players</p>
+                    <p className="mt-1 text-lg font-black text-slate-900">
+                      <CountUp value={summary.players} />
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-red-100 bg-red-50/40 px-3 py-2">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-red-600">Avg Accuracy</p>
+                    <p className="mt-1 text-lg font-black text-slate-900">
+                      <CountUp value={summary.avgAccuracy} decimals={1} suffix="%" />
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </Reveal>
+          ) : null}
+
+          {/* Anti-cheat rules */}
+          <Reveal delay={0.14}>
+            <article className="surface-card relative overflow-hidden p-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400/55 to-transparent" />
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-[0_10px_22px_rgba(16,185,129,0.3)]">
+                  <Shield className="h-4 w-4" />
+                </span>
+                <h3 className="text-base font-black tracking-tight text-slate-900">Integrity Rules</h3>
               </div>
-            </div>
-          </article>
+              <div className="mt-3 space-y-2">
+                {(data?.antiCheatRules ?? []).slice(0, 5).map((rule) => (
+                  <p key={rule} className="rounded-lg border border-emerald-100 bg-emerald-50/40 px-3 py-2 text-[11px] leading-5 text-slate-700">
+                    {rule}
+                  </p>
+                ))}
+              </div>
+            </article>
+          </Reveal>
         </div>
       </section>
     </div>

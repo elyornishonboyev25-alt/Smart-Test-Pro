@@ -3,20 +3,28 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Activity,
-  AlertTriangle,
   ArrowLeft,
+  ArrowUpRight,
+  Award,
   BrainCircuit,
-  Gem,
+  CheckCircle2,
+  Flame,
   Sparkles,
   Target,
+  TrendingUp,
+  Trophy,
+  Zap,
 } from 'lucide-react'
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
-  Line,
-  LineChart,
-  ReferenceDot,
+  PolarAngleAxis,
+  PolarGrid,
+  Radar,
+  RadarChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -26,70 +34,20 @@ import { apiClient } from '@/lib/apiClient'
 import { useAsyncData } from '@/hooks/useAsyncData'
 import type { ProfileOverview } from '@/types/platform'
 import { Skeleton } from '@/components/common/Skeleton'
-import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { useAuthStore, type AuthState } from '@/store/authStore'
-import { Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
-
-function toneByInsight(type: 'warning' | 'tip' | 'success') {
-  if (type === 'warning') {
-    return {
-      wrapper: 'border-amber-200 bg-amber-50/80',
-      icon: AlertTriangle,
-      iconColor: 'text-amber-600',
-    }
-  }
-
-  if (type === 'tip') {
-    return {
-      wrapper: 'border-blue-200 bg-blue-50/80',
-      icon: BrainCircuit,
-      iconColor: 'text-blue-600',
-    }
-  }
-
-  return {
-    wrapper: 'border-emerald-200 bg-emerald-50/80',
-    icon: Sparkles,
-    iconColor: 'text-emerald-600',
-  }
-}
-
-function ProgressMeter({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-        <p className="text-xs font-semibold text-slate-700">{value.toFixed(1)}</p>
-      </div>
-      <div className="h-2 w-full rounded-full bg-red-100/70">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-red-600 via-rose-500 to-orange-500"
-          style={{ width: `${Math.max(5, Math.min(100, value))}%` }}
-        />
-      </div>
-    </div>
-  )
-}
+import { AnimatedBar, CountUp, ProgressRing, Reveal, Stagger, StaggerItem, Tilt3D, XPGem } from '@/components/fx'
 
 function CompactSkeletonCard() {
-  return <Skeleton className="h-24 w-full rounded-2xl" />
+  return <Skeleton className="h-28 w-full rounded-2xl" />
 }
-
-const skillMatrixLegend = [
-  { label: 'Speaking', tone: 'ielts' },
-  { label: 'Writing', tone: 'ielts' },
-  { label: 'Listening', tone: 'ielts' },
-  { label: 'SAT Math', tone: 'sat' },
-  { label: 'SAT Reading/Writing', tone: 'sat' },
-] as const
 
 const guestProfilePreview: ProfileOverview = {
   profile: {
     id: 'guest-preview',
     fullName: 'Guest Learner',
     email: 'preview@smarttest.pro',
-    level: 2,
-    xp: 240,
+    level: 1,
+    xp: 0,
     currentStreak: 0,
     longestStreak: 0,
     memberSince: new Date().toISOString(),
@@ -101,20 +59,20 @@ const guestProfilePreview: ProfileOverview = {
     totalXpFromAttempts: 0,
   },
   levelProgress: {
-    currentLevelThreshold: 200,
-    nextLevelThreshold: 400,
-    xpIntoCurrent: 40,
+    currentLevelThreshold: 0,
+    nextLevelThreshold: 200,
+    xpIntoCurrent: 0,
     levelSpan: 200,
-    progressPercent: 20,
+    progressPercent: 0,
   },
   competitive: {
-    rank: 512,
-    previousRank: 512,
+    rank: 0,
+    previousRank: 0,
     rankDelta: 0,
     rankTrend: 'same',
     division: 'BRONZE',
     divisionLabel: 'Bronze',
-    rankScore: 22.4,
+    rankScore: 0,
     uniqueTests: 0,
     validatedAttempts: 0,
     discardedAttempts: 0,
@@ -123,7 +81,7 @@ const guestProfilePreview: ProfileOverview = {
       accuracy: 0,
       speedEfficiency: 0,
       consistencyScore: 0,
-      engagementScore: 8,
+      engagementScore: 0,
       inactivityDays: 0,
       inactivityPenalty: 0,
       activityDecay: 0,
@@ -133,71 +91,52 @@ const guestProfilePreview: ProfileOverview = {
       validatedAttempts: 0,
       discardedAttempts: 0,
       integrityScore: 100,
-      rankScore: 22.4,
+      rankScore: 0,
     },
   },
   skillAnalytics: {
     overall: {
-      skillPower: 12.8,
-      percentile: 86.4,
-      projectedSatScore: 980,
-      projectedPercentScore: 38,
+      skillPower: 0,
+      percentile: 0,
+      projectedSatScore: 0,
+      projectedPercentScore: 0,
       growthRate: 0,
-      totalUsers: 15420,
+      totalUsers: 0,
     },
     radar: [
-      { category: 'IELTS', label: 'IELTS Reading', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 14 },
-      { category: 'IELTS', label: 'IELTS Listening', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 13 },
-      { category: 'IELTS', label: 'IELTS Writing', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 10 },
-      { category: 'IELTS', label: 'IELTS Speaking', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 15 },
-      { category: 'SAT', label: 'SAT Math', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 12 },
-      { category: 'SAT', label: 'SAT Reading/Writing', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 11 },
+      { category: 'IELTS', label: 'Reading', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { category: 'IELTS', label: 'Listening', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { category: 'IELTS', label: 'Writing', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { category: 'IELTS', label: 'Speaking', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { category: 'SAT', label: 'SAT Math', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { category: 'SAT', label: 'SAT R/W', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
     ],
     trackBreakdown: [
-      { key: 'IELTS_READING', label: 'IELTS Reading', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 14 },
-      { key: 'IELTS_LISTENING', label: 'IELTS Listening', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 13 },
-      { key: 'IELTS_WRITING', label: 'IELTS Writing', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 10 },
-      { key: 'IELTS_SPEAKING', label: 'IELTS Speaking', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 15 },
-      { key: 'SAT_MATH', label: 'SAT Math', group: 'SAT', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 12 },
-      { key: 'SAT_READING_WRITING', label: 'SAT Reading/Writing', group: 'SAT', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 11 },
+      { key: 'IELTS_READING', label: 'IELTS Reading', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { key: 'IELTS_LISTENING', label: 'IELTS Listening', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { key: 'IELTS_WRITING', label: 'IELTS Writing', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { key: 'IELTS_SPEAKING', label: 'IELTS Speaking', group: 'IELTS', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { key: 'SAT_MATH', label: 'SAT Math', group: 'SAT', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
+      { key: 'SAT_READING_WRITING', label: 'SAT Reading/Writing', group: 'SAT', attempts: 0, accuracy: 0, speed: 0, consistency: 0, skillPower: 0 },
     ],
     distribution: {
-      mean: 46.5,
-      standardDeviation: 13.2,
-      userSkillPower: 12.8,
-      curve: [
-        { score: 0, density: 0.002 },
-        { score: 20, density: 0.012 },
-        { score: 40, density: 0.028 },
-        { score: 60, density: 0.024 },
-        { score: 80, density: 0.01 },
-        { score: 100, density: 0.002 },
-      ],
+      mean: 0,
+      standardDeviation: 0,
+      userSkillPower: 0,
+      curve: [],
     },
     xpMomentum: [
       { label: 'W1', xp: 0, score: 0, accuracy: 0 },
-      { label: 'W2', xp: 40, score: 0, accuracy: 0 },
-      { label: 'W3', xp: 120, score: 0, accuracy: 0 },
-      { label: 'W4', xp: 240, score: 0, accuracy: 0 },
+      { label: 'W2', xp: 0, score: 0, accuracy: 0 },
+      { label: 'W3', xp: 0, score: 0, accuracy: 0 },
+      { label: 'W4', xp: 0, score: 0, accuracy: 0 },
     ],
     insights: [
       {
         id: 'guest-tip-register',
         type: 'tip',
-        title: 'Create your account',
-        message: 'Register now so this dashboard can start tracking your real skill and rank.',
-      },
-      {
-        id: 'guest-tip-tests',
-        type: 'success',
-        title: 'Start with one full test',
-        message: 'Your matrix and ranking engine activate after the first submitted attempt.',
-      },
-      {
-        id: 'guest-warning-history',
-        type: 'warning',
-        title: 'Guest mode does not save',
-        message: 'Progress shown here is preview-only until you register.',
+        title: 'Sign up to unlock analytics',
+        message: 'Create an account to start tracking real XP, accuracy, and ranking on this dashboard.',
       },
     ],
   },
@@ -210,39 +149,22 @@ const guestProfilePreview: ProfileOverview = {
     { date: '2026-04-16', label: 'Thu', testsCompleted: 0, questionsAnswered: 0, xpEarned: 0, active: false },
     { date: '2026-04-17', label: 'Fri', testsCompleted: 0, questionsAnswered: 0, xpEarned: 0, active: false },
   ],
-  achievements: [
-    {
-      unlockedAt: new Date().toISOString(),
-      achievement: {
-        id: 'guest-preview-achievement',
-        slug: 'first-step',
-        title: 'First Step',
-        description: 'Register and complete your first test to unlock real achievements.',
-        icon: 'spark',
-        xpReward: 50,
-      },
-    },
-  ],
-  recentAttempts: [
-    {
-      id: 'guest-preview-attempt',
-      finalScore: 0,
-      percentage: 0,
-      xpEarned: 0,
-      completedAt: new Date().toISOString(),
-      test: {
-        id: 'guest-preview-test',
-        title: 'Preview Mode',
-        category: 'IELTS',
-        difficulty: 'EASY',
-      },
-    },
-  ],
+  achievements: [],
+  recentAttempts: [],
+}
+
+const tickStyle = { fill: '#64748B', fontSize: 11 }
+const gridColor = '#FEE2E2'
+const tooltipStyle = {
+  borderRadius: 12,
+  borderColor: '#FECACA',
+  boxShadow: '0 14px 30px rgba(15,23,42,0.12)',
+  fontSize: 12,
+  fontWeight: 600,
 }
 
 export default function Profile() {
   const navigate = useNavigate()
-  const { allowHoverMotion, minimalMotion } = useMotionPreferences()
   const user = useAuthStore((state: AuthState) => state.user)
   const isGuestPreview = !user
   const { data: fetchedData, loading, error } = useAsyncData<ProfileOverview | null>(
@@ -251,57 +173,47 @@ export default function Profile() {
   )
   const data = fetchedData ?? (isGuestPreview ? guestProfilePreview : null)
 
-  const summaryCards = useMemo(() => {
-    if (!data) return []
+  const xpToNext = useMemo(() => {
+    if (!data) return 0
+    return Math.max(0, data.levelProgress.nextLevelThreshold - data.profile.xp)
+  }, [data])
 
+  const heroMetrics = useMemo(() => {
+    if (!data) return []
     return [
       {
-        label: 'Total Attempts',
-        value: data.stats.totalAttempts.toString(),
+        label: 'Total XP',
+        value: data.profile.xp,
+        format: (v: number) => v.toLocaleString('en-US'),
+        icon: Zap,
+        accent: 'from-amber-400 to-orange-500',
+        ring: 'rgba(251,191,36,0.45)',
+      },
+      {
+        label: 'Tests Completed',
+        value: data.stats.totalAttempts,
+        format: (v: number) => v.toString(),
         icon: Activity,
+        accent: 'from-red-500 to-rose-600',
+        ring: 'rgba(244,63,94,0.35)',
       },
       {
-        label: 'Skill Power',
-        value: `${data.skillAnalytics.overall.skillPower.toFixed(1)}`,
-        icon: BrainCircuit,
-      },
-      {
-        label: 'Percentile',
-        value: `Top ${(100 - data.skillAnalytics.overall.percentile).toFixed(1)}%`,
+        label: 'Average Accuracy',
+        value: data.stats.averageAccuracy,
+        format: (v: number) => `${v.toFixed(1)}%`,
         icon: Target,
+        accent: 'from-rose-500 to-red-600',
+        ring: 'rgba(220,38,38,0.4)',
       },
       {
-        label: 'Integrity',
-        value: data.competitive ? `${data.competitive.integrityScore.toFixed(1)}%` : '--',
-        icon: Gem,
+        label: 'Streak',
+        value: data.profile.currentStreak,
+        format: (v: number) => `${v} d`,
+        icon: Flame,
+        accent: 'from-orange-500 to-red-500',
+        ring: 'rgba(249,115,22,0.4)',
       },
     ]
-  }, [data])
-
-  const trendText = useMemo(() => {
-    if (!data?.competitive) return null
-
-    if (data.competitive.rankTrend === 'up') {
-      return `Up +${data.competitive.rankDelta}`
-    }
-
-    if (data.competitive.rankTrend === 'down') {
-      return `Down ${data.competitive.rankDelta}`
-    }
-
-    return 'Stable'
-  }, [data])
-
-  const distributionMarker = useMemo(() => {
-    const curve = data?.skillAnalytics.distribution.curve
-    const userSkill = data?.skillAnalytics.distribution.userSkillPower
-
-    if (!curve || curve.length === 0 || userSkill === undefined) return null
-
-    return curve.reduce((closest, point) => {
-      if (!closest) return point
-      return Math.abs(point.score - userSkill) < Math.abs(closest.score - userSkill) ? point : closest
-    }, null as { score: number; density: number } | null)
   }, [data])
 
   const ieltsSkills = useMemo(
@@ -314,86 +226,133 @@ export default function Profile() {
   )
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Reveal>
-        <motion.section
-          initial={minimalMotion ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={minimalMotion ? { duration: 0.14 } : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-          className="premium-hero p-6 sm:p-9"
-        >
-        {loading ? (
-          <>
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="mt-3 h-4 w-80" />
-          </>
-        ) : data ? (
-          <div className="relative grid gap-4 xl:grid-cols-[minmax(0,1fr)_31rem] xl:items-start">
-            <div className="xl:pr-2">
-              <div className="premium-top-controls">
-                <button
-                  type="button"
-                  onClick={() => navigate('/tests')}
-                  className="premium-back-btn"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back
-                </button>
-                <span className="premium-top-chip">Performance Profile</span>
-              </div>
-              <h1 className="premium-section-title mt-4">
-                Performance <span className="arena-title-accent-red">Dashboard</span>
-              </h1>
-              <p className="premium-section-subtitle">
-                {data.profile.fullName} | {data.profile.email}
-              </p>
-            </div>
+        <section className="premium-hero relative overflow-hidden p-6 sm:p-9">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gradient-to-br from-amber-200/30 to-orange-300/15 blur-3xl" />
+          <div className="pointer-events-none absolute -left-16 bottom-0 h-60 w-60 rounded-full bg-rose-200/25 blur-3xl" />
 
-            <div className="grid gap-3 sm:grid-cols-3 xl:w-full">
-              <div className="hero-metric-card hero-metric-card-fit interactive-lift">
-                <p className="hero-metric-label">Current Rank</p>
-                <p className="hero-metric-value-sm hero-metric-value-fit">{data.competitive ? `#${data.competitive.rank}` : '--'}</p>
-                <p className="hero-metric-note">{trendText ?? 'Stable'}</p>
-              </div>
-              <div className="hero-metric-card hero-metric-card-fit interactive-lift">
-                <p className="hero-metric-label">Level / XP</p>
-                <p className="hero-metric-value-sm hero-metric-value-fit">{data.profile.level} | {data.profile.xp}</p>
-                <p className="hero-metric-note">Career progress</p>
-              </div>
-              <div className="hero-metric-card hero-metric-card-fit interactive-lift">
-                <p className="hero-metric-label">Division</p>
-                <p className="hero-metric-value-sm hero-metric-value-fit">
-                  {data.competitive ? data.competitive.divisionLabel : 'Unranked'}
+          {loading ? (
+            <>
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="mt-3 h-4 w-80" />
+            </>
+          ) : data ? (
+            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] xl:items-center">
+              <div>
+                <div className="premium-top-controls">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/tests')}
+                    className="premium-back-btn"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </button>
+                  <span className="premium-top-chip">
+                    <Trophy className="h-3.5 w-3.5" />
+                    Performance Studio
+                  </span>
+                </div>
+                <h1 className="premium-section-title mt-4">
+                  Welcome back, <span className="arena-title-accent-red">{data.profile.fullName.split(' ')[0]}</span>
+                </h1>
+                <p className="premium-section-subtitle">
+                  Track your XP, ranking, and skill power. Earn XP on every test — higher scores on harder tests rank you higher.
                 </p>
-                <p className="hero-metric-note">Competitive tier</p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-1.5">
+                    <Award className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm font-bold text-amber-700">
+                      Level <CountUp value={data.profile.level} />
+                    </span>
+                  </div>
+                  {data.competitive ? (
+                    <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-1.5">
+                      <Trophy className="h-4 w-4 text-red-600" />
+                      <span className="text-sm font-bold text-red-700">
+                        Rank #<CountUp value={data.competitive.rank} />
+                      </span>
+                      {data.competitive.rankTrend === 'up' ? (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+                          <ArrowUpRight className="h-3 w-3" />+{Math.abs(data.competitive.rankDelta)}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </div>
+
+              {/* XP gem progress card */}
+              <Tilt3D className="rounded-3xl" max={5}>
+                <div className="relative overflow-hidden rounded-3xl border border-red-100/80 bg-gradient-to-br from-white via-amber-50/30 to-rose-50/50 p-5 shadow-[0_18px_44px_rgba(220,38,38,0.12)]">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" />
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-600">XP Vault</p>
+                      <p className="mt-1 text-4xl font-black tracking-tight text-slate-900">
+                        <CountUp value={data.profile.xp} />
+                      </p>
+                      <p className="mt-1 text-[11px] font-medium text-slate-500">Total XP earned</p>
+                    </div>
+                    <XPGem size={64} />
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-slate-600">
+                      <span>Level {data.profile.level}</span>
+                      <span>{xpToNext} XP to L{data.profile.level + 1}</span>
+                    </div>
+                    <AnimatedBar value={data.levelProgress.progressPercent} height={9} />
+                  </div>
+                </div>
+              </Tilt3D>
             </div>
-          </div>
-        ) : null}
-        </motion.section>
+          ) : null}
+        </section>
       </Reveal>
 
       {isGuestPreview ? (
         <div className="mt-6 rounded-2xl border border-red-200/80 bg-[linear-gradient(120deg,rgba(254,226,226,0.76),rgba(255,255,255,0.92),rgba(255,228,230,0.8))] p-4 text-sm text-red-800 shadow-[0_10px_24px_rgba(220,38,38,0.1)]">
-          Preview mode is active. Register to see your real analytics, ranking, and saved attempts.
+          Preview mode is active. Register to see your real XP, ranking, and saved attempts.
         </div>
       ) : null}
-      {!isGuestPreview && error ? <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div> : null}
+      {!isGuestPreview && error ? (
+        <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+      ) : null}
 
+      {/* ── Hero metrics ────────────────────────────────────────── */}
       <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {loading
           ? Array.from({ length: 4 }).map((_, index) => <CompactSkeletonCard key={index} />)
-          : summaryCards.map((card) => {
+          : heroMetrics.map((card) => {
             const Icon = card.icon
             return (
               <StaggerItem key={card.label} className="h-full">
                 <Tilt3D className="h-full rounded-3xl" max={6}>
-                  <article className="surface-card h-full p-5">
-                    <div className="relative flex items-center justify-between">
-                      <p className="text-sm text-slate-500">{card.label}</p>
-                      <Icon className="h-4 w-4 text-red-600" />
+                  <article className="group relative h-full overflow-hidden rounded-3xl border border-slate-100 bg-white p-5 shadow-[0_12px_28px_rgba(15,23,42,0.06)] transition-shadow hover:shadow-[0_20px_40px_rgba(220,38,38,0.12)]">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-300/55 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">{card.label}</p>
+                      <span
+                        className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${card.accent} text-white shadow-[0_10px_22px_${card.ring}]`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </span>
                     </div>
-                    <p className="mt-3 text-3xl font-black text-slate-900">{card.value}</p>
+                    <p className="mt-4 text-[2rem] font-black leading-none tracking-tight text-slate-900">
+                      {card.label === 'Average Accuracy' ? (
+                        <CountUp value={card.value} decimals={1} suffix="%" />
+                      ) : card.label === 'Streak' ? (
+                        <CountUp value={card.value} suffix=" d" />
+                      ) : (
+                        <CountUp value={card.value} />
+                      )}
+                    </p>
+                    <div className="mt-2.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
+                      <span className="fx-pulse-dot h-1.5 w-1.5 rounded-full bg-red-400" />
+                      Live data
+                    </div>
                   </article>
                 </Tilt3D>
               </StaggerItem>
@@ -401,293 +360,302 @@ export default function Profile() {
           })}
       </Stagger>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className="surface-card p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">Dynamic Ranking Engine</h2>
-            {data?.competitive ? (
-              <span className="rounded-xl border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
-                Score {data.competitive.rankScore.toFixed(2)}
+      {/* ── Skill matrix radar + Average accuracy ring ─────────── */}
+      <section className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <Reveal>
+          <article className="surface-card relative overflow-hidden p-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/55 to-transparent" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                  <BrainCircuit className="h-4 w-4" />
+                </span>
+                <h2 className="text-lg font-black tracking-tight text-slate-900">Skill Matrix</h2>
+              </div>
+              <span className="rounded-full border border-red-100 bg-red-50 px-2.5 py-0.5 text-[10px] font-bold text-red-700">
+                IELTS + SAT
               </span>
-            ) : null}
-          </div>
-
-          {loading ? (
-            <div className="mt-4 space-y-3">
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
-              <Skeleton className="h-10 w-full rounded-xl" />
             </div>
-          ) : data?.competitive ? (
-            <div className="mt-4 space-y-4">
-              <div className="grid gap-2 sm:grid-cols-3">
-                <div className="rounded-xl border border-red-100 bg-red-50/60 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-red-600">Unique tests</p>
-                  <p className="mt-1 text-lg font-black text-slate-900">{data.competitive.uniqueTests}</p>
+
+            {loading ? (
+              <Skeleton className="mt-4 h-72 w-full rounded-2xl" />
+            ) : data ? (
+              <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_1fr]">
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={data.skillAnalytics.radar}>
+                      <PolarGrid stroke="#FECACA" />
+                      <PolarAngleAxis dataKey="label" tick={{ fill: '#64748B', fontSize: 10 }} />
+                      <Radar
+                        name="Skill Power"
+                        dataKey="skillPower"
+                        stroke="#DC2626"
+                        fill="#DC2626"
+                        fillOpacity={0.32}
+                        animationDuration={900}
+                      />
+                      <Tooltip contentStyle={tooltipStyle} />
+                    </RadarChart>
+                  </ResponsiveContainer>
                 </div>
-                <div className="rounded-xl border border-red-100 bg-red-50/60 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-red-600">Validated</p>
-                  <p className="mt-1 text-lg font-black text-slate-900">{data.competitive.validatedAttempts}</p>
-                </div>
-                <div className="rounded-xl border border-red-100 bg-red-50/60 px-3 py-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-red-600">Discarded</p>
-                  <p className="mt-1 text-lg font-black text-slate-900">{data.competitive.discardedAttempts}</p>
-                </div>
-              </div>
-              <ProgressMeter label="Accuracy Weight" value={data.competitive.breakdown.accuracy} />
-              <ProgressMeter label="Speed Efficiency" value={data.competitive.breakdown.speedEfficiency} />
-              <ProgressMeter label="Consistency Score" value={data.competitive.breakdown.consistencyScore} />
-              <ProgressMeter label="Engagement Score" value={data.competitive.breakdown.engagementScore} />
-              <ProgressMeter label="Activity Decay %" value={data.competitive.breakdown.activityDecay} />
-              <ProgressMeter label="Difficulty Impact" value={data.competitive.breakdown.normalizedDifficulty} />
-              <ProgressMeter label="Improvement Delta" value={data.competitive.breakdown.improvementDelta} />
-              <ProgressMeter label="Integrity Score" value={data.competitive.breakdown.integrityScore} />
-            </div>
-          ) : (
-            <p className="mt-4 text-sm text-slate-600">Complete a few tests to activate your competitive engine breakdown.</p>
-          )}
-        </div>
-
-        <div className="surface-card p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">Insight Engine</h2>
-            <span className="premium-chip text-[10px]">Auto Recommendations</span>
-          </div>
-
-          {loading ? (
-            <div className="mt-4 space-y-3">
-              <Skeleton className="h-16 w-full rounded-xl" />
-              <Skeleton className="h-16 w-full rounded-xl" />
-            </div>
-          ) : (
-            <div className="mt-4 space-y-3">
-              {data?.skillAnalytics.insights.map((insight) => {
-                const tone = toneByInsight(insight.type)
-                const Icon = tone.icon
-                return (
-                  <motion.article
-                    key={insight.id}
-                    whileHover={allowHoverMotion ? { y: -2 } : undefined}
-                    className={`rounded-xl border p-3 ${tone.wrapper}`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <Icon className={`mt-0.5 h-4 w-4 ${tone.iconColor}`} />
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">{insight.title}</p>
-                        <p className="mt-1 text-xs leading-5 text-slate-600">{insight.message}</p>
-                      </div>
-                    </div>
-                  </motion.article>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className="surface-card p-6">
-          <h2 className="text-xl font-semibold text-slate-900">IELTS + SAT Skill Matrix</h2>
-          <p className="mt-1 text-sm text-slate-500">SkillPower = (Accuracy x 0.6) + (Speed x 0.2) + (Consistency x 0.2)</p>
-
-          {loading ? (
-            <Skeleton className="mt-4 h-72 w-full rounded-2xl" />
-          ) : data ? (
-            <div className="mt-4 space-y-5">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700">IELTS Skills</p>
-                <div className="mt-2 space-y-2">
+                <div className="space-y-3">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-red-700">IELTS Tracks</p>
                   {ieltsSkills.map((skill) => (
-                    <ProgressMeter key={skill.key} label={skill.label} value={skill.skillPower} />
+                    <div key={skill.key}>
+                      <div className="mb-1 flex items-center justify-between">
+                        <span className="text-[12px] font-semibold text-slate-700">{skill.label}</span>
+                        <span className="text-[11px] font-bold text-slate-900">{skill.skillPower.toFixed(1)}</span>
+                      </div>
+                      <AnimatedBar value={skill.skillPower} height={6} />
+                    </div>
                   ))}
-                </div>
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-rose-700">SAT Skills</p>
-                <div className="mt-2 space-y-2">
+                  <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-700">SAT Tracks</p>
                   {satSkills.map((skill) => (
-                    <ProgressMeter key={skill.key} label={skill.label} value={skill.skillPower} />
+                    <div key={skill.key}>
+                      <div className="mb-1 flex items-center justify-between">
+                        <span className="text-[12px] font-semibold text-slate-700">{skill.label}</span>
+                        <span className="text-[11px] font-bold text-slate-900">{skill.skillPower.toFixed(1)}</span>
+                      </div>
+                      <AnimatedBar value={skill.skillPower} height={6} from="#2563EB" to="#1D4ED8" track="rgba(59,130,246,0.14)" />
+                    </div>
                   ))}
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={data.skillAnalytics.trackBreakdown}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#FEE2E2" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 12,
-                      borderColor: '#FECACA',
-                    }}
-                  />
-                  <Bar dataKey="skillPower" radius={[8, 8, 3, 3]} fill="#DC2626" />
-                </BarChart>
-              </ResponsiveContainer>
-              <div className="rounded-2xl border border-red-100 bg-gradient-to-r from-red-50/60 to-rose-50/40 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-red-700">Skill Labels</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {skillMatrixLegend.map((item) => (
-                    <span
-                      key={item.label}
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        item.tone === 'ielts'
-                          ? 'border border-red-200 bg-white text-red-700'
-                          : 'border border-rose-200 bg-white text-rose-700'
-                      }`}
-                    >
-                      {item.label}
-                    </span>
-                  ))}
+            ) : null}
+          </article>
+        </Reveal>
+
+        <Reveal delay={0.08}>
+          <article className="surface-card relative overflow-hidden p-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-400/55 to-transparent" />
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                <Target className="h-4 w-4" />
+              </span>
+              <h2 className="text-lg font-black tracking-tight text-slate-900">Accuracy Score</h2>
+            </div>
+
+            {loading ? (
+              <Skeleton className="mt-4 h-56 w-full rounded-2xl" />
+            ) : data ? (
+              <div className="mt-4 flex flex-col items-center">
+                <ProgressRing value={data.stats.averageAccuracy} size={170} stroke={14}>
+                  <div className="text-center">
+                    <p className="text-3xl font-black tracking-tight text-slate-900">
+                      <CountUp value={data.stats.averageAccuracy} decimals={1} suffix="%" />
+                    </p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Avg accuracy</p>
+                  </div>
+                </ProgressRing>
+                <div className="mt-5 grid w-full grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-red-100 bg-red-50/60 p-3 text-center">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-red-600">Avg Score</p>
+                    <p className="mt-1 text-lg font-black text-slate-900">
+                      <CountUp value={data.stats.averageScore} decimals={1} suffix="%" />
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-amber-100 bg-amber-50/60 p-3 text-center">
+                    <p className="text-[10px] font-bold uppercase tracking-wide text-amber-700">From Tests</p>
+                    <p className="mt-1 inline-flex items-center gap-1 text-lg font-black text-slate-900">
+                      <Zap className="h-4 w-4 fill-amber-400 text-amber-500" />
+                      <CountUp value={data.stats.totalXpFromAttempts} />
+                    </p>
+                  </div>
                 </div>
+              </div>
+            ) : null}
+          </article>
+        </Reveal>
+      </section>
+
+      {/* ── XP Momentum ─────────────────────────────────────────── */}
+      <Reveal className="mt-6">
+        <article className="surface-card relative overflow-hidden p-6">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/55 to-transparent" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                <TrendingUp className="h-4 w-4" />
+              </span>
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-900">XP Momentum</h2>
+                <p className="text-[11px] font-medium text-slate-500">Cumulative XP earned over recent attempts</p>
               </div>
             </div>
-          ) : null}
-        </div>
-
-        <div className="surface-card p-6">
-          <h2 className="text-xl font-semibold text-slate-900">Platform Distribution</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Percentile {data ? `${data.skillAnalytics.overall.percentile.toFixed(1)}%` : '--'} across {data?.skillAnalytics.overall.totalUsers ?? '--'} users
-          </p>
+          </div>
 
           {loading ? (
             <Skeleton className="mt-4 h-72 w-full rounded-2xl" />
           ) : data ? (
             <div className="mt-4 h-72 w-full">
               <ResponsiveContainer>
-                <LineChart data={data.skillAnalytics.distribution.curve}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#FEE2E2" />
-                  <XAxis dataKey="score" tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <YAxis tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 12,
-                      borderColor: '#FECACA',
-                    }}
+                <AreaChart data={data.skillAnalytics.xpMomentum} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="xpGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#EF4444" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="#EF4444" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                  <XAxis dataKey="label" tick={tickStyle} axisLine={false} tickLine={false} />
+                  <YAxis tick={tickStyle} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Area
+                    type="monotone"
+                    dataKey="xp"
+                    stroke="#DC2626"
+                    strokeWidth={2.5}
+                    fill="url(#xpGradient)"
+                    animationDuration={900}
                   />
-                  <Line type="monotone" dataKey="density" stroke="#DC2626" strokeWidth={2.5} dot={false} />
-                  {distributionMarker ? (
-                    <ReferenceDot
-                      x={distributionMarker.score}
-                      y={distributionMarker.density}
-                      r={6}
-                      fill="#DC2626"
-                      stroke="#ffffff"
-                      strokeWidth={2}
-                    />
-                  ) : null}
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           ) : null}
-        </div>
-      </section>
+        </article>
+      </Reveal>
 
+      {/* ── Weekly activity + Achievements ──────────────────────── */}
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-        <div className="surface-card p-6">
-          <h2 className="text-xl font-semibold text-slate-900">XP Momentum Timeline</h2>
-          <p className="mt-1 text-sm text-slate-500">Cumulative XP and score trend over your recent attempts</p>
-
-          {loading ? (
-            <Skeleton className="mt-4 h-72 w-full rounded-2xl" />
-          ) : data ? (
-            <div className="mt-4 h-72 w-full">
-              <ResponsiveContainer>
-                <LineChart data={data.skillAnalytics.xpMomentum}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#FEE2E2" />
-                  <XAxis dataKey="label" tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <YAxis yAxisId="left" tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 12,
-                      borderColor: '#FECACA',
-                    }}
-                  />
-                  <Line yAxisId="left" type="monotone" dataKey="xp" stroke="#DC2626" strokeWidth={2.5} dot={{ r: 3 }} />
-                  <Line yAxisId="right" type="monotone" dataKey="score" stroke="#0F172A" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
+        <Reveal>
+          <article className="surface-card relative overflow-hidden p-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-rose-400/55 to-transparent" />
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                <Activity className="h-4 w-4" />
+              </span>
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-slate-900">Weekly Activity</h2>
+                <p className="text-[11px] font-medium text-slate-500">Tests and XP earned each day</p>
+              </div>
             </div>
-          ) : null}
-        </div>
+            {loading ? (
+              <Skeleton className="mt-4 h-64 w-full rounded-2xl" />
+            ) : data ? (
+              <div className="mt-4 h-64 w-full">
+                <ResponsiveContainer>
+                  <BarChart data={data.weeklyActivity}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={tickStyle} />
+                    <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={tickStyle} />
+                    <Tooltip cursor={{ fill: 'rgba(220,38,38,0.06)' }} contentStyle={tooltipStyle} />
+                    <Bar dataKey="xpEarned" radius={[10, 10, 4, 4]} fill="url(#weeklyXpGradient)" animationDuration={700} />
+                    <defs>
+                      <linearGradient id="weeklyXpGradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#F59E0B" />
+                        <stop offset="100%" stopColor="#DC2626" />
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : null}
+          </article>
+        </Reveal>
 
-        <div className="surface-card p-6">
-          <h2 className="text-xl font-semibold text-slate-900">Weekly Activity</h2>
-          {loading ? (
-            <Skeleton className="mt-4 h-72 w-full rounded-2xl" />
-          ) : data ? (
-            <div className="mt-4 h-72 w-full">
-              <ResponsiveContainer>
-                <BarChart data={data.weeklyActivity}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#FEE2E2" vertical={false} />
-                  <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fill: '#64748B', fontSize: 12 }} />
-                  <Tooltip
-                    cursor={{ fill: 'rgba(220,38,38,0.08)' }}
-                    contentStyle={{ borderRadius: 12, borderColor: '#FECACA' }}
-                  />
-                  <Bar dataKey="testsCompleted" radius={[8, 8, 3, 3]} fill="#DC2626" />
-                </BarChart>
-              </ResponsiveContainer>
+        <Reveal delay={0.08}>
+          <article className="surface-card relative overflow-hidden p-6">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-amber-400/55 to-transparent" />
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-[0_10px_22px_rgba(245,158,11,0.32)]">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <h2 className="text-lg font-black tracking-tight text-slate-900">Achievements</h2>
             </div>
-          ) : null}
-        </div>
+            {loading ? (
+              <div className="mt-4 space-y-3">
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-14 w-full" />
+              </div>
+            ) : data?.achievements.length ? (
+              <Stagger className="mt-4 space-y-2.5">
+                {data.achievements.slice(0, 5).map((entry) => (
+                  <StaggerItem key={entry.achievement.id}>
+                    <div className="group flex items-start gap-2.5 rounded-xl border border-amber-100 bg-gradient-to-r from-amber-50/60 to-white p-3 transition hover:border-amber-200 hover:shadow-[0_8px_18px_rgba(245,158,11,0.15)]">
+                      <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-sm">
+                        <CheckCircle2 className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold text-slate-900">{entry.achievement.title}</p>
+                        <p className="mt-0.5 line-clamp-2 text-[11px] text-slate-500">{entry.achievement.description}</p>
+                      </div>
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                        <Zap className="h-3 w-3 fill-amber-400 text-amber-500" />+{entry.achievement.xpReward}
+                      </span>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </Stagger>
+            ) : (
+              <p className="mt-4 text-sm text-slate-500">Complete tests to unlock achievements.</p>
+            )}
+          </article>
+        </Reveal>
       </section>
 
-      <section className="mt-6 grid gap-6 lg:grid-cols-2">
-        <div className="surface-card p-6">
-          <h2 className="text-xl font-semibold text-slate-900">Achievements</h2>
-          {loading ? (
-            <div className="mt-4 space-y-3">
-              <Skeleton className="h-14 w-full" />
-              <Skeleton className="h-14 w-full" />
+      {/* ── Recent attempts ─────────────────────────────────────── */}
+      <Reveal className="mt-6">
+        <article className="surface-card relative overflow-hidden p-6">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/55 to-transparent" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-[0_10px_22px_rgba(220,38,38,0.32)]">
+                <Activity className="h-4 w-4" />
+              </span>
+              <h2 className="text-lg font-black tracking-tight text-slate-900">Recent Attempts</h2>
             </div>
-          ) : data ? (
-            <div className="mt-4 space-y-3">
-              {data.achievements.slice(0, 6).map((entry) => (
-                <div key={entry.achievement.id} className="rounded-xl border border-red-100 bg-white/90 p-3">
-                  <p className="text-sm font-semibold text-slate-900">{entry.achievement.title}</p>
-                  <p className="mt-1 text-xs text-slate-600">{entry.achievement.description}</p>
-                  <p className="mt-1 text-[11px] font-semibold text-red-700">+{entry.achievement.xpReward} XP</p>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
+          </div>
 
-        <div className="surface-card p-6">
-          <h2 className="text-xl font-semibold text-slate-900">Recent Attempts</h2>
           {loading ? (
             <div className="mt-4 space-y-3">
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </div>
-          ) : data ? (
-            <div className="mt-4 space-y-3">
-              {data.recentAttempts.map((attempt) => (
-                <div key={attempt.id} className="rounded-xl border border-red-100 bg-white/90 p-3">
-                  <p className="text-sm font-semibold text-slate-900">{attempt.test.title}</p>
-                  <p className="mt-1 text-xs text-slate-600">
-                    Score {attempt.finalScore.toFixed(1)}% | Accuracy {attempt.percentage.toFixed(1)}% | +{attempt.xpEarned} XP
-                  </p>
-                  <p className="mt-1 text-[11px] text-slate-500">
-                    {new Date(attempt.completedAt).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
+          ) : data?.recentAttempts.length ? (
+            <Stagger className="mt-4 grid gap-3 md:grid-cols-2">
+              {data.recentAttempts.slice(0, 6).map((attempt) => (
+                <StaggerItem key={attempt.id}>
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    className="group rounded-xl border border-slate-100 bg-white p-4 shadow-sm transition hover:border-red-200 hover:shadow-[0_10px_22px_rgba(220,38,38,0.1)]"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-sm font-bold text-slate-900">{attempt.test.title}</p>
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                        <Zap className="h-3 w-3 fill-amber-400 text-amber-500" />+{attempt.xpEarned}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-[11px] font-semibold text-slate-500">
+                        {attempt.test.category} · {attempt.test.difficulty}
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-700">
+                        {attempt.percentage.toFixed(1)}% ({attempt.finalScore.toFixed(1)}%)
+                      </span>
+                    </div>
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-red-100/60">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-red-500 to-rose-500"
+                        style={{ width: `${Math.max(2, Math.min(100, attempt.percentage))}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-[10px] font-medium text-slate-400">
+                      {new Date(attempt.completedAt).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </motion.div>
+                </StaggerItem>
               ))}
-            </div>
-          ) : null}
-        </div>
-      </section>
+            </Stagger>
+          ) : (
+            <p className="mt-4 text-sm text-slate-500">No attempts yet. Complete a test to start earning XP.</p>
+          )}
+        </article>
+      </Reveal>
     </div>
   )
 }
-
-

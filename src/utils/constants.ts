@@ -1,7 +1,7 @@
 ﻿export const APP_CONFIG = {
-  name: 'SmartTest Pro',
+  name: 'ProfAI',
   version: '1.0.0',
-  description: 'Professional Educational Testing Platform'
+  description: 'AI-Powered Tutoring & Exam Prep Platform'
 }
 
 export const TEST_CATEGORIES = {

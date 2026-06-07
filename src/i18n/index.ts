@@ -16,8 +16,8 @@ const translation = {
     lightMode: 'Light Mode',
   },
   home: {
-    title: 'SmartTest Pro',
-    subtitle: 'Gamified Educational Assessment Platform',
+    title: 'ProfAI',
+    subtitle: 'Your Personal AI Tutor for SAT & IELTS',
     description: 'Professional test preparation for grades 1-11, SAT, IELTS, and Olympiad exams with AI-powered personalized learning.',
     getStarted: 'Get Started',
     exploreTests: 'Explore Tests',

@@ -75,13 +75,13 @@ function sanitizeUser(user: {
 }
 
 function deriveFullNameFromEmail(email: string) {
-  const localPart = email.split('@')[0] || 'SmartTest Learner'
+  const localPart = email.split('@')[0] || 'ProfAI Learner'
   const cleaned = localPart
     .replace(/[._-]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
 
-  if (!cleaned) return 'SmartTest Learner'
+  if (!cleaned) return 'ProfAI Learner'
 
   return cleaned
     .split(' ')

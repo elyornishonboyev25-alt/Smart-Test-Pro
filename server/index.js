@@ -1056,5 +1056,5 @@ app.get('/api/v1/profile/overview', auth, (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Smart Test Pro local API running on http://localhost:${PORT}/api/v1`);
+  console.log(`ProfAI local API running on http://localhost:${PORT}/api/v1`);
 });

@@ -45,7 +45,7 @@ const guestProfilePreview: ProfileOverview = {
   profile: {
     id: 'guest-preview',
     fullName: 'Guest Learner',
-    email: 'preview@smarttest.pro',
+    email: 'preview@profai.app',
     level: 1,
     xp: 0,
     currentStreak: 0,

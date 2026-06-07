@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['logo.svg'],
       manifest: {
-        name: 'SmartTest Pro',
-        short_name: 'SmartTest',
-        description: 'SAT va IELTS uchun real exam environment va premium analytics platformasi',
+        name: 'ProfAI',
+        short_name: 'ProfAI',
+        description: 'SAT va IELTS uchun shaxsiy AI repetitor va premium analytics platformasi',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',

@@ -1,4 +1,4 @@
-name: Smart Test Pro CI
+name: ProfAI CI
 
 on:
   push:

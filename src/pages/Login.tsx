@@ -82,7 +82,7 @@ export default function Login() {
       pushToast({
         type: 'success',
         title: 'Signed in successfully',
-        message: 'Welcome back to SmartTest Pro.',
+        message: 'Welcome back to ProfAI.',
       })
       navigate(redirectPath, { replace: true })
     } catch (error) {
@@ -106,7 +106,7 @@ export default function Login() {
       pushToast({
         type: 'success',
         title: 'Signed in with Google',
-        message: 'Welcome to SmartTest Pro.',
+        message: 'Welcome to ProfAI.',
       })
       // Full reload guarantees the persisted session is hydrated and the
       // destination route renders immediately (fixes the blank-until-refresh

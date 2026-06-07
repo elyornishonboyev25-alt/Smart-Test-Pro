@@ -79,7 +79,7 @@ export default function RegisterModal() {
       pushToast({
         type: 'success',
         title: 'Account created',
-        message: 'Welcome to SmartTest Pro.',
+        message: 'Welcome to ProfAI.',
       })
       reset()
       closeRegisterModal()
@@ -138,7 +138,7 @@ export default function RegisterModal() {
                 <BrandMark size={56} className="mx-auto shadow-[0_14px_26px_rgba(220,38,38,0.32)]" />
                 <p className="mx-auto mt-4 inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-red-700">
                   <Sparkles className="h-3.5 w-3.5" />
-                  SmartTest Account
+                  ProfAI Account
                 </p>
                 <h1 className="mt-3 text-3xl font-black tracking-tight text-[#1F2937]">Create your account</h1>
                 <p className="mt-2 text-sm leading-6 text-[#6B7280]">

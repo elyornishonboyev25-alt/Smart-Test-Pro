@@ -20,6 +20,7 @@ export function BrandMark({ size = 44, className }: BrandMarkProps) {
   const bgGradientId = `brand-bg-${id}`
   const shineGradientId = `brand-shine-${id}`
   const blueAccentId = `brand-blue-${id}`
+  const sparkGradientId = `brand-spark-${id}`
 
   return (
     <span
@@ -42,6 +43,10 @@ export function BrandMark({ size = 44, className }: BrandMarkProps) {
             <stop offset="0%" stopColor="#93C5FD" />
             <stop offset="100%" stopColor="#2563EB" />
           </linearGradient>
+          <linearGradient id={sparkGradientId} x1="37" y1="9" x2="49" y2="21" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="100%" stopColor="#BFDBFE" />
+          </linearGradient>
         </defs>
 
         <rect x="2" y="2" width="52" height="52" rx="16" fill={`url(#${bgGradientId})`} />
@@ -59,6 +64,9 @@ export function BrandMark({ size = 44, className }: BrandMarkProps) {
         <path d="M37.4 26.4v7.2" stroke="white" strokeWidth="2.1" strokeLinecap="round" />
         <circle cx="37.4" cy="35.9" r="2.1" fill={`url(#${blueAccentId})`} />
         <path d="M17.4 39.9c3 2.7 6.4 4.1 10.6 4.1 4.2 0 7.7-1.4 10.6-4.1" stroke="white" strokeOpacity="0.82" strokeWidth="2.1" strokeLinecap="round" />
+
+        <path d="M42 8.4 43.2 12.6 47.4 13.8 43.2 15 42 19.2 40.8 15 36.6 13.8 40.8 12.6Z" fill={`url(#${sparkGradientId})`} />
+        <path d="M48 17.6 48.6 19.5 50.5 20.1 48.6 20.7 48 22.6 47.4 20.7 45.5 20.1 47.4 19.5Z" fill={`url(#${sparkGradientId})`} fillOpacity="0.9" />
       </svg>
     </span>
   )
@@ -76,7 +84,7 @@ export function BrandLockup({
     <div className={cn('flex items-center gap-3', className)}>
       <BrandMark size={iconSize} className={iconClassName} />
       <div>
-        <p className={cn('text-sm font-black tracking-tight text-slate-900', titleClassName)}>SmartTest Pro</p>
+        <p className={cn('text-sm font-black tracking-tight text-slate-900', titleClassName)}>Prof<span className="text-red-600">AI</span></p>
         <p className={cn('text-xs font-medium text-slate-700', subtitleClassName)}>{subtitle}</p>
       </div>
     </div>

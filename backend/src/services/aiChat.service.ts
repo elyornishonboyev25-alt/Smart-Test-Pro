@@ -514,7 +514,7 @@ export async function generateAiChatResponse(userId: string, input: AiChatReques
   }
 
   const systemPrompt = [
-    'You are SmartTest Premium AI Copilot.',
+    'You are ProfAI, a premium AI tutor and exam copilot.',
     locale === 'uz' ? 'Reply in Uzbek language.' : 'Reply in English language.',
     isTrainingContext
       ? 'Training mode: only vocabulary support, no direct answers.'

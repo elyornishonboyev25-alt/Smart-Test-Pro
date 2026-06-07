@@ -20,7 +20,7 @@ export default function Footer() {
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-4 lg:px-8">
           <div>
             <h3 className="text-lg font-black tracking-tight text-slate-900">
-              SmartTest <span className="text-gradient-red">Pro</span>
+              Prof<span className="text-gradient-red">AI</span>
             </h3>
             <p className="mt-3 text-sm leading-6 text-slate-600">
               Advanced testing platform for SAT and IELTS students with measurable, competitive progress.
@@ -87,7 +87,7 @@ export default function Footer() {
       </Reveal>
 
       <div className="border-t border-red-100 py-4 text-center text-sm text-slate-500">
-        &copy; {currentYear} SmartTest Pro. All rights reserved.
+        &copy; {currentYear} ProfAI. All rights reserved.
       </div>
     </footer>
   )

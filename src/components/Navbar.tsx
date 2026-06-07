@@ -45,11 +45,11 @@ export default function Navbar({ darkMode, setDarkMode, toggleLanguage, currentL
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-3 group">
               <div className="w-9 h-9 rounded-lg overflow-hidden transform transition-transform duration-300 group-hover:rotate-12 shadow-md">
-                <img src="/logo.svg" alt="SmartTest Pro Logo" className="w-full h-full object-cover" />
+                <img src="/logo.svg" alt="ProfAI Logo" className="w-full h-full object-cover" />
               </div>
               <span className="text-xl font-extrabold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent tracking-tight flex items-center">
-                SmartTest <span className="text-indigo-400 ml-1">Pro</span>
-                <span className="ml-2 inline-block w-1 h-1 rounded-full bg-indigo-400 animate-pulse" aria-hidden="true" />
+                Prof<span className="text-red-400">AI</span>
+                <span className="ml-2 inline-block w-1 h-1 rounded-full bg-red-400 animate-pulse" aria-hidden="true" />
               </span>
             </Link>
           </div>

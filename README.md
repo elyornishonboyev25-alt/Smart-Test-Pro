@@ -1,10 +1,10 @@
-# Smart Test Pro
+# ProfAI
 
-Production-ready full-stack EdTech SaaS platform for AI-powered testing, scoring, and gamified learning.
+Production-ready full-stack EdTech SaaS platform for AI-powered tutoring, testing, scoring, and gamified learning.
 
 ## What This Platform Delivers
 
-Smart Test Pro supports:
+ProfAI supports:
 - School student testing
 - SAT preparation
 - IELTS preparation
@@ -225,8 +225,8 @@ npm run prisma:deploy
 ## Demo Seed Credentials
 
 After running `npm run db:seed` in backend:
-- Admin: `admin@smarttestpro.com` / `Admin@12345`
-- Student: `student@smarttestpro.com` / `Student@12345`
+- Admin: `admin@profai.app` / `Admin@12345`
+- Student: `student@profai.app` / `Student@12345`
 
 ## Notes
 

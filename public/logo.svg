@@ -13,6 +13,10 @@
       <stop offset="0%" stop-color="#93C5FD" />
       <stop offset="100%" stop-color="#2563EB" />
     </linearGradient>
+    <linearGradient id="brand-spark" x1="80" y1="20" x2="104" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#BFDBFE" />
+    </linearGradient>
   </defs>
 
   <rect x="5" y="5" width="110" height="110" rx="30" fill="url(#brand-bg)" />
@@ -24,4 +28,8 @@
   <path d="M79.2 56.6v14.8" stroke="white" stroke-width="3.8" stroke-linecap="round" />
   <circle cx="79.2" cy="75.8" r="4.4" fill="url(#brand-accent)" />
   <path d="M38 84.4c6.3 5.8 13.5 8.8 22 8.8 8.5 0 15.8-3 22-8.8" stroke="white" stroke-opacity="0.82" stroke-width="3.8" stroke-linecap="round" />
+
+  <!-- AI spark -->
+  <path d="M90 22.5 92.6 30.4 100.5 33 92.6 35.6 90 43.5 87.4 35.6 79.5 33 87.4 30.4Z" fill="url(#brand-spark)" />
+  <path d="M101 41 102.3 45 106.3 46.3 102.3 47.6 101 51.6 99.7 47.6 95.7 46.3 99.7 45Z" fill="url(#brand-spark)" fill-opacity="0.9" />
 </svg>

@@ -7,7 +7,7 @@ async function bootstrap() {
   await runStartupHealthChecks()
 
   const server = app.listen(env.PORT, () => {
-    console.log(`Smart Test Pro API running on http://localhost:${env.PORT}`)
+    console.log(`ProfAI API running on http://localhost:${env.PORT}`)
   })
 
   const shutdown = async () => {

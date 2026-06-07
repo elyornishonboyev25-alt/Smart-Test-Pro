@@ -31,17 +31,17 @@ if (!(Test-Path $tsxCmd)) {
 }
 
 if (!(Test-PortListening 5001)) {
-  Write-Host 'Starting SmartTest Pro backend on localhost:5001...'
+  Write-Host 'Starting ProfAI backend on localhost:5001...'
   Start-Process cmd.exe -ArgumentList '/k', "cd /d `"$backendRoot`" && `"$tsxCmd`" src/index.ts"
 } else {
   Write-Host 'Backend is already running on localhost:5001.'
 }
 
 if (!(Test-PortListening 5173)) {
-  Write-Host 'Starting SmartTest Pro web on localhost:5173...'
+  Write-Host 'Starting ProfAI web on localhost:5173...'
   Start-Process cmd.exe -ArgumentList '/k', "cd /d `"$projectRoot`" && npm run dev:web"
 } else {
   Write-Host 'Web app is already running on localhost:5173.'
 }
 
-Write-Host 'SmartTest Pro is ready.'
+Write-Host 'ProfAI is ready.'

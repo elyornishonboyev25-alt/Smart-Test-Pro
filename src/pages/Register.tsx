@@ -76,7 +76,7 @@ export default function Register() {
       pushToast({
         type: 'success',
         title: 'Account created',
-        message: 'Your SmartTest Pro account is ready.',
+        message: 'Your ProfAI account is ready.',
       })
       navigate('/dashboard', { replace: true })
     } catch (error) {
@@ -159,7 +159,7 @@ export default function Register() {
                 Where studying levels up like a game.
               </h1>
               <p className="mt-4 text-sm leading-7 text-red-50/90">
-                Join SmartTest and turn IELTS &amp; SAT prep into a daily streak. Earn XP, unlock
+                Join ProfAI and turn IELTS &amp; SAT prep into a daily streak. Earn XP, unlock
                 achievements, and let your AI coach build the roadmap to your target score.
               </p>
             </div>

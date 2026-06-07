@@ -1,4 +1,4 @@
-# Smart Test Pro API Reference
+# ProfAI API Reference
 
 Base URL: `/api/v1`
 

@@ -1,6 +1,6 @@
-# Smart Test Pro API
+# ProfAI API
 
-Production-grade Express + TypeScript backend for Smart Test Pro.
+Production-grade Express + TypeScript backend for ProfAI.
 
 ## Stack
 - Node.js + Express

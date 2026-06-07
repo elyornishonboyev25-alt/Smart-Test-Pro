@@ -421,29 +421,29 @@ async function main() {
   const studentPasswordHash = await bcrypt.hash('Student@12345', 12)
 
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@smarttestpro.com' },
+    where: { email: 'admin@profai.app' },
     update: {
-      fullName: 'Smart Test Admin',
+      fullName: 'ProfAI Admin',
       role: 'ADMIN',
       passwordHash: adminPasswordHash,
     },
     create: {
-      email: 'admin@smarttestpro.com',
-      fullName: 'Smart Test Admin',
+      email: 'admin@profai.app',
+      fullName: 'ProfAI Admin',
       role: 'ADMIN',
       passwordHash: adminPasswordHash,
     },
   })
 
   await prisma.user.upsert({
-    where: { email: 'student@smarttestpro.com' },
+    where: { email: 'student@profai.app' },
     update: {
       fullName: 'Demo Student',
       role: 'USER',
       passwordHash: studentPasswordHash,
     },
     create: {
-      email: 'student@smarttestpro.com',
+      email: 'student@profai.app',
       fullName: 'Demo Student',
       role: 'USER',
       passwordHash: studentPasswordHash,

@@ -23,7 +23,7 @@ export default function NotFound() {
       >
         <span className="premium-top-chip">
           <Sparkles className="h-3.5 w-3.5" />
-          SmartTest Pro
+          ProfAI
         </span>
 
         <motion.div

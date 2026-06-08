@@ -11,6 +11,7 @@ import PremiumRoute from '@/components/auth/PremiumRoute'
 import { ToastViewport } from '@/components/common/ToastViewport'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import RegisterModal from '@/components/auth/RegisterModal'
+import FloatingAIAssistant from '@/components/ai/FloatingAIAssistant'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { addTrackedMinutes, routeToActivityKey } from '@/utils/weeklyPlanner'
@@ -169,6 +170,7 @@ function App() {
       <AnimatedBackground />
       <ToastViewport />
       <RegisterModal />
+      <FloatingAIAssistant />
 
       <div className="relative z-10 flex min-h-screen flex-col">
         {showTopNavigation && <TopNavigation />}

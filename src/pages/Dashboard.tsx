@@ -28,6 +28,7 @@ import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import type { DashboardOverview } from '@/types/platform'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import WeeklyPlannerLab from '@/components/dashboard/WeeklyPlannerLab'
+import DailyPlanner from '@/components/dashboard/DailyPlanner'
 import { MetricSkeletonGrid, Skeleton } from '@/components/common/Skeleton'
 import { BrandIcon, CountUp, Reveal, Stagger, StaggerItem, Tilt3D, XPGem } from '@/components/fx'
 
@@ -523,6 +524,13 @@ export default function Dashboard() {
       <section className="mt-8">
         <WeeklyPlannerLab />
       </section>
+
+      {/* ── Daily planner (time-based tasks + reminders) ──────── */}
+      {user ? (
+        <section className="mt-8">
+          <DailyPlanner />
+        </section>
+      ) : null}
 
       {/* ── Track Launch Board + Recent Activity ──────────────── */}
       <section className="mt-8 grid gap-6 lg:grid-cols-2">

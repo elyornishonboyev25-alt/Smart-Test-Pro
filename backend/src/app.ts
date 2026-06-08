@@ -15,6 +15,7 @@ import testsRoutes from './routes/tests.routes.js'
 import dashboardRoutes from './routes/dashboard.routes.js'
 import profileRoutes from './routes/profile.routes.js'
 import leaderboardRoutes from './routes/leaderboard.routes.js'
+import plannerRoutes from './routes/planner.routes.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -52,6 +53,7 @@ app.use('/api/v1/tests', testsRoutes)
 app.use('/api/v1/dashboard', dashboardRoutes)
 app.use('/api/v1/profile', profileRoutes)
 app.use('/api/v1/leaderboard', leaderboardRoutes)
+app.use('/api/v1/planner', plannerRoutes)
 
 if (isProduction && fs.existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath))

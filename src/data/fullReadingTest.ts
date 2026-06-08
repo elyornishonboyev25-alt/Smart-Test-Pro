@@ -563,7 +563,7 @@ export const fullReadingTests = [
   },
   {
     id: 4,
-    title: "IELTS Reading Full Test 4 - Georgia O'Keeffe, Climate Change Adaptation, Guard Dogs",
+    title: 'IELTS Reading Full Test 4 - William Gilbert, Pacific Navigation, The Dingo Debate',
     description: 'Official 3-passage full IELTS reading set with 40 questions and answer mapping.',
     level: 'HARD',
     duration: '60 minutes',

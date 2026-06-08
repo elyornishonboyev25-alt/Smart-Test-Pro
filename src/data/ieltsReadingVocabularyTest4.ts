@@ -1,630 +1,114 @@
 import type { ReadingVocabularySeed } from './ieltsReadingVocabularySource'
 
+// Full Test 4 vocabulary (user-supplied). definition = "Meaning (EN) | UZ: tarjima";
+// example = "EN: sentence | UZ: jumla". P1 William Gilbert, P2 Pacific, P3 Dingo.
 export const readingVocabularyByTest4: Record<string, Record<string, ReadingVocabularySeed[]>> = {
   "4": {
     "1": [
-      {
-        "term": "aquatic",
-        "definition": "suvda yashovchi",
-        "synonyms": "aquatic ecosystem, aquatic life",
-        "example": "Many species struggle to survive in highly polluted aquatic environments."
-      },
-      {
-        "term": "flippers",
-        "definition": "suzish uchun qanotga o‘xshash oyoqlar",
-        "synonyms": "",
-        "example": "Seals use their flippers efficiently to navigate through icy waters."
-      },
-      {
-        "term": "propulsion",
-        "definition": "harakatlantiruvchi kuch",
-        "synonyms": "means of propulsion",
-        "example": "The fish relies on its tail for propulsion in fast-moving currents."
-      },
-      {
-        "term": "leftover",
-        "definition": "qoldiq, qolgan narsa (evolution kontekstida juda muhim)",
-        "synonyms": "",
-        "example": "Some physical traits are evolutionary leftovers from ancient ancestors."
-      },
-      {
-        "term": "wrinkled",
-        "definition": "ajin bosgan",
-        "synonyms": "",
-        "example": "The animal’s wrinkled skin helps retain moisture in dry conditions."
-      },
-      {
-        "term": "graze",
-        "definition": "o‘tlamoq",
-        "synonyms": "graze on grass/plants",
-        "example": "Herbivores typically graze on vegetation for several hours a day."
-      },
-      {
-        "term": "uproot",
-        "definition": "ildizi bilan sug‘urib olmoq",
-        "synonyms": "",
-        "example": "Strong currents can uproot plants from the seabed."
-      },
-      {
-        "term": "omnivorous",
-        "definition": "ham o‘simlik, ham go‘sht yeydigan",
-        "synonyms": "",
-        "example": "Bears are omnivorous animals that adapt their diet seasonally."
-      },
-      {
-        "term": "abrasive",
-        "definition": "ishqalanib yeyiladigan / silliqlovchi",
-        "synonyms": "",
-        "example": "An abrasive diet can gradually wear down an animal’s teeth."
-      },
-      {
-        "term": "molars",
-        "definition": "oziqni maydalovchi tishlar",
-        "synonyms": "",
-        "example": "Herbivores rely heavily on molars to grind tough plant material."
-      },
-      {
-        "term": "grasp",
-        "definition": "ushlamoq, mahkam tutmoq",
-        "synonyms": "",
-        "example": "Primates use their fingers to grasp objects with precision."
-      },
-      {
-        "term": "diaphragm",
-        "definition": "diafragma (nafas olish mushagi)",
-        "synonyms": "",
-        "example": "The diaphragm plays a crucial role in regulating breathing patterns."
-      },
-      {
-        "term": "buoyancy",
-        "definition": "suvda suzib turish qobiliyati",
-        "synonyms": "",
-        "example": "Fish adjust their buoyancy to remain stable at different depths."
-      },
-      {
-        "term": "coastal",
-        "definition": "qirg‘oq bo‘yidagi",
-        "synonyms": "",
-        "example": "Coastal regions are particularly vulnerable to climate change."
-      },
-      {
-        "term": "subspecies",
-        "definition": "kichik tur (tur ichidagi bo‘linma)",
-        "synonyms": "",
-        "example": "This bird has several subspecies adapted to different climates."
-      },
-      {
-        "term": "ambient",
-        "definition": "atrof-muhitga oid (temperature bilan ko‘p ishlatiladi)",
-        "synonyms": "",
-        "example": "Plants are highly sensitive to changes in ambient temperature."
-      },
-      {
-        "term": "take refuge",
-        "definition": "boshpana topmoq",
-        "synonyms": "",
-        "example": "Animals take refuge in warmer areas during extreme weather."
-      },
-      {
-        "term": "landlocked",
-        "definition": "dengizga chiqish yo‘li yo‘q",
-        "synonyms": "",
-        "example": "Landlocked countries often depend on neighbors for trade routes."
-      },
-      {
-        "term": "shallow",
-        "definition": "sayoz",
-        "synonyms": "",
-        "example": "Many marine species prefer shallow waters for breeding."
-      },
-      {
-        "term": "endangered",
-        "definition": "yo‘qolib ketish xavfi ostida",
-        "synonyms": "",
-        "example": "Tigers are considered endangered due to habitat loss."
-      },
-      {
-        "term": "extinction",
-        "definition": "butunlay yo‘qolib ketish",
-        "synonyms": "",
-        "example": "Climate change is accelerating the extinction of many species."
-      },
-      {
-        "term": "vulnerable",
-        "definition": "xavf ostida, himoyasiz",
-        "synonyms": "",
-        "example": "Small populations are particularly vulnerable to environmental changes."
-      },
-      {
-        "term": "incidental capture",
-        "definition": "tasodifiy tutib olish (IELTS’da juda chiqadi!)",
-        "synonyms": "",
-        "example": "Many dolphins die due to incidental capture in fishing nets."
-      },
-      {
-        "term": "entanglement",
-        "definition": "chirmashib qolish",
-        "synonyms": "",
-        "example": "Marine animals often suffer from entanglement in plastic waste."
-      },
-      {
-        "term": "undergo",
-        "definition": "boshdan kechirmoq",
-        "synonyms": "",
-        "example": "The species is expected to undergo significant population decline."
-      },
-      {
-        "term": "decline",
-        "definition": "kamayish",
-        "synonyms": "",
-        "example": "There has been a rapid decline in biodiversity over the past decade."
-      },
-      {
-        "term": "respond",
-        "definition": "javob bermoq / reaksiya bildirmoq",
-        "synonyms": "",
-        "example": "Animals must respond quickly to threats in their environment."
-      }
+      { "term": "eminent", "definition": "highly respected and important | UZ: nufuzli, mashhur", "synonyms": "distinguished", "example": "EN: Marie Curie was an eminent scientist. | UZ: Mariya Kyuri nufuzli olim edi." },
+      { "term": "accredited", "definition": "officially accepted as having a status | UZ: tan olingan", "synonyms": "recognized", "example": "EN: He is accredited as a pioneer in the field. | UZ: U sohada kashshof sifatida tan olingan." },
+      { "term": "physician", "definition": "a medical doctor | UZ: shifokor", "synonyms": "doctor", "example": "EN: The physician examined the patient carefully. | UZ: Shifokor bemorni diqqat bilan ko'rikdan o'tkazdi." },
+      { "term": "culminated", "definition": "reached a final or highest point | UZ: yakunlandi, cho'qqisiga chiqdi", "synonyms": "climaxed", "example": "EN: Their efforts culminated in a successful launch. | UZ: Ularning sa'y-harakatlari muvaffaqiyatli uchirish bilan yakunlandi." },
+      { "term": "mysticism", "definition": "belief in supernatural or mysterious forces | UZ: mistitsizm, sirli e'tiqodlar", "synonyms": "spirituality", "example": "EN: The book explores ancient mysticism. | UZ: Kitob qadimgi mistitsizmni o'rganadi." },
+      { "term": "alchemy", "definition": "an early form of chemistry aimed at transforming substances | UZ: alkimyo", "synonyms": "medieval chemistry", "example": "EN: Alchemy influenced the development of chemistry. | UZ: Alkimyo kimyo fanining rivojlanishiga ta'sir ko'rsatgan." },
+      { "term": "transmutation", "definition": "changing one substance into another | UZ: aylantirish, o'zgartirish", "synonyms": "transformation", "example": "EN: Alchemists sought the transmutation of metals. | UZ: Alkimyogarlar metallarning aylantirilishini izlashgan." },
+      { "term": "lodestone", "definition": "a naturally magnetic mineral | UZ: magnit tosh", "synonyms": "magnetite", "example": "EN: Sailors used lodestones for navigation. | UZ: Dengizchilar navigatsiya uchun magnit toshlardan foydalangan." },
+      { "term": "seafaring", "definition": "connected with travel by sea | UZ: dengizchilikka oid", "synonyms": "maritime", "example": "EN: Britain became a major seafaring nation. | UZ: Britaniya yirik dengizchi davlatga aylandi." },
+      { "term": "Armada", "definition": "a large group of warships | UZ: flot, harbiy dengiz floti", "synonyms": "fleet", "example": "EN: The Spanish Armada was defeated. | UZ: Ispan Armada floti mag'lub etildi." },
+      { "term": "speculated", "definition": "formed an opinion without complete evidence | UZ: taxmin qilgan", "synonyms": "guessed", "example": "EN: Scientists speculated about life on Mars. | UZ: Olimlar Marsdagi hayot haqida taxmin qilishdi." },
+      { "term": "ingenious", "definition": "highly inventive and intelligent | UZ: zukko, juda aqlli", "synonyms": "clever", "example": "EN: She devised an ingenious solution. | UZ: U juda aqlli yechim topdi." },
+      { "term": "coined", "definition": "created a new word or expression | UZ: yangi atama yaratgan", "synonyms": "invented", "example": "EN: The scientist coined a new term. | UZ: Olim yangi atama yaratdi." },
+      { "term": "entangled", "definition": "complicatedly connected with something | UZ: aralashib ketgan", "synonyms": "involved", "example": "EN: Politics became entangled with religion. | UZ: Siyosat din bilan aralashib ketdi." },
+      { "term": "neutralise", "definition": "make something ineffective | UZ: neytrallashtirmoq", "synonyms": "cancel out", "example": "EN: The chemical neutralises harmful acids. | UZ: Kimyoviy modda zararli kislotalarni neytrallashtiradi." },
+      { "term": "polarity", "definition": "the state of having two opposite ends | UZ: qutblanish", "synonyms": "opposite charge", "example": "EN: Magnets work because of their polarity. | UZ: Magnitlar qutblanish tufayli ishlaydi." },
+      { "term": "repel", "definition": "drive something away | UZ: itarmoq", "synonyms": "push away", "example": "EN: Like magnetic poles repel each other. | UZ: Bir xil magnit qutblari bir-birini itaradi." },
+      { "term": "quintessential", "definition": "representing the perfect example of something | UZ: eng tipik, mukammal namuna", "synonyms": "typical", "example": "EN: He is the quintessential modern scientist. | UZ: U zamonaviy olimning eng tipik namunasidir." },
+      { "term": "equidistant", "definition": "at the same distance from something | UZ: teng masofada joylashgan", "synonyms": "equally distant", "example": "EN: The town is equidistant from two cities. | UZ: Shahar ikki shahardan teng masofada joylashgan." },
+      { "term": "aligned", "definition": "positioned correctly in relation to something | UZ: moslashtirilgan", "synonyms": "arranged", "example": "EN: The wheels were carefully aligned. | UZ: G'ildiraklar ehtiyotkorlik bilan moslashtirildi." },
+      { "term": "wobble", "definition": "move unsteadily from side to side | UZ: tebranmoq, chayqalmoq", "synonyms": "shake", "example": "EN: The table began to wobble. | UZ: Stol tebrana boshladi." },
+      { "term": "orbiting", "definition": "moving around another object in space | UZ: orbitada aylanish", "synonyms": "circling", "example": "EN: The moon is orbiting the Earth. | UZ: Oy Yer atrofida aylanmoqda." },
+      { "term": "analogy", "definition": "a comparison between similar things | UZ: o'xshashlik, analogiya", "synonyms": "comparison", "example": "EN: The teacher used an analogy to explain the idea. | UZ: O'qituvchi g'oyani tushuntirish uchun o'xshashlikdan foydalandi." },
+      { "term": "revolutionary", "definition": "causing major changes | UZ: inqilobiy", "synonyms": "groundbreaking", "example": "EN: The discovery was revolutionary for physics. | UZ: Bu kashfiyot fizika uchun inqilobiy bo'ldi." },
+      { "term": "experimentation", "definition": "the process of trying things out | UZ: tajriba o'tkazish", "synonyms": "testing", "example": "EN: Scientific progress depends on experimentation. | UZ: Ilmiy taraqqiyot tajribaga bog'liq." },
+      { "term": "authoritative", "definition": "accepted as accurate and trustworthy | UZ: obro'li, ishonchli", "synonyms": "reliable", "example": "EN: She wrote an authoritative book on history. | UZ: U tarix bo'yicha ishonchli kitob yozgan." },
+      { "term": "deductive", "definition": "based on reasoning from general facts | UZ: deduktiv", "synonyms": "logical", "example": "EN: Detectives often use deductive reasoning. | UZ: Detektivlar ko'pincha deduktiv fikrlashdan foydalanadilar." },
+      { "term": "investigation", "definition": "a careful examination to discover facts | UZ: tadqiqot, surishtiruv", "synonyms": "inquiry", "example": "EN: The investigation lasted several months. | UZ: Tadqiqot bir necha oy davom etdi." },
+      { "term": "contribution", "definition": "something given to help achieve a result | UZ: hissa", "synonyms": "input", "example": "EN: Her contribution to science was enormous. | UZ: Uning ilm-fanga qo'shgan hissasi juda katta edi." },
+      { "term": "observation", "definition": "careful watching of something | UZ: kuzatuv", "synonyms": "monitoring", "example": "EN: Accurate observation is essential in science. | UZ: Aniq kuzatuv ilm-fanda juda muhim." }
     ],
     "2": [
-      {
-        "term": "procrastination",
-        "definition": "ishni kechiktirish odati",
-        "synonyms": "",
-        "example": "Chronic procrastination can significantly hinder academic success."
-      },
-      {
-        "term": "berate",
-        "definition": "o‘zini yoki boshqani qattiq tanqid qilmoq",
-        "synonyms": "",
-        "example": "Constantly berating yourself can damage your confidence over time."
-      },
-      {
-        "term": "contrary to",
-        "definition": "ga zid ravishda",
-        "synonyms": "",
-        "example": "Contrary to common assumptions, success often requires patience."
-      },
-      {
-        "term": "mood management",
-        "definition": "kayfiyatni boshqarish",
-        "synonyms": "",
-        "example": "Effective mood management is essential for maintaining productivity."
-      },
-      {
-        "term": "put off",
-        "definition": "kechiktirmoq",
-        "synonyms": "",
-        "example": "Many students put off difficult tasks until the last minute."
-      },
-      {
-        "term": "self-worth",
-        "definition": "o‘zini qadrlash hissi",
-        "synonyms": "",
-        "example": "Academic failure can negatively affect a student’s sense of self-worth."
-      },
-      {
-        "term": "anxious",
-        "definition": "xavotirlangan",
-        "synonyms": "",
-        "example": "People often feel anxious when facing uncertain outcomes."
-      },
-      {
-        "term": "emotion regulation",
-        "definition": "his-tuyg‘ularni boshqarish",
-        "synonyms": "",
-        "example": "Strong emotion regulation skills help individuals cope with stress."
-      },
-      {
-        "term": "chronically",
-        "definition": "doimiy ravishda",
-        "synonyms": "",
-        "example": "Chronically stressed individuals are more likely to experience burnout."
-      },
-      {
-        "term": "prime candidate",
-        "definition": "eng mos / eng ehtimoliy nomzod",
-        "synonyms": "",
-        "example": "Complex assignments are prime candidates for procrastination."
-      },
-      {
-        "term": "perfectionist",
-        "definition": "mukammallikni haddan tashqari xohlovchi odam",
-        "synonyms": "",
-        "example": "Perfectionists often struggle to complete tasks on time."
-      },
-      {
-        "term": "harshly",
-        "definition": "qattiq (tanqid qilishda)",
-        "synonyms": "",
-        "example": "His work was judged too harshly by the reviewers."
-      },
-      {
-        "term": "evaluate",
-        "definition": "baholamoq",
-        "synonyms": "",
-        "example": "Teachers evaluate students based on multiple criteria."
-      },
-      {
-        "term": "associated with",
-        "definition": "bilan bog‘liq",
-        "synonyms": "",
-        "example": "Stress is often associated with poor time management."
-      },
-      {
-        "term": "rewarding",
-        "definition": "foydali / yoqimli natija beradigan",
-        "synonyms": "",
-        "example": "Avoiding stress temporarily can feel rewarding."
-      },
-      {
-        "term": "condition (verb)",
-        "definition": "odatlantirmoq",
-        "synonyms": "",
-        "example": "Repeated behavior can condition the brain to respond in certain ways."
-      },
-      {
-        "term": "in the long run",
-        "definition": "uzoq muddatda",
-        "synonyms": "",
-        "example": "In the long run, discipline leads to better outcomes than motivation."
-      },
-      {
-        "term": "temporary",
-        "definition": "vaqtinchalik",
-        "synonyms": "",
-        "example": "The relief gained from avoidance is only temporary."
-      },
-      {
-        "term": "reinforce",
-        "definition": "kuchaytirmoq",
-        "synonyms": "",
-        "example": "Bad habits are reinforced through repetition."
-      },
-      {
-        "term": "toll",
-        "definition": "salbiy ta’sir (ko‘pincha health/productivity ga)",
-        "synonyms": "",
-        "example": "Lack of sleep takes a serious toll on concentration."
-      },
-      {
-        "term": "productivity",
-        "definition": "unumdorlik",
-        "synonyms": "",
-        "example": "Distractions can significantly reduce productivity."
-      },
-      {
-        "term": "misconduct",
-        "definition": "noto‘g‘ri xatti-harakat",
-        "synonyms": "",
-        "example": "Academic misconduct can lead to serious consequences."
-      },
-      {
-        "term": "plagiarism",
-        "definition": "plagiat",
-        "synonyms": "",
-        "example": "Universities have strict policies against plagiarism."
-      },
-      {
-        "term": "fraudulent",
-        "definition": "firibgarona, yolg‘on",
-        "synonyms": "",
-        "example": "He provided fraudulent excuses to avoid penalties."
-      },
-      {
-        "term": "outcome",
-        "definition": "natija",
-        "synonyms": "",
-        "example": "Hard work usually leads to positive outcomes."
-      },
-      {
-        "term": "employment stability",
-        "definition": "ish barqarorligi",
-        "synonyms": "",
-        "example": "Skills development improves employment stability."
-      },
-      {
-        "term": "correlate with",
-        "definition": "o‘zaro bog‘liq bo‘lmoq",
-        "synonyms": "",
-        "example": "Poor sleep often correlates with reduced performance."
-      },
-      {
-        "term": "well-being",
-        "definition": "umumiy sog‘lik va holat",
-        "synonyms": "",
-        "example": "Exercise plays a key role in mental well-being."
-      },
-      {
-        "term": "numerous",
-        "definition": "juda ko‘p",
-        "synonyms": "",
-        "example": "Numerous studies support this theory."
-      },
-      {
-        "term": "digestive issues",
-        "definition": "ovqat hazm qilish muammolari",
-        "synonyms": "",
-        "example": "Stress can lead to serious digestive issues."
-      },
-      {
-        "term": "coping strategies",
-        "definition": "muammoni yengish usullari",
-        "synonyms": "",
-        "example": "Healthy coping strategies include exercise and meditation."
-      },
-      {
-        "term": "prone to",
-        "definition": "moyil bo‘lmoq",
-        "synonyms": "",
-        "example": "Teenagers are more prone to distractions."
-      },
-      {
-        "term": "account for",
-        "definition": "hisobga olmoq",
-        "synonyms": "",
-        "example": "The study accounts for age and lifestyle differences."
-      },
-      {
-        "term": "vicious cycle",
-        "definition": "yomon aylana (to‘xtamaydigan muammo)",
-        "synonyms": "",
-        "example": "Stress and procrastination often form a vicious cycle."
-      },
-      {
-        "term": "evidence-based",
-        "definition": "ilmiy asoslangan",
-        "synonyms": "",
-        "example": "The school implemented evidence-based teaching methods."
-      },
-      {
-        "term": "fend off",
-        "definition": "himoyalanmoq / oldini olmoq",
-        "synonyms": "",
-        "example": "Students must fend off distractions while studying."
-      },
-      {
-        "term": "compassion",
-        "definition": "hamdardlik",
-        "synonyms": "",
-        "example": "Self-compassion helps reduce anxiety and stress."
-      },
-      {
-        "term": "overly critical",
-        "definition": "haddan tashqari tanqidiy",
-        "synonyms": "",
-        "example": "Being overly critical of yourself can slow your progress."
-      },
-      {
-        "term": "take the edge off",
-        "definition": "sal yengillashtirmoq",
-        "synonyms": "",
-        "example": "Listening to music can take the edge off stress."
-      },
-      {
-        "term": "get back on track",
-        "definition": "yana to‘g‘ri yo‘lga qaytmoq",
-        "synonyms": "",
-        "example": "After a short break, he managed to get back on track."
-      }
+      { "term": "migrate", "definition": "move from one place to another | UZ: ko'chib o'tmoq", "synonyms": "relocate", "example": "EN: Many birds migrate during winter. | UZ: Ko'plab qushlar qishda ko'chib o'tadi." },
+      { "term": "vast", "definition": "extremely large | UZ: ulkan, juda katta", "synonyms": "enormous", "example": "EN: The desert covers a vast area. | UZ: Cho'l juda katta hududni egallaydi." },
+      { "term": "simultaneously", "definition": "happening together | UZ: bir vaqtning o'zida", "synonyms": "at the same time", "example": "EN: The two events occurred simultaneously. | UZ: Ikki voqea bir vaqtning o'zida sodir bo'ldi." },
+      { "term": "investigators", "definition": "people who examine something carefully | UZ: tadqiqotchilar", "synonyms": "researchers", "example": "EN: Investigators studied the ancient site. | UZ: Tadqiqotchilar qadimiy joyni o'rganishdi." },
+      { "term": "assessment", "definition": "judgment after examination | UZ: baholash", "synonyms": "evaluation", "example": "EN: The assessment took several weeks. | UZ: Baholash bir necha hafta davom etdi." },
+      { "term": "forthcoming", "definition": "about to happen or appear | UZ: keladigan, taqdim etiladigan", "synonyms": "upcoming", "example": "EN: Details were not forthcoming. | UZ: Tafsilotlar taqdim etilmadi." },
+      { "term": "asserting", "definition": "stating confidently | UZ: ta'kidlamoq", "synonyms": "claiming", "example": "EN: He kept asserting his innocence. | UZ: U o'zining aybsizligini ta'kidlashda davom etdi." },
+      { "term": "expertise", "definition": "expert knowledge | UZ: mutaxassislik mahorati", "synonyms": "skill", "example": "EN: Her expertise impressed everyone. | UZ: Uning mutaxassisligi barchani hayratda qoldirdi." },
+      { "term": "dependent", "definition": "needing something else | UZ: bog'liq", "synonyms": "reliant", "example": "EN: Success is dependent on effort. | UZ: Muvaffaqiyat mehnatga bog'liq." },
+      { "term": "deservedly", "definition": "in a way that is deserved | UZ: haqli ravishda", "synonyms": "rightly", "example": "EN: She deservedly won the award. | UZ: U mukofotni haqli ravishda qo'lga kiritdi." },
+      { "term": "spark", "definition": "cause something to begin | UZ: turtki bermoq", "synonyms": "trigger", "example": "EN: The speech sparked debate. | UZ: Nutq munozaraga turtki berdi." },
+      { "term": "renewed", "definition": "started again | UZ: yangilangan", "synonyms": "revived", "example": "EN: The project received renewed support. | UZ: Loyiha yangidan qo'llab-quvvatlandi." },
+      { "term": "precipitated", "definition": "make something happen suddenly | UZ: sabab bo'lmoq", "synonyms": "caused", "example": "EN: The decision precipitated a crisis. | UZ: Qaror inqirozga sabab bo'ldi." },
+      { "term": "wealth", "definition": "a large amount | UZ: katta miqdor", "synonyms": "abundance", "example": "EN: The book contains a wealth of information. | UZ: Kitob juda ko'p ma'lumotni o'z ichiga oladi." },
+      { "term": "denigrate", "definition": "unfairly attack someone's value | UZ: yomonlamoq", "synonyms": "criticize", "example": "EN: He tried to denigrate his rivals. | UZ: U raqiblarini yomonlashga urindi." },
+      { "term": "relied on", "definition": "trust or depend upon | UZ: tayanmoq", "synonyms": "depend on", "example": "EN: We relied on his advice. | UZ: Biz uning maslahatiga tayandik." },
+      { "term": "missionary", "definition": "person sent to spread religion | UZ: missioner", "synonyms": "evangelist", "example": "EN: The missionary traveled widely. | UZ: Missioner keng sayohat qilgan." },
+      { "term": "narratives", "definition": "spoken or written stories | UZ: hikoyalar, bayonlar", "synonyms": "accounts", "example": "EN: Historical narratives differ greatly. | UZ: Tarixiy hikoyalar bir-biridan farq qiladi." },
+      { "term": "accompanied", "definition": "go with someone | UZ: hamrohlik qilmoq", "synonyms": "joined", "example": "EN: She accompanied her friend home. | UZ: U do'stiga uyiga qadar hamrohlik qildi." },
+      { "term": "banished", "definition": "forced away | UZ: chiqarib yuborilgan", "synonyms": "removed", "example": "EN: Phones were banished from class. | UZ: Telefonlar sinfdan chiqarib yuborildi." },
+      { "term": "nautical", "definition": "related to ships and the sea | UZ: dengizchilikka oid", "synonyms": "maritime", "example": "EN: Nautical charts are important. | UZ: Dengiz xaritalari muhimdir." },
+      { "term": "horizon", "definition": "line where earth and sky meet | UZ: ufq", "synonyms": "skyline", "example": "EN: The sun disappeared below the horizon. | UZ: Quyosh ufq ortiga botdi." },
+      { "term": "geographer", "definition": "person who studies Earth | UZ: geograf", "synonyms": "geography expert", "example": "EN: The geographer mapped the region. | UZ: Geograf hududni xaritalashtirdi." },
+      { "term": "obtaining", "definition": "getting something | UZ: qo'lga kiritish", "synonyms": "acquiring", "example": "EN: Obtaining data was difficult. | UZ: Ma'lumot olish qiyin edi." },
+      { "term": "instrumentation", "definition": "measuring devices | UZ: asbob-uskunalar tizimi", "synonyms": "equipment", "example": "EN: Modern instrumentation improved accuracy. | UZ: Zamonaviy uskunalar aniqlikni oshirdi." },
+      { "term": "remote", "definition": "far away | UZ: olis", "synonyms": "distant", "example": "EN: They lived in a remote village. | UZ: Ular olis qishloqda yashashardi." },
+      { "term": "attributes", "definition": "qualities of something | UZ: xususiyatlar", "synonyms": "characteristics", "example": "EN: Leadership is one of his attributes. | UZ: Yetakchilik uning xususiyatlaridan biridir." },
+      { "term": "contribution", "definition": "something given to help | UZ: hissa", "synonyms": "input", "example": "EN: Her contribution was significant. | UZ: Uning hissasi muhim edi." },
+      { "term": "physiologist", "definition": "scientist studying body functions | UZ: fiziolog", "synonyms": "body scientist", "example": "EN: The physiologist studied muscles. | UZ: Fiziolog mushaklarni o'rgandi." },
+      { "term": "expenditure", "definition": "amount used or spent | UZ: sarf-xarajat", "synonyms": "consumption", "example": "EN: Energy expenditure increased. | UZ: Energiya sarfi oshdi." },
+      { "term": "propelled", "definition": "drove forward | UZ: harakatlantirmoq", "synonyms": "pushed", "example": "EN: The boat was propelled by wind. | UZ: Qayiq shamol yordamida harakatlandi." },
+      { "term": "linguists", "definition": "people who study languages | UZ: tilshunoslar", "synonyms": "language experts", "example": "EN: Linguists analyzed the dialect. | UZ: Tilshunoslar shevani tahlil qilishdi." },
+      { "term": "remarkably", "definition": "unusually | UZ: hayratlanarli darajada", "synonyms": "notably", "example": "EN: The results were remarkably accurate. | UZ: Natijalar hayratlanarli darajada aniq edi." },
+      { "term": "pioneered", "definition": "developed something new first | UZ: birinchi bo'lib yaratgan", "synonyms": "initiated", "example": "EN: Scientists pioneered new techniques. | UZ: Olimlar yangi usullarni birinchi bo'lib yaratishdi." },
+      { "term": "categorically", "definition": "in a definite and clear way | UZ: qat'iy ravishda", "synonyms": "absolutely", "example": "EN: He categorically denied the accusation. | UZ: U ayblovni qat'iy ravishda rad etdi." }
     ],
     "3": [
-      {
-        "term": "umpire",
-        "definition": "hakam (sportda)",
-        "synonyms": "",
-        "example": "The umpire made a controversial decision during the match."
-      },
-      {
-        "term": "automated",
-        "definition": "avtomatlashtirilgan",
-        "synonyms": "",
-        "example": "Many industries rely on automated systems to improve efficiency."
-      },
-      {
-        "term": "judgment",
-        "definition": "qaror (subyektiv baho)",
-        "synonyms": "",
-        "example": "Human judgment is often influenced by emotions."
-      },
-      {
-        "term": "contraption",
-        "definition": "g‘alati qurilma",
-        "synonyms": "",
-        "example": "The engineer built a strange contraption to test his theory."
-      },
-      {
-        "term": "mounted",
-        "definition": "o‘rnatilgan",
-        "synonyms": "",
-        "example": "Cameras were mounted on the walls for security purposes."
-      },
-      {
-        "term": "commission (verb)",
-        "definition": "buyurtma bermoq / topshirmoq",
-        "synonyms": "",
-        "example": "The company commissioned a new system to improve accuracy."
-      },
-      {
-        "term": "heckling",
-        "definition": "masxara qilib baqirish",
-        "synonyms": "",
-        "example": "The speaker ignored the heckling from the audience."
-      },
-      {
-        "term": "animating force",
-        "definition": "asosiy harakatlantiruvchi kuch",
-        "synonyms": "",
-        "example": "Innovation is the animating force behind economic growth."
-      },
-      {
-        "term": "countless",
-        "definition": "sanoqsiz",
-        "synonyms": "",
-        "example": "The discovery has sparked countless debates among scientists."
-      },
-      {
-        "term": "evolve",
-        "definition": "rivojlanmoq / o‘zgarib borish",
-        "synonyms": "",
-        "example": "Language continues to evolve over time."
-      },
-      {
-        "term": "boundaries",
-        "definition": "chegaralar",
-        "synonyms": "",
-        "example": "The boundaries of acceptable behavior are clearly defined."
-      },
-      {
-        "term": "consensus",
-        "definition": "umumiy fikr",
-        "synonyms": "",
-        "example": "There is a general consensus among experts on this issue."
-      },
-      {
-        "term": "profoundly",
-        "definition": "juda chuqur darajada",
-        "synonyms": "",
-        "example": "Technology has profoundly changed modern communication."
-      },
-      {
-        "term": "precise",
-        "definition": "aniq",
-        "synonyms": "",
-        "example": "The measurements must be extremely precise."
-      },
-      {
-        "term": "fractions",
-        "definition": "juda kichik qismlar",
-        "synonyms": "",
-        "example": "The difference was measured in fractions of a second."
-      },
-      {
-        "term": "controversy",
-        "definition": "bahsli masala",
-        "synonyms": "",
-        "example": "The policy has caused widespread controversy."
-      },
-      {
-        "term": "unforgiving",
-        "definition": "xatoni kechirmaydigan",
-        "synonyms": "",
-        "example": "The system is unforgiving when it comes to minor errors."
-      },
-      {
-        "term": "pedantic",
-        "definition": "haddan tashqari mayda-chuydaga yopishadigan",
-        "synonyms": "",
-        "example": "His pedantic approach annoyed his colleagues."
-      },
-      {
-        "term": "legalistic",
-        "definition": "haddan tashqari qonun-qoidaga yopishgan",
-        "synonyms": "",
-        "example": "The process became overly legalistic and inefficient."
-      },
-      {
-        "term": "dialogue",
-        "definition": "muloqot",
-        "synonyms": "",
-        "example": "Open dialogue is essential for resolving conflicts."
-      },
-      {
-        "term": "tasked with",
-        "definition": "vazifa yuklangan",
-        "synonyms": "",
-        "example": "She was tasked with managing the entire project."
-      },
-      {
-        "term": "executive",
-        "definition": "rahbar / yuqori lavozimli shaxs",
-        "synonyms": "",
-        "example": "Company executives are responsible for strategic decisions."
-      },
-      {
-        "term": "terrified of",
-        "definition": "juda qo‘rqmoq",
-        "synonyms": "",
-        "example": "Many companies are terrified of losing market share."
-      },
-      {
-        "term": "flatten",
-        "definition": "soddalashtirib yubormoq / bir xil qilib qo‘ymoq",
-        "synonyms": "",
-        "example": "Standardization can flatten creativity in some fields."
-      },
-      {
-        "term": "lacking",
-        "definition": "yetishmayotgan",
-        "synonyms": "",
-        "example": "The plan was lacking clear direction."
-      },
-      {
-        "term": "brainstorm",
-        "definition": "g‘oyalar o‘ylab topmoq",
-        "synonyms": "",
-        "example": "The team brainstormed several innovative solutions."
-      },
-      {
-        "term": "rule out",
-        "definition": "inkor qilmoq / variantdan chiqarib tashlamoq",
-        "synonyms": "",
-        "example": "They ruled out all impractical options."
-      },
-      {
-        "term": "vehicle for change",
-        "definition": "o‘zgarish vositasi",
-        "synonyms": "",
-        "example": "Education is often seen as a vehicle for social change."
-      },
-      {
-        "term": "geometry",
-        "definition": "shakl/tuzilish (kontekstda field design)",
-        "synonyms": "",
-        "example": "The geometry of the structure affects its stability."
-      },
-      {
-        "term": "delineated",
-        "definition": "aniq belgilangan",
-        "synonyms": "",
-        "example": "The responsibilities were clearly delineated."
-      },
-      {
-        "term": "discretion",
-        "definition": "erkin qaror qilish huquqi",
-        "synonyms": "",
-        "example": "Judges must use discretion when making decisions."
-      },
-      {
-        "term": "algorithm",
-        "definition": "algoritm",
-        "synonyms": "",
-        "example": "Social media platforms rely on algorithms to recommend content."
-      },
-      {
-        "term": "maximize",
-        "definition": "maksimal darajaga yetkazmoq",
-        "synonyms": "",
-        "example": "Companies aim to maximize their profits."
-      },
-      {
-        "term": "dissenting stance",
-        "definition": "qarshi fikr",
-        "synonyms": "",
-        "example": "Some scientists take a dissenting stance on this theory."
-      },
-      {
-        "term": "accuracy",
-        "definition": "aniqlik",
-        "synonyms": "",
-        "example": "High accuracy is crucial in medical diagnostics."
-      },
-      {
-        "term": "reality",
-        "definition": "haqiqat",
-        "synonyms": "",
-        "example": "Expectations do not always match reality."
-      }
+      { "term": "graziers", "definition": "people who raise livestock on grazing land | UZ: chorvadorlar", "synonyms": "cattle farmers", "example": "EN: Graziers depend on healthy pastures. | UZ: Chorvadorlar sog'lom yaylovlarga bog'liq." },
+      { "term": "pests", "definition": "animals that cause damage | UZ: zararkunandalar", "synonyms": "nuisance animals", "example": "EN: Farmers struggle with agricultural pests. | UZ: Fermerlar qishloq xo'jaligi zararkunandalari bilan kurashadilar." },
+      { "term": "biodiversity", "definition": "the diversity of plants and animals | UZ: biologik xilma-xillik", "synonyms": "variety of life", "example": "EN: Biodiversity is essential for healthy ecosystems. | UZ: Biologik xilma-xillik sog'lom ekotizimlar uchun muhimdir." },
+      { "term": "predator", "definition": "an animal that hunts other animals | UZ: yirtqich", "synonyms": "hunter", "example": "EN: The lion is a powerful predator. | UZ: Arslon kuchli yirtqichdir." },
+      { "term": "bane", "definition": "a cause of great trouble | UZ: balo, bosh og'rig'i", "synonyms": "curse", "example": "EN: Traffic is the bane of city life. | UZ: Tirbandlik shahar hayotining balosidir." },
+      { "term": "livelihoods", "definition": "means of earning a living | UZ: tirikchilik manbai", "synonyms": "income source", "example": "EN: Fishing provides livelihoods for many families. | UZ: Baliqchilik ko'plab oilalarning tirikchilik manbaidir." },
+      { "term": "threatened", "definition": "exposed to danger | UZ: xavf ostida qolgan", "synonyms": "endangered", "example": "EN: Many species are threatened by habitat loss. | UZ: Ko'plab turlar yashash joyi yo'qolishi tufayli xavf ostida." },
+      { "term": "prey", "definition": "an animal hunted for food | UZ: o'lja", "synonyms": "hunted animal", "example": "EN: Wolves search for prey at night. | UZ: Bo'rilar tunda o'lja qidiradi." },
+      { "term": "roam", "definition": "move freely over a large area | UZ: kezib yurmoq", "synonyms": "wander", "example": "EN: Wild horses roam the plains. | UZ: Yovvoyi otlar tekisliklarda kezib yuradi." },
+      { "term": "ensuing", "definition": "happening afterward | UZ: keyingi, ortidan kelgan", "synonyms": "following", "example": "EN: The ensuing debate lasted hours. | UZ: Keyingi bahs bir necha soat davom etdi." },
+      { "term": "descendants", "definition": "people or animals related to ancestors | UZ: avlodlar", "synonyms": "offspring", "example": "EN: They are descendants of early settlers. | UZ: Ular ilk ko'chmanchilarning avlodlaridir." },
+      { "term": "agricultural", "definition": "related to farming | UZ: qishloq xo'jaligiga oid", "synonyms": "farming", "example": "EN: Agricultural production increased. | UZ: Qishloq xo'jaligi ishlab chiqarishi oshdi." },
+      { "term": "livestock", "definition": "animals raised on farms | UZ: chorva mollari", "synonyms": "farm animals", "example": "EN: Livestock require regular care. | UZ: Chorva mollari muntazam parvarish talab qiladi." },
+      { "term": "sustained", "definition": "continuing for a long time | UZ: uzoq davom etgan", "synonyms": "prolonged", "example": "EN: The country experienced sustained growth. | UZ: Mamlakat uzoq davom etgan o'sishni boshdan kechirdi." },
+      { "term": "eliminate", "definition": "completely get rid of | UZ: yo'q qilmoq", "synonyms": "remove", "example": "EN: Scientists hope to eliminate the disease. | UZ: Olimlar kasallikni yo'q qilishga umid qilishmoqda." },
+      { "term": "unleashed", "definition": "allowed to move freely | UZ: qo'yib yuborilgan", "synonyms": "released", "example": "EN: The company unleashed a new product. | UZ: Kompaniya yangi mahsulotni taqdim etdi." },
+      { "term": "feral", "definition": "living in the wild after domestication | UZ: yovvoyilashgan", "synonyms": "wild", "example": "EN: Feral cats are common in the area. | UZ: Hududda yovvoyilashgan mushuklar ko'p." },
+      { "term": "abundance", "definition": "a very large amount | UZ: mo'llik", "synonyms": "plenty", "example": "EN: The forest has an abundance of wildlife. | UZ: O'rmonda yovvoyi hayvonlar juda ko'p." },
+      { "term": "dwindling", "definition": "gradually becoming smaller | UZ: kamayib borayotgan", "synonyms": "shrinking", "example": "EN: The town has a dwindling population. | UZ: Shaharning aholisi kamayib bormoqda." },
+      { "term": "adaptation", "definition": "change to fit conditions | UZ: moslashuv", "synonyms": "adjustment", "example": "EN: Adaptation helps species survive. | UZ: Moslashuv turlarning yashab qolishiga yordam beradi." },
+      { "term": "arid", "definition": "receiving very little rain | UZ: qurg'oqchil", "synonyms": "dry", "example": "EN: Cacti thrive in arid climates. | UZ: Kaktuslar qurg'oqchil iqlimda yaxshi o'sadi." },
+      { "term": "scarce", "definition": "not enough available | UZ: tanqis", "synonyms": "limited", "example": "EN: Water is scarce in the desert. | UZ: Cho'lda suv tanqis." },
+      { "term": "fertile", "definition": "capable of producing offspring | UZ: serhosil", "synonyms": "productive", "example": "EN: Only one female remained fertile. | UZ: Faqat bitta urg'ochi serhosil bo'lib qoldi." },
+      { "term": "extinctions", "definition": "complete loss of species | UZ: qirilib ketishlar", "synonyms": "disappearances", "example": "EN: Human activity causes extinctions. | UZ: Inson faoliyati turlarning qirilib ketishiga sabab bo'ladi." },
+      { "term": "desolate", "definition": "empty and lifeless | UZ: huvillagan", "synonyms": "barren", "example": "EN: They crossed a desolate landscape. | UZ: Ular huvillagan hududdan o'tishdi." },
+      { "term": "predominate", "definition": "be the largest or strongest group | UZ: ustunlik qilmoq", "synonyms": "dominate", "example": "EN: Women predominate in the profession. | UZ: Bu kasbda ayollar ustunlik qiladi." },
+      { "term": "staple", "definition": "most important or common | UZ: asosiy", "synonyms": "primary", "example": "EN: Rice is a staple food. | UZ: Guruch asosiy oziq-ovqat hisoblanadi." },
+      { "term": "deteriorating", "definition": "becoming worse | UZ: yomonlashayotgan", "synonyms": "worsening", "example": "EN: The weather is deteriorating rapidly. | UZ: Ob-havo tez yomonlashmoqda." },
+      { "term": "drought", "definition": "long period without rain | UZ: qurg'oqchilik", "synonyms": "dry period", "example": "EN: The drought damaged crops. | UZ: Qurg'oqchilik ekinlarga zarar yetkazdi." },
+      { "term": "aggressive", "definition": "very strong and determined | UZ: keskin, tajovuzkor", "synonyms": "forceful", "example": "EN: The company adopted an aggressive strategy. | UZ: Kompaniya keskin strategiyani tanladi." },
+      { "term": "counter-productive", "definition": "producing the opposite result | UZ: teskari natija beruvchi", "synonyms": "ineffective", "example": "EN: Excessive pressure is counter-productive. | UZ: Haddan tashqari bosim teskari natija beradi." },
+      { "term": "recolonized", "definition": "occupied again by a species | UZ: qayta egallangan", "synonyms": "repopulated", "example": "EN: The area was recolonized by wolves. | UZ: Hudud bo'rilar tomonidan qayta egallandi." },
+      { "term": "predation", "definition": "act of hunting prey | UZ: yirtqichlik", "synonyms": "hunting", "example": "EN: Predation affects ecosystem balance. | UZ: Yirtqichlik ekotizim muvozanatiga ta'sir qiladi." },
+      { "term": "persuaded", "definition": "made to believe something | UZ: ishontirilgan", "synonyms": "convinced", "example": "EN: I was persuaded by the evidence. | UZ: Men dalillar orqali ishontirildim." },
+      { "term": "ecological", "definition": "related to ecosystems and nature | UZ: ekologik", "synonyms": "environmental", "example": "EN: The project has ecological benefits. | UZ: Loyiha ekologik foydalarga ega." }
     ]
   }
-}
+} as const

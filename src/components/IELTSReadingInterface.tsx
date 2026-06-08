@@ -3465,6 +3465,105 @@ export default function IELTSReadingInterface({
             if (q.number > 8 && q.number <= 13) return null
           }
 
+          if (currentSection?.id === 'gilbert-magnetism-p1-v4') {
+            if (q.number === 1) {
+              return (
+                <div key="v4-gilbert-headings-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 7),
+                    'Questions 1-7',
+                    'Reading Passage 1 has seven paragraphs A-G. Choose the correct heading for each paragraph from the list of headings below. Write the correct number i-x in boxes 1-7 on your answer sheet.',
+                    'List of Headings',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 1 && q.number <= 7) return null
+            if (q.number === 8) {
+              return (
+                <div key="v4-gilbert-tfng-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 8 && entry.number <= 10),
+                    'Questions 8-10',
+                    'Do the following statements agree with the information given in Reading Passage 1? Write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
+                    ['TRUE', 'FALSE', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 8 && q.number <= 10) return null
+          }
+
+          if (currentSection?.id === 'pacific-voyaging-p2-v4') {
+            if (q.number === 14) {
+              return (
+                <div key="v4-pacific-yng-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 14 && entry.number <= 18),
+                    'Questions 14-18',
+                    'Do the following statements agree with the claims of the writer in Reading Passage 2? Write YES if the statement agrees with the claims of the writer, NO if the statement contradicts the claims of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this.',
+                    ['YES', 'NO', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 14 && q.number <= 18) return null
+            if (q.number === 24) {
+              return (
+                <div key="v4-pacific-endings-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 24 && entry.number <= 27),
+                    'Questions 24-27',
+                    'Complete each sentence with the correct ending, A-F, below. Write the correct letter, A-F, in boxes 24-27 on your answer sheet.',
+                    'List of Sentence Endings',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 24 && q.number <= 27) return null
+          }
+
+          if (currentSection?.id === 'dingo-debate-p3-v4') {
+            if (q.number === 28) {
+              return (
+                <div key="v4-dingo-sections-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 28 && entry.number <= 34),
+                    'Questions 28-34',
+                    'Reading Passage 3 has eight sections, A-H. Which section contains the following information? Write the correct letter, A-H, in boxes 28-34. NB You may use any letter more than once.',
+                    'Sections A-H',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 28 && q.number <= 34) return null
+            if (q.number === 35) {
+              return (
+                <div key="v4-dingo-people-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 35 && entry.number <= 37),
+                    'Questions 35-37',
+                    'Look at the following statements (Questions 35-37) and the list of people below. Match each statement with the correct person, A, B, C or D.',
+                    'List of People',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 35 && q.number <= 37) return null
+            if (q.number === 38) {
+              return (
+                <div key="v4-dingo-completion-group">
+                  {renderSentenceCompletionGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 38 && entry.number <= 40),
+                    'Questions 38-40',
+                    'Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer.',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 38 && q.number <= 40) return null
+          }
+
           if (currentSection?.id === 'metropolis-p3') {
             if (q.number === 27) {
               return (

@@ -1,8 +1,14 @@
 // The API key is read from an environment variable so it is never committed to the repo.
 // Set VITE_GEMINI_API_KEY in your .env (local) and in Railway's environment variables (deploy).
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
-const GEMINI_MODEL = 'gemini-2.5-flash'
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
+
+// Models are tried in order. The first is highest quality but has a small daily free
+// quota (~20/day); when it is exhausted (429) we fall back to the lite model which has a
+// much larger free quota (~1000/day), so the app keeps working all day.
+const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
+
+const buildModelUrl = (model: string) =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`
 
 export interface WritingError {
   original: string
@@ -187,41 +193,65 @@ async function callGeminiAPI(
     },
   }
 
-  // The model is occasionally overloaded (503) — retry once after a short pause.
-  let response: Response | null = null
-  for (let attempt = 0; attempt < 2; attempt++) {
-    response = await fetch(GEMINI_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-    if (response.status !== 503 || attempt === 1) break
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-  }
+  let lastError = ''
+  let sawQuota = false
+  let sawOverload = false
 
-  if (!response) throw new Error('No response from Gemini API.')
+  // Try each model in turn. On a quota (429) error we move straight to the next model
+  // (its quota is separate); on a transient overload (503) we retry the same model with
+  // backoff before falling through.
+  for (const model of GEMINI_MODELS) {
+    const url = buildModelUrl(model)
+    let response: Response | null = null
 
-  if (!response.ok) {
-    let detail = ''
+    const MAX_ATTEMPTS = 3
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (response.status !== 503 || attempt === MAX_ATTEMPTS - 1) break
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)))
+    }
+
+    if (!response) continue
+
+    if (response.ok) {
+      const data = await response.json()
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
+      if (text) return text
+      lastError = 'Empty response from the AI.'
+      continue
+    }
+
+    // Capture the error, then decide whether to fall through to the next model.
     try {
       const errData = await response.json()
-      detail = errData?.error?.message ?? ''
+      lastError = errData?.error?.message ?? ''
     } catch {
-      detail = await response.text().catch(() => '')
+      lastError = await response.text().catch(() => '')
     }
+
     if (response.status === 429) {
-      throw new Error('The AI is busy right now (rate limit). Please wait a moment and try again.')
+      sawQuota = true
+      continue // this model's quota is used up — try the next one
     }
     if (response.status === 503) {
-      throw new Error('The AI is temporarily overloaded. Please try again in a few seconds.')
+      sawOverload = true
+      continue
     }
-    throw new Error(`Gemini API error (${response.status}): ${detail}`)
+    // Other errors (e.g. 400/403) won't be fixed by another model.
+    throw new Error(`Gemini API error (${response.status}): ${lastError}`)
   }
 
-  const data = await response.json()
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text
-  if (!text) throw new Error('Empty response from Gemini API. Please try again.')
-  return text
+  if (sawQuota) {
+    throw new Error("Today's free AI quota is used up. It resets daily — please try again later.")
+  }
+  if (sawOverload) {
+    throw new Error('The AI is temporarily overloaded. Please try again in a few seconds.')
+  }
+  throw new Error(lastError || 'The AI did not return a response. Please try again.')
 }
 
 function extractJSON(raw: string): string {

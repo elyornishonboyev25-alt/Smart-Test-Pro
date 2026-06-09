@@ -235,38 +235,39 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
 
   const quickChips = isAnalysis ? QUICK_CHIPS.analysis : QUICK_CHIPS.default
 
+  // Analysis variant keeps the immersive dark theme; floating + panel use the site's
+  // light red/white premium look so the assistant matches the rest of the product.
   return (
     <section
-      className={`overflow-hidden rounded-2xl border ${
+      className={`overflow-hidden rounded-[1.4rem] border ${
         isAnalysis
           ? 'border-slate-700/80 bg-[radial-gradient(circle_at_0%_0%,rgba(255,255,255,0.11),transparent_45%),linear-gradient(155deg,#06080f_0%,#0d111b_58%,#141926_100%)] text-slate-100 shadow-[0_34px_80px_rgba(2,6,23,0.62)]'
-          : isFloating
-            ? 'border-rose-500/40 bg-[radial-gradient(circle_at_8%_0%,rgba(248,113,113,0.28),transparent_50%),linear-gradient(155deg,#0b1020_0%,#101828_52%,#111827_100%)] text-slate-100 shadow-[0_24px_50px_rgba(2,6,23,0.5)]'
-            : 'border-red-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]'
+          : 'border-red-100 bg-white text-slate-900 shadow-[0_24px_55px_-20px_rgba(239,68,68,0.4)]'
       }`}
     >
       <header
-        className={`flex items-center justify-between px-4 py-3 ${
-          isAnalysis || isFloating ? 'border-b border-slate-700/80' : 'border-b border-red-100'
+        className={`relative flex items-center justify-between px-4 py-3 ${
+          isAnalysis
+            ? 'border-b border-slate-700/80'
+            : 'border-b border-red-100 bg-gradient-to-r from-red-50 via-rose-50/60 to-white'
         }`}
       >
+        {!isAnalysis ? (
+          <span className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-red-400/70 to-transparent" />
+        ) : null}
         <div className="flex items-center gap-2.5">
           <span
-            className={`relative inline-flex h-9 w-9 items-center justify-center rounded-xl ${
-              isAnalysis || isFloating
-                ? 'bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/30'
-                : 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-500/25'
-            }`}
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-500/30"
           >
             <Bot className="h-5 w-5" />
-            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-900 bg-emerald-400" />
+            <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 bg-emerald-400 ${isAnalysis ? 'border-slate-900' : 'border-white'}`} />
           </span>
           <div>
-            <p className={`flex items-center gap-1.5 ${isAnalysis ? 'text-base font-bold' : 'text-sm font-bold'}`}>
+            <p className={`flex items-center gap-1.5 ${isAnalysis ? 'text-base font-bold' : 'text-sm font-black text-slate-900'}`}>
               AI Study Buddy
-              <Sparkles className={`h-3 w-3 ${isAnalysis || isFloating ? 'text-rose-300' : 'text-red-500'}`} />
+              <Sparkles className={`h-3 w-3 ${isAnalysis ? 'text-rose-300' : 'text-red-500'}`} />
             </p>
-            <p className={`text-[11px] ${isAnalysis || isFloating ? 'text-slate-300' : 'text-slate-500'}`}>
+            <p className={`text-[11px] font-medium ${isAnalysis ? 'text-slate-300' : 'text-red-500/80'}`}>
               {reportUpdatedAt ? 'Synced · ready to help' : 'IELTS & SAT companion'}
             </p>
           </div>
@@ -276,7 +277,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
             type="button"
             onClick={clearMessages}
             className={`rounded-lg p-2 ${
-              isAnalysis || isFloating ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-100'
+              isAnalysis ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-400 hover:bg-red-50 hover:text-red-600'
             }`}
             aria-label="Clear chat"
           >
@@ -287,7 +288,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
               type="button"
               onClick={onClose}
               className={`rounded-lg p-2 ${
-                isAnalysis || isFloating ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-100'
+                isAnalysis ? 'text-slate-300 hover:bg-slate-800' : 'text-slate-400 hover:bg-red-50 hover:text-red-600'
               }`}
               aria-label="Close chat"
             >
@@ -302,7 +303,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
           isAnalysis
             ? 'min-h-[16rem] max-h-[30rem] bg-slate-950/25'
             : isFloating
-              ? 'max-h-[22rem] bg-slate-950/25'
+              ? 'max-h-[22rem] bg-gradient-to-b from-white via-rose-50/30 to-white'
               : 'max-h-[20rem] bg-white'
         }`}
       >
@@ -339,12 +340,12 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
               key={message.id}
               className={`rounded-2xl border px-3.5 py-2.5 text-sm leading-6 ${
                 message.role === 'assistant'
-                  ? isAnalysis || isFloating
+                  ? isAnalysis
                     ? 'border-slate-700 bg-slate-900/70 text-slate-100'
-                    : 'border-red-100 bg-red-50/50 text-slate-800'
-                  : isAnalysis || isFloating
+                    : 'border-red-100 bg-white text-slate-800 shadow-sm'
+                  : isAnalysis
                     ? 'ml-auto max-w-[85%] border-rose-400/30 bg-gradient-to-br from-rose-500/25 to-red-500/15 text-rose-50'
-                    : 'ml-auto max-w-[85%] border-red-200 bg-red-100 text-red-900'
+                    : 'ml-auto max-w-[85%] border-transparent bg-gradient-to-br from-red-600 to-rose-600 text-white shadow-md shadow-red-500/20'
               }`}
             >
               {message.content}
@@ -353,9 +354,9 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
           {isSending ? (
             <div
               className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs ${
-                isAnalysis || isFloating
+                isAnalysis
                   ? 'border-slate-700 bg-slate-900 text-slate-300'
-                  : 'border-red-100 bg-red-50 text-slate-600'
+                  : 'border-red-100 bg-red-50 text-red-600'
               }`}
             >
               <Sparkles className="h-3.5 w-3.5 animate-pulse" />
@@ -368,7 +369,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
 
       <div
         className={`border-t px-4 py-3 ${
-          isAnalysis || isFloating ? 'border-slate-700 bg-slate-950/20' : 'border-red-100 bg-white'
+          isAnalysis ? 'border-slate-700 bg-slate-950/20' : 'border-red-100 bg-white'
         }`}
       >
         <div className={`${isAnalysis ? 'rounded-3xl border border-slate-700/80 bg-slate-900/65 p-2.5' : ''}`}>
@@ -380,7 +381,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
                 onClick={() => void sendMessage(chip)}
                 disabled={isSending}
                 className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
-                  isAnalysis || isFloating
+                  isAnalysis
                     ? 'border-slate-600 bg-slate-900/70 text-slate-100 hover:bg-slate-800'
                     : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
                 }`}
@@ -400,7 +401,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
                   : 'Ask me: open a test, writing tips, a question...'
               }
               className={`${isAnalysis ? 'h-14 rounded-2xl' : 'h-10 rounded-xl'} flex-1 border px-3 text-sm outline-none focus:ring-2 ${
-                isAnalysis || isFloating
+                isAnalysis
                   ? 'border-slate-600 bg-slate-900/70 text-slate-100 placeholder:text-slate-400 focus:border-rose-400 focus:ring-rose-500/20'
                   : 'border-red-200 bg-white text-slate-900 placeholder:text-slate-400 focus:border-red-400 focus:ring-red-200'
               }`}
@@ -409,10 +410,8 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
             <button
               type="submit"
               disabled={isSending || !draft.trim()}
-              className={`inline-flex ${isAnalysis ? 'h-14 w-14 rounded-2xl' : 'h-10 rounded-xl px-3'} items-center justify-center text-sm font-semibold transition ${
-                isAnalysis || isFloating
-                  ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white hover:brightness-110 disabled:opacity-50'
-                  : 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:brightness-110 disabled:opacity-50'
+              className={`inline-flex ${isAnalysis ? 'h-14 w-14 rounded-2xl' : 'h-10 rounded-xl px-3.5'} items-center justify-center text-sm font-semibold transition ${
+                'bg-gradient-to-r from-red-600 to-rose-600 text-white hover:brightness-110 disabled:opacity-50'
               }`}
             >
               <Send className="h-4 w-4" />
@@ -428,7 +427,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
 
         {error ? (
           <p
-            className={`mt-2 text-xs ${isAnalysis || isFloating ? 'text-rose-200' : 'text-red-700'}`}
+            className={`mt-2 text-xs font-medium ${isAnalysis ? 'text-rose-200' : 'text-red-600'}`}
             role="status"
             aria-live="polite"
           >

@@ -132,7 +132,10 @@ Available routes you can navigate to:
 - /analyze-mistakes — Analyze past mistakes
 - /account — Account settings
 
-When the user asks you to open a page or test, include a navigation action in your response.
+NAVIGATION RULE — Only include an action when the user EXPLICITLY asks to open, go to,
+start, or show a page/test (e.g. "open writing tests", "start Day 1", "go to leaderboard").
+For questions, tips, explanations, greetings, or general chat, return an EMPTY actions array
+and just reply with text. Never navigate as a side effect of answering a question.
 
 RESPONSE FORMAT — Return ONLY valid JSON:
 {

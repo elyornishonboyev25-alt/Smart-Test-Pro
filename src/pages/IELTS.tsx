@@ -107,13 +107,17 @@ export default function IELTS() {
               <StaggerItem key={section.id} className="h-full">
                 <Tilt3D className="h-full rounded-[1.8rem]" max={6}>
                   <button
-                    onClick={() =>
-                      navigate(`/ielts/${section.id}`, {
+                    onClick={() => {
+                      const target =
+                        section.id === 'writing'
+                          ? '/ielts/writing/tests'
+                          : `/ielts/${section.id}`
+                      navigate(target, {
                         state: fromMock
                           ? { entry: 'mock-ielts', from: mockFrom }
                           : { entry: 'ielts-hub' },
                       })
-                    }
+                    }}
                     className="interactive-lift group h-full w-full rounded-[1.8rem] border border-red-200 bg-gradient-to-br from-white via-rose-50 to-red-100/70 p-6 text-left shadow-[0_18px_36px_rgba(244,63,94,0.16)]"
                   >
                     <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700">

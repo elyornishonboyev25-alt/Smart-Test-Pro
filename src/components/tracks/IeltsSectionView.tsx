@@ -162,7 +162,7 @@ export function IeltsSectionView({
       return
     }
     if (section === 'writing') {
-      navigate('/writing-lab')
+      navigate('/ielts/writing/tests')
       return
     }
     navigate('/speaking-lab')
@@ -178,7 +178,7 @@ export function IeltsSectionView({
       return
     }
     if (section === 'writing') {
-      navigate('/writing-lab')
+      navigate('/ielts/writing/tests')
       return
     }
     navigate('/speaking-lab')

@@ -42,6 +42,8 @@ const Login = lazy(() => import('@/pages/Login'))
 const Register = lazy(() => import('@/pages/Register'))
 const Premium = lazy(() => import('@/pages/Premium'))
 const Leaderboard = lazy(() => import('@/pages/Leaderboard'))
+const IELTSWritingTests = lazy(() => import('@/pages/IELTSWritingTests'))
+const IELTSWritingTest = lazy(() => import('@/pages/IELTSWritingTest'))
 const TestRunner = lazy(() => import('@/pages/TestRunner'))
 const Articles = lazy(() => import('@/pages/Articles'))
 const ShadowingLab = lazy(() => import('@/pages/ShadowingLab'))
@@ -255,6 +257,8 @@ function App() {
                       <Route path="/sat/:section" element={<AnimatedRoute><SATSection /></AnimatedRoute>} />
                       <Route path="/sat/calculator" element={<AnimatedRoute><SATCalculator /></AnimatedRoute>} />
                       <Route path="/ielts" element={<AnimatedRoute><IELTS /></AnimatedRoute>} />
+                      <Route path="/ielts/writing/tests" element={<AnimatedRoute><IELTSWritingTests /></AnimatedRoute>} />
+                      <Route path="/ielts/writing/test/:id" element={<AnimatedRoute><IELTSWritingTest /></AnimatedRoute>} />
                       <Route path="/ielts/:section/tests" element={<AnimatedRoute><IELTSSectionTests /></AnimatedRoute>} />
                       <Route path="/ielts/:section" element={<AnimatedRoute><IELTSSection /></AnimatedRoute>} />
                       <Route

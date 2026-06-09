@@ -1,11 +1,26 @@
-// The API key is read from an environment variable so it is never committed to the repo.
-// Set VITE_GEMINI_API_KEY in your .env (local) and in Railway's environment variables (deploy).
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
+// API keys are read from environment variables so they are never committed to the repo.
+// You can supply MANY keys (from different Google accounts/projects) to multiply the free
+// quota — separate them with commas in VITE_GEMINI_API_KEY, e.g. "key1,key2,key3".
+// You may also use numbered vars VITE_GEMINI_API_KEY_2, _3, _4, _5 for clarity.
+// Each (key × model) pair has its OWN daily free quota, so the rotation below keeps the
+// app working even under heavy use — when one pair is exhausted/rate-limited it moves on.
+const GEMINI_API_KEYS: string[] = (() => {
+  const env = import.meta.env as Record<string, string | undefined>
+  const raw = [
+    env.VITE_GEMINI_API_KEY,
+    env.VITE_GEMINI_API_KEY_2,
+    env.VITE_GEMINI_API_KEY_3,
+    env.VITE_GEMINI_API_KEY_4,
+    env.VITE_GEMINI_API_KEY_5,
+  ]
+  return raw
+    .filter(Boolean)
+    .flatMap((value) => (value as string).split(','))
+    .map((key) => key.trim())
+    .filter((key) => key.length > 0)
+})()
 
-// Models are tried in order. The first is highest quality but has a small daily free
-// quota (~20/day); when it is exhausted or rate-limited (429) we fall through to the next.
-// Each model has its OWN separate free quota, so chaining several keeps the app working
-// even after heavy use. Quality stays high (all are flash-class models).
+// Models tried in priority order — first is highest quality, rest are high-quota fallbacks.
 const GEMINI_MODELS = [
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
@@ -13,8 +28,14 @@ const GEMINI_MODELS = [
   'gemini-flash-lite-latest',
 ]
 
-const buildModelUrl = (model: string) =>
-  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`
+// Every (model, key) combination, ordered model-first so the best model is preferred
+// across all keys before dropping to a lighter model.
+const MODEL_KEY_COMBOS: Array<{ model: string; key: string }> = GEMINI_MODELS.flatMap((model) =>
+  GEMINI_API_KEYS.map((key) => ({ model, key })),
+)
+
+const buildModelUrl = (model: string, key: string) =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`
 
 export interface WritingError {
   original: string
@@ -205,7 +226,7 @@ async function callGeminiAPI(
   userMessage: string,
   maxOutputTokens = 2048,
 ): Promise<string> {
-  if (!GEMINI_API_KEY) {
+  if (MODEL_KEY_COMBOS.length === 0) {
     throw new Error('AI is not configured yet. Add VITE_GEMINI_API_KEY to your environment and restart.')
   }
 
@@ -230,15 +251,17 @@ async function callGeminiAPI(
   let lastError = ''
   let sawQuota = false
   let sawOverload = false
+  let fatalError: string | null = null
 
-  // Try each model in turn. On a quota (429) error we move straight to the next model
-  // (its quota is separate); on a transient overload (503) we retry the same model with
-  // backoff before falling through.
-  for (const model of GEMINI_MODELS) {
-    const url = buildModelUrl(model)
+  // Rotate through every (model, key) pair. Each pair has its own free quota, so when one
+  // is exhausted/rate-limited (429) or its key is rejected (403) we simply move to the next
+  // pair. A transient overload (503) is retried in place first. This is why the daily-limit
+  // problem does not come back: add more keys and the combined capacity scales linearly.
+  for (const { model, key } of MODEL_KEY_COMBOS) {
+    const url = buildModelUrl(model, key)
     let response: Response | null = null
 
-    const MAX_ATTEMPTS = 3
+    const MAX_ATTEMPTS = 2
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       response = await fetch(url, {
         method: 'POST',
@@ -259,7 +282,7 @@ async function callGeminiAPI(
       continue
     }
 
-    // Capture the error, then decide whether to fall through to the next model.
+    // Capture the error, then decide whether to fall through to the next pair.
     try {
       const errData = await response.json()
       lastError = errData?.error?.message ?? ''
@@ -269,18 +292,24 @@ async function callGeminiAPI(
 
     if (response.status === 429) {
       sawQuota = true
-      continue // this model's quota is used up — try the next one
+      continue // quota/rate limit for this pair — try the next key/model
     }
     if (response.status === 503) {
       sawOverload = true
       continue
     }
-    // Other errors (e.g. 400/403) won't be fixed by another model.
-    throw new Error(`Gemini API error (${response.status}): ${lastError}`)
+    if (response.status === 403 || response.status === 401) {
+      // This key is rejected (leaked/invalid/restricted). A different key may still work.
+      continue
+    }
+    // A 400-style error is a request problem that no other key/model will fix.
+    fatalError = `Gemini API error (${response.status}): ${lastError}`
+    break
   }
 
+  if (fatalError) throw new Error(fatalError)
   if (sawQuota) {
-    throw new Error("Today's free AI quota is used up. It resets daily — please try again later.")
+    throw new Error("All AI keys hit their free quota for now. It resets daily, or add another key to keep going.")
   }
   if (sawOverload) {
     throw new Error('The AI is temporarily overloaded. Please try again in a few seconds.')

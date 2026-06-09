@@ -3,9 +3,15 @@
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
 
 // Models are tried in order. The first is highest quality but has a small daily free
-// quota (~20/day); when it is exhausted (429) we fall back to the lite model which has a
-// much larger free quota (~1000/day), so the app keeps working all day.
-const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
+// quota (~20/day); when it is exhausted or rate-limited (429) we fall through to the next.
+// Each model has its OWN separate free quota, so chaining several keeps the app working
+// even after heavy use. Quality stays high (all are flash-class models).
+const GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-flash-latest',
+  'gemini-flash-lite-latest',
+]
 
 const buildModelUrl = (model: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`

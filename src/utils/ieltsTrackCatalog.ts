@@ -61,6 +61,7 @@ const CURRENTLY_AVAILABLE_TRACK_TESTS: Record<IeltsTrackType, Set<string>> = {
     'reading-day-22',
     'reading-day-23',
     'reading-day-24',
+    'reading-day-25',
     'reading-day-11',
     'reading-day-12',
     'reading-day-13',

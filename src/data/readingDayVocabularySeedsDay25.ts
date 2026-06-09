@@ -1,0 +1,30 @@
+import type { ReadingVocabularySeed } from './ieltsReadingVocabularySource'
+
+export const readingDayVocabularySeedsDay25: Record<number, ReadingVocabularySeed[]> = {
+  25: [
+    { term: 'coveted', definition: `wanted very much by many people | UZ: orzu qilingan, e'tibor qaratilgan`, synonyms: 'desired', example: `EN: The award is coveted by every musician. | UZ: Bu mukofotni har bir musiqachi orzu qiladi.` },
+    { term: 'contentious', definition: `likely to cause disagreement | UZ: bahsli`, synonyms: 'controversial', example: `EN: The question remains highly contentious. | UZ: Bu savol hali ham juda bahsli.` },
+    { term: 'divergent', definition: `differing from each other | UZ: turlicha, bir-biridan farqli`, synonyms: 'differing', example: `EN: Experts hold divergent views on the topic. | UZ: Mutaxassislar bu mavzuda turlicha fikrlarga ega.` },
+    { term: 'distinctive', definition: `clearly different and easy to recognize | UZ: o'ziga xos`, synonyms: 'characteristic', example: `EN: Every violin has a distinctive voice. | UZ: Har bir skripka o'ziga xos ovozga ega.` },
+    { term: 'resonance', definition: `a deep, clear, continuing sound | UZ: rezonans, jaranglash`, synonyms: 'vibration', example: `EN: The loudspeaker excites a resonance in the plate. | UZ: Karnay plastinada rezonans hosil qiladi.` },
+    { term: 'supreme', definition: `highest in quality or degree | UZ: oliy, eng yuqori`, synonyms: 'ultimate', example: `EN: The ear is a supreme detection device. | UZ: Quloq oliy darajadagi aniqlash vositasidir.` },
+    { term: 'optimise', definition: `make something as good as possible | UZ: eng yaxshilamoq`, synonyms: 'improve', example: `EN: Makers optimise the tone of the instrument. | UZ: Ustalar asbobning ohangini eng yaxshilashadi.` },
+    { term: 'arching', definition: `the curved shape of a surface | UZ: kavisli shakl`, synonyms: 'curvature', example: `EN: They carve the plates to get the right arching. | UZ: Ular to'g'ri kavisni olish uchun plastinalarni o'yishadi.` },
+    { term: 'flexed', definition: `bent or curved | UZ: egilgan`, synonyms: 'bent', example: `EN: Makers test the feel of the plates when flexed. | UZ: Ustalar plastinalarni egilganda his qilib sinashadi.` },
+    { term: 'overtly', definition: `in an open and obvious way | UZ: oshkora`, synonyms: 'openly', example: `EN: They took a more overtly scientific approach. | UZ: Ular ko'proq oshkora ilmiy yondashuvni qo'lladilar.` },
+    { term: 'suspended', definition: `hanging from something | UZ: osilgan`, synonyms: 'hung', example: `EN: The plates are suspended above a loudspeaker. | UZ: Plastinalar karnay ustida osib qo'yiladi.` },
+    { term: 'reluctant', definition: `unwilling to do something | UZ: istamaydigan`, synonyms: 'unwilling', example: `EN: Owners are reluctant to take their violins apart. | UZ: Egalar skripkalarini ajratishni istashmaydi.` },
+    { term: 'prevailing', definition: `most common or widely accepted | UZ: hukmron, ustun`, synonyms: 'dominant', example: `EN: This matched the prevailing view of perfection. | UZ: Bu mukammallik haqidagi hukmron qarashga mos kelardi.` },
+    { term: 'ratios', definition: `relationships between two amounts | UZ: nisbatlar`, synonyms: 'proportions', example: `EN: Perfection was measured in exact ratios. | UZ: Mukammallik aniq nisbatlarda o'lchanardi.` },
+    { term: 'moisture', definition: `small amounts of water in something | UZ: namlik`, synonyms: 'dampness', example: `EN: The presence of moisture affects sound quality. | UZ: Namlikning mavjudligi ovoz sifatiga ta'sir qiladi.` },
+    { term: 'vibrancy', definition: `the quality of being bright and full of life | UZ: jonlilik, jarang`, synonyms: 'liveliness', example: `EN: Vibrancy requires wood with low internal damping. | UZ: Jonlilik ichki so'nishi past yog'ochni talab qiladi.` },
+    { term: 'damping', definition: `the reduction of vibration or sound | UZ: so'ndirish`, synonyms: 'reduction', example: `EN: High-quality wood has low internal damping. | UZ: Yuqori sifatli yog'och past ichki so'nishga ega.` },
+    { term: 'seasoned', definition: `dried and prepared over time (wood) | UZ: quritilgan, yetiltirilgan`, synonyms: 'matured', example: `EN: The wood had only been seasoned for five years. | UZ: Yog'och atigi besh yil quritilgan edi.` },
+    { term: 'intrinsic', definition: `belonging naturally to something | UZ: ichki, tabiiy`, synonyms: 'inherent', example: `EN: The intrinsic damping decreases with time. | UZ: Ichki so'nish vaqt o'tishi bilan kamayadi.` },
+    { term: 'varnish', definition: `a protective shiny coating | UZ: lak`, synonyms: 'coating', example: `EN: The varnish protects the instrument. | UZ: Lak asbobni himoya qiladi.` },
+    { term: 'contaminated', definition: `made impure by an unwanted substance | UZ: ifloslangan`, synonyms: 'polluted', example: `EN: The varnish was contaminated with insect wings. | UZ: Lak hasharot qanotlari bilan ifloslangan edi.` },
+    { term: 'debris', definition: `scattered pieces of waste or remains | UZ: chiqindi, qoldiq`, synonyms: 'waste', example: `EN: Debris from the workshop floor mixed in. | UZ: Ustaxona polidagi chiqindilar aralashib ketgan.` },
+    { term: 'vested interest', definition: `a private reason for wanting something | UZ: shaxsiy manfaat`, synonyms: 'personal stake', example: `EN: Dealers have a vested interest in the legend. | UZ: Sotuvchilar bu afsonadan shaxsiy manfaatdor.` },
+    { term: 'unconvinced', definition: `not persuaded that something is true | UZ: ishonmagan`, synonyms: 'doubtful', example: `EN: The foremost soloists remain unconvinced. | UZ: Yetakchi yakkaxonlar hali ham ishonmaydi.` },
+  ],
+}

@@ -1,0 +1,176 @@
+import type { Question, Section } from '../types/ieltsTypes'
+
+const day25HeadingOptions = [
+  'i. A popular theory about varnish that has been disproved',
+  'ii. Adopting a scientific approach to violin making',
+  'iii. The importance of climate in instrument production',
+  'iv. The unique voice of each instrument',
+  'v. Why Stradivarius violins are popular with collectors',
+  'vi. An explanation for the improved sound of older instruments',
+  'vii. The effect of string type on sound quality',
+  'viii. A shortage of data on fine Italian violins',
+  'ix. Traditional methods of violin construction',
+  'x. The failure of science to provide definitive answers',
+  'xi. Claims about wood treatment that lack supporting evidence',
+]
+
+const day25Questions: Question[] = [
+  {
+    id: 'day25-q1',
+    number: 1,
+    type: 'matching-headings',
+    groupTitle: 'Questions 1-8',
+    instruction:
+      'Reading Passage 2 has eight paragraphs, A-H. Choose the correct heading for each paragraph from the list of headings below.',
+    text: 'Paragraph A',
+    options: day25HeadingOptions,
+    correctAnswer: 'iv',
+    location: 'Paragraph A',
+  },
+  {
+    id: 'day25-q2',
+    number: 2,
+    type: 'matching-headings',
+    text: 'Paragraph B',
+    options: day25HeadingOptions,
+    correctAnswer: 'ix',
+    location: 'Paragraph B',
+  },
+  {
+    id: 'day25-q3',
+    number: 3,
+    type: 'matching-headings',
+    text: 'Paragraph C',
+    options: day25HeadingOptions,
+    correctAnswer: 'ii',
+    location: 'Paragraph C',
+  },
+  {
+    id: 'day25-q4',
+    number: 4,
+    type: 'matching-headings',
+    text: 'Paragraph D',
+    options: day25HeadingOptions,
+    correctAnswer: 'viii',
+    location: 'Paragraph D',
+  },
+  {
+    id: 'day25-q5',
+    number: 5,
+    type: 'matching-headings',
+    text: 'Paragraph E',
+    options: day25HeadingOptions,
+    correctAnswer: 'vi',
+    location: 'Paragraph E',
+  },
+  {
+    id: 'day25-q6',
+    number: 6,
+    type: 'matching-headings',
+    text: 'Paragraph F',
+    options: day25HeadingOptions,
+    correctAnswer: 'i',
+    location: 'Paragraph F',
+  },
+  {
+    id: 'day25-q7',
+    number: 7,
+    type: 'matching-headings',
+    text: 'Paragraph G',
+    options: day25HeadingOptions,
+    correctAnswer: 'xi',
+    location: 'Paragraph G',
+  },
+  {
+    id: 'day25-q8',
+    number: 8,
+    type: 'matching-headings',
+    text: 'Paragraph H',
+    options: day25HeadingOptions,
+    correctAnswer: 'x',
+    location: 'Paragraph H',
+  },
+  {
+    id: 'day25-q9',
+    number: 9,
+    type: 'true-false-not-given',
+    groupTitle: 'Questions 9-13',
+    instruction:
+      'Do the following statements agree with the information given in Reading Passage? Write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
+    text: 'It is extremely difficult to distinguish a fine Stradivarius from a modern copy based on measured response alone.',
+    correctAnswer: 'TRUE',
+    location: 'Paragraph A',
+  },
+  {
+    id: 'day25-q10',
+    number: 10,
+    type: 'true-false-not-given',
+    text: 'Traditional violin makers test the wood by suspending it above a loudspeaker.',
+    correctAnswer: 'FALSE',
+    location: 'Paragraph C',
+  },
+  {
+    id: 'day25-q11',
+    number: 11,
+    type: 'true-false-not-given',
+    text: 'The first Italian makers definitely tuned the plates to exact musical intervals.',
+    correctAnswer: 'NOT GIVEN',
+    location: 'Paragraph D',
+  },
+  {
+    id: 'day25-q12',
+    number: 12,
+    type: 'true-false-not-given',
+    text: 'The age of the wood may contribute to the improved quality of older instruments.',
+    correctAnswer: 'TRUE',
+    location: 'Paragraph E',
+  },
+  {
+    id: 'day25-q13',
+    number: 13,
+    type: 'true-false-not-given',
+    text: 'Historical research has shown that the varnish used by Stradivarius had a unique secret composition.',
+    correctAnswer: 'FALSE',
+    location: 'Paragraph F',
+  },
+]
+
+export const readingDaySectionDay25: Section = {
+  id: 'day25-stradivarius-p2',
+  title: 'Day 25 Passage 2: Science and the Stradivarius',
+  paragraphs: [
+    {
+      label: 'A',
+      content: `Violins made by long-dead Italian craftsmen from the Cremona region are beautiful works of art, coveted by collectors as well as players. Particularly outstanding violins have reputedly changed hands for over a million pounds. In contrast, fine modern instruments can be bought for under £100. Do such figures really reflect such large differences in quality? After more than a hundred years of vigorous debate, this question remains highly contentious, provoking strongly held but divergent views among musicians, violin makers and scientists alike. Every violin, whether a Stradivarius or the cheapest factory-made copy, has a distinctive 'voice' of its own. Just as any musician can immediately recognise the difference between Domingo and Pavarotti singing the same operatic aria, so a skilled violinist can distinguish between different qualities in the sound produced by individual Stradivari or Guarneri violins. Individual notes on a single instrument sound different each time they are played, which suggests that the perceived tone of a violin must be related to the overall design of the instrument, rather than the frequencies of particular resonances on it. But although various attempts have been made to analyse such global properties, it is extremely difficult to distinguish between a fine Stradivarius instrument and an indifferent modern copy on the basis of the measured response alone. The ear is a supreme detection device, and a system has yet to be developed which can match the brain's sophisticated ability to assess complex sounds.`,
+    },
+    {
+      label: 'B',
+      content: `So how do skilled violinmakers optimise the tone of an instrument during the construction process? They begin by selecting a wood of the highest possible quality for the front and back plates (or parts of the violin), which they test by tapping with a hammer and judging how well it 'rings'. The next important step is to skillfully carve the plates out of the solid wood, taking great care to get the right degree of arching and variations in thickness. Traditional makers optimise the thickness by testing the 'feel' of the plates when they are flexed, and by the sounds produced when they are tapped at different positions with the knuckles.`,
+    },
+    {
+      label: 'C',
+      content: `However, in the last 50 years or so a group of violin makers has emerged who have tried to take a more overtly scientific approach to violin making. One common practice they have adopted is to replace the traditional flexing and tapping of plates by controlled measurements. During the carving process, the thinned plates are sprinkled with flakes of glitter and suspended horizontally above a loudspeaker. The glitter forms a pattern each time the loudspeaker excites a resonance. The aim is to interactively 'tune' these first few free plate resonances to specified patterns.`,
+    },
+    {
+      label: 'D',
+      content: `Unfortunately, there are very few examples of such measurements for really fine Italian instruments because their owners are naturally reluctant to allow their violins to be taken apart for the sake of science. The few tests that have been performed suggest that the first Italian makers may have tuned the resonant modes of the individual plates - which they could identify as they tapped them - to exact musical intervals. This would be consistent with the prevailing Renaissance view of 'perfection', which was measured in terms of numbers and exact ratios. However, there is no historical data to support this case.`,
+    },
+    {
+      label: 'E',
+      content: `Another factor that affects sound quality is the presence of moisture. To achieve the quality of 'vibrancy' in a violin requires high-quality wood with low internal damping. By measuring the pattern of growth-rings in the wood of a Stradivarius, we know that the Italian violin makers sometimes used planks of wood that had only been seasoned for five years. However, such wood is now 300 years old, and the intrinsic internal damping will almost certainly have decreased with time. The age of the wood may therefore automatically contribute to the improved quality of older instruments. This may also explain why the quality of a modern instrument appears to improve in its first few years.`,
+    },
+    {
+      label: 'F',
+      content: `Another factor thought to account for sound quality is the nature of the varnish used to protect the instrument. One of the most popular theories for well over a century to account for the Stradivarius secret has been that the varnish had some sort of 'magic' composition. However, historical research has shown that it was very similar to the varnish used today. So apart from the possibility that the Italian varnish was contaminated with the wings of passing insects and debris from the workshop floor, there is no convincing evidence to support the idea of a secret formula.`,
+    },
+    {
+      label: 'G',
+      content: `Other researchers, meanwhile, have claimed that Stradivarius's secret was to soak the timber in water, to leach out supposedly harmful chemicals, before it was seasoned. Although this would be consistent with the idea that the masts and oars of recently sunken Venetian war galleys might have been used to make violins, other scientific and historical evidence to support this view is unconvincing.`,
+    },
+    {
+      label: 'H',
+      content: `In conclusion, science has not provided any convincing evidence to set Cremonese instruments apart from the finest violins made by skilled craftsmen today. Indeed, some leading soloists do occasionally play on modern instruments. However, the foremost soloists - and, not surprisingly, violin dealers, who have a vested interest in maintaining the Cremonese legend of intrinsic superiority - remain utterly unconvinced.`,
+    },
+  ],
+  questions: day25Questions,
+}

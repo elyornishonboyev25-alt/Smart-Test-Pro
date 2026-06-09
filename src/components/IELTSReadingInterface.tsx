@@ -62,8 +62,8 @@ const sectionIdsWithoutParagraphLabels = new Set([
   'day14-pagodas-p1',
   'day17-story-of-silk-p1',
   'day18-great-migrations-p2',
-  'day21-polar-bears-p1',
-  'day23-future-work-p3',
+  'day21-fishbourne-palace-p1',
+  'day23-food-desert-p3',
 ])
 
 function sectionHasLabeledParagraphs(section: Section | undefined): boolean {
@@ -2019,100 +2019,6 @@ export default function IELTSReadingInterface({
     )
   }
 
-  const renderDay24PrestonNotesGroup = (questions: Question[]) => {
-    const questionByNumber = new Map<number, Question>(questions.map((question) => [question.number, question]))
-
-    const renderAnswerInput = (questionNumber: number) => {
-      const question = questionByNumber.get(questionNumber)
-      if (!question) return null
-
-      const meta = getQuestionReviewMeta(question)
-      const isCorrect = meta?.status === 'correct'
-      const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
-
-      return (
-        <span id={`question-card-${question.id}`} className="inline-flex align-middle">
-          <input
-            type="text"
-            value={(answers[question.id] as string) || ''}
-            onChange={(event) => handleAnswerChange(question.id, event.target.value)}
-            disabled={isReviewMode}
-            className={`mx-1 inline-flex h-8 min-w-[96px] max-w-[150px] rounded-md border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
-              isReviewMode && reviewShowCorrectAnswers
-                ? isWrong
-                  ? 'border-red-300 bg-red-50/70 text-red-700'
-                  : isCorrect
-                    ? 'border-emerald-300 bg-emerald-50/80 text-emerald-700'
-                    : 'border-slate-300'
-                : 'border-slate-300 bg-white'
-            }`}
-            placeholder={String(question.number)}
-          />
-        </span>
-      )
-    }
-
-    const renderReviewHints = () => {
-      if (!isReviewMode || !reviewShowCorrectAnswers) return null
-      return (
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {questions.map((question) => (
-            <div key={`day24-review-${question.id}`}>{reviewHint(question, 'mt-0')}</div>
-          ))}
-        </div>
-      )
-    }
-
-    return (
-      <section className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
-        <h4 className="text-xl font-black leading-tight text-slate-900">Questions 8-13</h4>
-        <div className="mt-1 space-y-0.5 text-sm text-slate-700">
-          <p>Complete the notes below.</p>
-          <p>
-            Choose <span className="font-black text-slate-900">ONE WORD AND/OR A NUMBER</span> from the passage for each answer.
-          </p>
-          <p>Write your answers in boxes 8-13 on your answer sheet.</p>
-        </div>
-
-        <div className="mt-2.5 rounded-xl border border-slate-200 bg-[#fefefe] px-3 py-3">
-          <p className="text-lg leading-tight font-black text-slate-900 sm:text-xl">Margaret Preston&apos;s later life</p>
-
-          <div className="mt-3 space-y-5 text-[15px] leading-relaxed text-slate-900">
-            <div>
-              <p className="font-black text-slate-900">Aboriginal influence</p>
-              <ul className="mt-2 list-disc space-y-1.5 pl-6">
-                <li>interest in Aboriginal art was inspired by seeing rock engravings close to her Berowra home</li>
-                <li>
-                  incorporated {renderAnswerInput(8)} and colours from Aboriginal art in her own work often referred to Aboriginal sources in the {renderAnswerInput(9)} she gave her artworks
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="font-black text-slate-900">1953 exhibition</p>
-              <ul className="mt-2 list-disc space-y-1.5 pl-6">
-                <li>very old method of {renderAnswerInput(10)} was used for some prints</li>
-                <li>was inspired by {renderAnswerInput(11)} about Chinese art that she had started collecting in 1915</li>
-                <li>combination of Chinese and Aboriginal elements</li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="font-medium text-slate-700">Old age</p>
-              <ul className="mt-2 list-disc space-y-1.5 pl-6">
-                <li>still interested in {renderAnswerInput(12)} and art</li>
-                <li>worked for nearly six decades making more than {renderAnswerInput(13)} artworks</li>
-                <li>dedicated to Australian art and the originality of her work is seen in Preston&apos;s long career</li>
-              </ul>
-            </div>
-          </div>
-
-          {renderReviewHints()}
-        </div>
-      </section>
-    )
-  }
-
   const renderMatchingSelectGroup = (
     questions: Question[],
     title: string,
@@ -2174,16 +2080,20 @@ export default function IELTSReadingInterface({
 
   const renderDragDropSummaryGroup = (question: Question) => {
     const slotCount = Array.isArray(question.correctAnswer) ? Math.max(1, question.correctAnswer.length) : 1
-    const lines = question.text
+    const blankPattern = /_{3,}/
+    const allLines = question.text
       .split('\n')
       .map((line) => line.trim())
       .filter(Boolean)
+    // Optional leading heading line (e.g. a summary title) that is not an answer slot.
+    const hasTitleLine = allLines.length === slotCount + 1 && !blankPattern.test(allLines[0])
+    const summaryTitle = hasTitleLine ? allLines[0] : null
+    const lines = hasTitleLine ? allLines.slice(1) : allLines
     const answerSlots = readAnswerArray(answers[question.id] as unknown)
     const slots = Array.from({ length: slotCount }, (_, slotIndex) =>
       String(answerSlots[slotIndex] ?? '').trim(),
     )
     const queuedOption = activeDragOption[question.id]?.trim() ?? ''
-    const blankPattern = /_{3,}/
 
     const renderInlineDropSlot = (slotIndex: number) => {
       const slotValue = slots[slotIndex] || ''
@@ -2269,6 +2179,9 @@ export default function IELTSReadingInterface({
         <p className="mt-0.5 text-sm text-slate-700">{question.instruction || 'Complete the summary by dragging the correct words into the gaps.'}</p>
 
         <div className="mt-2 rounded-xl border border-red-100 bg-[#fffdfd] p-2">
+          {summaryTitle && (
+            <p className="mb-1.5 text-center text-lg font-black leading-tight text-slate-900">{summaryTitle}</p>
+          )}
           <div className="space-y-1.5">
             {lines.map((line, lineIndex) => {
               const slotNumber = question.number + lineIndex
@@ -2479,6 +2392,72 @@ export default function IELTSReadingInterface({
             ))}
           </div>
         ) : null}
+      </section>
+    )
+  }
+
+  // Reusable themed summary/notes box with a passage-style title heading and inline blanks.
+  // The optional `title` is stripped from sentence text if it appears embedded in the first line.
+  const renderTitledSummaryGroup = (
+    questions: Question[],
+    groupTitle: string,
+    instruction: string,
+    title: string,
+  ) => {
+    return (
+      <section className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
+        <h4 className="text-xl font-black text-slate-900">{groupTitle}</h4>
+        <p className="mt-1 text-sm text-slate-700">{instruction}</p>
+        <div className="mt-2.5 rounded-xl border border-slate-200 bg-[#fefefe] px-3 py-3">
+          <p className="text-center text-lg font-black leading-tight text-slate-900 sm:text-xl">{title}</p>
+          <p className="mt-2 text-[15px] leading-relaxed text-slate-900">
+            {questions.map((question, index) => {
+              const meta = getQuestionReviewMeta(question)
+              const isCorrect = meta?.status === 'correct'
+              const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
+              const cleanedText = question.text
+                .split('\n')
+                .map((segment) => segment.trim())
+                .filter((segment) => segment && segment !== title)
+                .join(' ')
+              return (
+                <span key={question.id} id={`question-card-${question.id}`}>
+                  {index > 0 ? ' ' : null}
+                  {cleanedText.split(/(______|_+)/).map((part, partIndex) =>
+                    /^_+$/.test(part) || part === '______' ? (
+                      <input
+                        key={`${question.id}-blank-${partIndex}`}
+                        type="text"
+                        value={(answers[question.id] as string) || ''}
+                        onChange={(event) => handleAnswerChange(question.id, event.target.value)}
+                        disabled={isReviewMode}
+                        className={`mx-1 inline-flex h-8 min-w-[96px] max-w-[150px] rounded-md border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+                          isReviewMode && reviewShowCorrectAnswers
+                            ? isWrong
+                              ? 'border-red-300 bg-red-50/70 text-red-700'
+                              : isCorrect
+                                ? 'border-emerald-300 bg-emerald-50/80 text-emerald-700'
+                                : 'border-red-200'
+                            : 'border-red-200'
+                        }`}
+                        placeholder={String(question.number)}
+                      />
+                    ) : (
+                      <span key={`${question.id}-text-${partIndex}`}>{part}</span>
+                    ),
+                  )}
+                </span>
+              )
+            })}
+          </p>
+          {isReviewMode ? (
+            <div className="mt-2 space-y-1">
+              {questions.map((question) => (
+                <div key={`titled-summary-hint-${question.id}`}>{reviewHint(question)}</div>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </section>
     )
   }
@@ -3360,15 +3339,44 @@ export default function IELTSReadingInterface({
             if (q.number > 35 && q.number <= 40) return null
           }
 
-          if (currentSection?.id === 'day21-polar-bears-p1') {
+          if (currentSection?.id === 'day21-fishbourne-palace-p1') {
             if (q.number === 1) {
               return (
-                <div key="day21-polar-statement-group">
+                <div key="day21-fishbourne-statement-group">
                   {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 6),
+                    'Questions 1-6',
+                    'Do the following statements agree with the information given in the passage? Choose TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
+                    ['TRUE', 'FALSE', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 1 && q.number <= 6) return null
+            if (q.number === 7) {
+              return (
+                <div key="day21-fishbourne-summary-group">
+                  {renderTitledSummaryGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 7 && entry.number <= 13),
+                    'Questions 7-13',
+                    'Complete the summary below. Choose NO MORE THAN TWO WORDS AND/OR A NUMBER from the passage for each answer.',
+                    'Fishbourne Roman Palace',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 7 && q.number <= 13) return null
+          }
+
+          if (currentSection?.id === 'day22-fear-unknown-p2') {
+            if (q.number === 1) {
+              return (
+                <div key="day22-fear-matching-group">
+                  {renderMatchingSelectGroup(
                     currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 7),
                     'Questions 1-7',
-                    'Choose TRUE if the statement agrees with the information in the text, choose FALSE if the statement contradicts the information, or choose NOT GIVEN if there is no information on this.',
-                    ['TRUE', 'FALSE', 'NOT GIVEN'],
+                    'The passage has seven paragraphs, A-G. Which paragraph contains the following information? Write the correct letter, A-G. NB You may use any letter more than once.',
+                    'Paragraphs A-G',
                   )}
                 </div>
               )
@@ -3376,93 +3384,207 @@ export default function IELTSReadingInterface({
             if (q.number > 1 && q.number <= 7) return null
             if (q.number === 8) {
               return (
-                <div key="day21-polar-summary-group">
-                  {renderSentenceCompletionGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 8 && entry.number <= 13),
-                    'Questions 8-13',
-                    'Complete the notes below. Choose ONE WORD ONLY from the passage for each answer.',
+                <div key="day22-fear-statement-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 8 && entry.number <= 11),
+                    'Questions 8-11',
+                    'Do the following statements agree with the information given in the passage? Choose TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
+                    ['TRUE', 'FALSE', 'NOT GIVEN'],
                   )}
                 </div>
               )
             }
-            if (q.number > 8 && q.number <= 13) return null
+            if (q.number > 8 && q.number <= 11) return null
+            if (q.number === 12) {
+              return (
+                <div key="day22-fear-endings-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 12 && entry.number <= 14),
+                    'Questions 12-14',
+                    'Complete each sentence with the correct ending, A-D, below.',
+                    'List of Sentence Endings',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 12 && q.number <= 14) return null
           }
 
-          if (currentSection?.id === 'day22-step-pyramid-p2') {
-            if (q.number === 14) {
+          if (currentSection?.id === 'day23-food-desert-p3') {
+            if (q.number === 1) {
               return (
-                <div key="day22-pyramid-headings-group">
+                <div key="day23-fooddesert-summary-group">
+                  {renderTitledSummaryGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 6),
+                    'Questions 1-6',
+                    'Complete the summary below. Choose ONE WORD ONLY from the passage for each answer.',
+                    'Mapping food deserts in Brooklyn',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 1 && q.number <= 6) return null
+            if (q.number === 7) {
+              return (
+                <div key="day23-fooddesert-statement-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 7 && entry.number <= 13),
+                    'Questions 7-13',
+                    'Do the following statements agree with the information given in the passage? Choose TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
+                    ['TRUE', 'FALSE', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 7 && q.number <= 13) return null
+          }
+
+          if (currentSection?.id === 'day24-amusia-p1') {
+            if (q.number === 1) {
+              return (
+                <div key="day24-amusia-matching-group">
                   {renderMatchingSelectGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 14 && entry.number <= 20),
-                    'Questions 14-20',
-                    'Choose the correct heading for each paragraph from the list of headings below.',
+                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 5),
+                    'Questions 1-5',
+                    'The passage has seven paragraphs, A-G. Which paragraph contains the following information? Write the correct letter, A-G. NB You may use any letter more than once.',
+                    'Paragraphs A-G',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 1 && q.number <= 5) return null
+            if (q.number === 6) {
+              return (
+                <div key="day24-amusia-yesno-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 6 && entry.number <= 9),
+                    'Questions 6-9',
+                    'Do the following statements agree with the claims of the writer in Reading Passage? Write YES if the statement agrees with the claims of the writer, NO if the statement contradicts the claims of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this.',
+                    ['YES', 'NO', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 6 && q.number <= 9) return null
+            if (q.number === 10) {
+              return (
+                <div key="day24-amusia-matching2-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 10 && entry.number <= 14),
+                    'Questions 10-14',
+                    'The passage has seven paragraphs, A-G. Which paragraph contains the following information? Write the correct letter, A-G.',
+                    'Paragraphs A-G',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 10 && q.number <= 14) return null
+          }
+
+          if (currentSection?.id === 'day25-stradivarius-p2') {
+            if (q.number === 1) {
+              return (
+                <div key="day25-stradivarius-headings-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 8),
+                    'Questions 1-8',
+                    'Reading Passage 2 has eight paragraphs, A-H. Choose the correct heading for each paragraph from the list of headings below.',
                     'List of Headings',
                   )}
                 </div>
               )
             }
-            if (q.number > 14 && q.number <= 20) return null
-            if (q.number === 21) {
+            if (q.number > 1 && q.number <= 8) return null
+            if (q.number === 9) {
               return (
-                <div key="day22-pyramid-summary-group">
-                  {renderSentenceCompletionGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 21 && entry.number <= 24),
-                    'Questions 21-24',
-                    'Complete the notes below. Choose ONE WORD ONLY from the passage for each answer.',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 21 && q.number <= 24) return null
-          }
-
-          if (currentSection?.id === 'day23-future-work-p3') {
-            if (q.number === 31) {
-              return (
-                <div key="day23-futurework-drag-group">
-                  {renderDragDropSummaryGroup(q)}
-                </div>
-              )
-            }
-            if (q.number === 35) {
-              return (
-                <div key="day23-futurework-people-group">
-                  {renderMatchingSelectGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 35 && entry.number <= 40),
-                    'Questions 35-40',
-                    'Match each statement with the correct person.',
-                    'List of Names',
-                  )}
-                </div>
-              )
-            }
-            if (q.number > 35 && q.number <= 40) return null
-          }
-
-          if (currentSection?.id === 'day24-margaret-preston-p1') {
-            if (q.number === 1) {
-              return (
-                <div key="day24-preston-statement-group">
+                <div key="day25-stradivarius-statement-group">
                   {renderStatementChoiceGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 7),
-                    'Questions 1-7',
-                    'Do the following statements agree with the information given in Reading Passage? In boxes 1-7 on your answer sheet, write TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
+                    currentSection.questions.filter((entry) => entry.number >= 9 && entry.number <= 13),
+                    'Questions 9-13',
+                    'Do the following statements agree with the information given in Reading Passage? Choose TRUE if the statement agrees with the information, FALSE if the statement contradicts the information, or NOT GIVEN if there is no information on this.',
                     ['TRUE', 'FALSE', 'NOT GIVEN'],
                   )}
                 </div>
               )
             }
-            if (q.number > 1 && q.number <= 7) return null
-            if (q.number === 8) {
+            if (q.number > 9 && q.number <= 13) return null
+          }
+
+          if (currentSection?.id === 'aus-parrots-p1-v6') {
+            if (q.number === 1) {
               return (
-                <div key="day24-preston-notes-group">
-                  {renderDay24PrestonNotesGroup(
-                    currentSection.questions.filter((entry) => entry.number >= 8 && entry.number <= 13),
+                <div key="parrots-matching-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 1 && entry.number <= 6),
+                    'Questions 1-6',
+                    'Reading Passage 1 has ten paragraphs, A–J. Which paragraph contains the following information? Write the correct letter, A–J.',
+                    'Paragraphs A–J',
                   )}
                 </div>
               )
             }
-            if (q.number > 8 && q.number <= 13) return null
+            if (q.number > 1 && q.number <= 6) return null
+            if (q.number === 10) {
+              return (
+                <div key="parrots-summary-group">
+                  {renderTitledSummaryGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 10 && entry.number <= 13),
+                    'Questions 10-13',
+                    'Complete the summary below. Choose NO MORE THAN TWO WORDS AND/OR A NUMBER from the passage for each answer.',
+                    'Parrots in Australia',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 10 && q.number <= 13) return null
+          }
+
+          if (currentSection?.id === 'yawning-p2-v6') {
+            if (q.number === 14) {
+              return <div key="yawning-drag-group">{renderDragDropSummaryGroup(q)}</div>
+            }
+            if (q.number === 25) {
+              return (
+                <div key="yawning-yng-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 25 && entry.number <= 27),
+                    'Questions 25-27',
+                    'Do the following statements agree with the claims of the writer? Write YES if the statement agrees with the views of the writer, NO if the statement contradicts the views of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this.',
+                    ['YES', 'NO', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 25 && q.number <= 27) return null
+          }
+
+          if (currentSection?.id === 'history-film-p3-v6') {
+            if (q.number === 28) {
+              return (
+                <div key="history-film-matching-group">
+                  {renderMatchingSelectGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 28 && entry.number <= 36),
+                    'Questions 28-36',
+                    'Reading Passage 3 has seven paragraphs, A–G. Which paragraph contains the following information? Write the correct letter, A–G. NB You may use any letter more than once.',
+                    'Paragraphs A–G',
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 28 && q.number <= 36) return null
+            if (q.number === 37) {
+              return (
+                <div key="history-film-yng-group">
+                  {renderStatementChoiceGroup(
+                    currentSection.questions.filter((entry) => entry.number >= 37 && entry.number <= 40),
+                    'Questions 37-40',
+                    'Do the following statements agree with the claims of the writer in Reading Passage 3? Write YES if the statement reflects the claims of the writer, NO if the statement contradicts the claims of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this.',
+                    ['YES', 'NO', 'NOT GIVEN'],
+                  )}
+                </div>
+              )
+            }
+            if (q.number > 37 && q.number <= 40) return null
           }
 
           if (currentSection?.id === 'gilbert-magnetism-p1-v4') {

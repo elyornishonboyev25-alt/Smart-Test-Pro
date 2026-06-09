@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Bot, Lock } from 'lucide-react'
+import { Bot, Lock, Sparkles, X } from 'lucide-react'
 import { apiClient } from '@/lib/apiClient'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useAiAssistantStore } from '@/store/aiAssistantStore'
@@ -107,8 +107,10 @@ export function FloatingAIAssistant() {
         ) : null}
       </AnimatePresence>
 
-      <button
+      <motion.button
         type="button"
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
         onClick={() => {
           if (assistantBlocked) return
           if (isOpen) {
@@ -117,20 +119,29 @@ export function FloatingAIAssistant() {
           }
           open()
         }}
-        aria-label="Open AI assistant"
-        className={`pointer-events-auto relative inline-flex h-12 w-12 items-center justify-center rounded-full border shadow-[0_18px_32px_rgba(2,6,23,0.32)] ${
+        aria-label="Open AI study buddy"
+        className={`pointer-events-auto group relative inline-flex h-14 w-14 items-center justify-center rounded-2xl border shadow-[0_18px_38px_rgba(220,38,38,0.4)] ${
           isLegacyTestMode
             ? 'border-slate-700 bg-slate-900 text-slate-200'
-            : 'border-red-300 bg-gradient-to-r from-red-500 to-rose-500 text-white'
+            : 'border-red-300/60 bg-gradient-to-br from-red-500 via-rose-500 to-red-600 text-white'
         }`}
       >
-        <Bot className="h-5 w-5" />
+        {!isLegacyTestMode && !isOpen ? (
+          <span className="absolute inset-0 rounded-2xl bg-rose-500/50 animate-ping opacity-60" />
+        ) : null}
+        <span className="relative">
+          {isOpen ? <X className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
+        </span>
         {!hasPremium && !assistantBlocked ? (
-          <span className="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-slate-100">
-            <Lock className="h-3 w-3" />
+          <span className="absolute -right-1.5 -top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-slate-900 text-slate-100">
+            <Lock className="h-2.5 w-2.5" />
+          </span>
+        ) : !isOpen ? (
+          <span className="absolute -right-1 -top-1 inline-flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-emerald-400">
+            <Sparkles className="h-2 w-2 text-white" />
           </span>
         ) : null}
-      </button>
+      </motion.button>
     </div>
   )
 }

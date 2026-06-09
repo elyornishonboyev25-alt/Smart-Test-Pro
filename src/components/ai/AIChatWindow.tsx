@@ -5,16 +5,8 @@ import { apiClient } from '@/lib/apiClient'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useAiAssistantStore } from '@/store/aiAssistantStore'
 import { hasPremiumAccess } from '@/utils/premiumAccess'
-import type {
-  AiChatRequest,
-  AiChatResponse,
-  AiContextMode,
-  AiPreferences,
-  ChatLocale,
-  OpenTestMode,
-  RouteTargetId,
-  SpeakingPartMode,
-} from '@/types/platform'
+import { chatWithAssistant, type GeminiChatAction } from '@/services/geminiAI'
+import type { AiContextMode, AiPreferences, ChatLocale } from '@/types/platform'
 
 type ChatWindowVariant = 'floating' | 'panel' | 'analysis'
 
@@ -24,25 +16,18 @@ type AIChatWindowProps = {
   contextMode?: AiContextMode
 }
 
-const ROUTE_TARGET_MAP: Record<RouteTargetId, string> = {
-  DASHBOARD: '/dashboard',
-  TEST_LIBRARY: '/tests',
-  SAT_PREP: '/sat',
-  IELTS_PREP: '/ielts',
-  VOCABULARY: '/vocabulary',
-  MOCK: '/mock',
-  LEADERBOARD: '/leaderboard',
-  AI_ANALYSIS: '/ai-coach',
-  ACCOUNT: '/account',
-}
-
 const QUICK_CHIPS: Record<'default' | 'analysis', string[]> = {
-  default: ['Open IELTS', 'Open SAT', 'Open Test Library', 'Study abroad checklist'],
+  default: [
+    'Open Writing Day 1 for 20 min',
+    'Open IELTS Writing tests',
+    'Give me a Task 2 tip',
+    'Open my mistakes',
+  ],
   analysis: [
-    'Open Reading Full Test 2',
-    'Open Reading Full Test 2 Passage 2 for 20 min',
-    'Open Listening Full Test 2 Part 3',
-    'Show my weak IELTS track',
+    'Open Writing Day 1 with timer',
+    'How do I improve coherence?',
+    'Open IELTS Reading tests',
+    'What is a good band 7 essay structure?',
   ],
 }
 
@@ -70,66 +55,19 @@ function detectLocaleFromMessage(message: string, fallback: ChatLocale): ChatLoc
   const normalized = message.toLowerCase()
   if (
     containsAny(normalized, [
-      'salom',
-      'rahmat',
-      'iltimos',
-      'ochib ber',
-      'menga',
-      'savol',
-      'lugat',
-      'imtihon',
-      'yozing',
-      'ochildi',
-      'oquv',
-      'gaplash',
+      'salom', 'rahmat', 'iltimos', 'ochib ber', 'menga', 'savol', 'lugat', 'imtihon',
+      'yozing', 'ochildi', 'oquv', 'gaplash', 'qanday', 'qil', 'och', 'yordam', 'kerak',
     ])
   ) {
     return 'uz'
   }
-  if (containsAny(normalized, ['hello', 'open', 'reading', 'listening', 'practice', 'exam'])) {
+  if (containsAny(normalized, ['hello', 'open', 'reading', 'listening', 'practice', 'exam', 'how', 'what', 'help'])) {
     return 'en'
   }
   return fallback
 }
 
-function resolveContextMode(pathname: string, search: string, forced?: AiContextMode): AiContextMode {
-  if (forced) return forced
-  if (pathname === '/ai-coach') return 'analysis'
-  if (pathname.startsWith('/test/reading/')) {
-    const mode = new URLSearchParams(search).get('mode')
-    if (mode === 'simulation') return 'exam'
-    return 'training_reading'
-  }
-  if (pathname.startsWith('/test/listening/')) {
-    const mode = new URLSearchParams(search).get('mode')
-    if (mode === 'full-test' || mode === 'simulation') return 'exam'
-    return 'training_listening'
-  }
-  return 'general'
-}
-
-function buildRequestPayload(params: {
-  message: string
-  history: Array<{ role: 'user' | 'assistant'; content: string }>
-  pathname: string
-  locale: ChatLocale
-  contextMode: AiContextMode
-}): AiChatRequest {
-  return {
-    message: params.message,
-    history: params.history,
-    locale: params.locale,
-    contextMode: params.contextMode,
-    uiContext: { pathname: params.pathname },
-  }
-}
-
-function resolveTestMode(mode: OpenTestMode): OpenTestMode {
-  if (mode === 'simulation' || mode === 'practice' || mode === 'full-test') return mode
-  return 'practice'
-}
-
-export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChatWindowProps) {
+export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
@@ -152,12 +90,12 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
   const isAnalysis = variant === 'analysis'
 
   const welcomeMessage = useMemo(() => {
-    const greeting = preferredName ? `Hi ${preferredName}. ` : 'Hi. '
+    const greeting = preferredName ? `Hi ${preferredName}! ` : 'Hi! '
     return createMessage(
       'assistant',
       preferredLocale === 'uz'
-        ? `${greeting}SAT/IELTS bo'yicha yordam bera olaman: testlarni ochish, vocabulary, speaking feedback va study analytics.`
-      : `${greeting}I can help with SAT/IELTS study, open tests, vocabulary, speaking feedback, and analytics.`,
+        ? `${greeting}Men sizning shaxsiy o'qish yordamchingizman 📚 IELTS va SAT bo'yicha savollarga javob beraman, testlarni ochaman va writing bo'yicha maslahat beraman. Nimadan boshlaymiz?`
+        : `${greeting}I'm your personal study buddy 📚 I can answer IELTS/SAT questions, open tests for you, and share writing tips. What shall we work on?`,
     )
   }, [preferredLocale, preferredName])
 
@@ -189,51 +127,21 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [viewMessages, isSending])
 
-  const dispatchNavigationAction = (target: RouteTargetId) => {
-    const path = ROUTE_TARGET_MAP[target]
-    if (!path) return
-    navigate(path)
-  }
+  const dispatchAction = (action: GeminiChatAction) => {
+    if (action.type === 'navigate' && action.target) {
+      navigate(action.target)
+      return
+    }
 
-  const dispatchOpenTestAction = (payload: {
-    track: 'reading' | 'listening'
-    testId: string
-    mode: OpenTestMode
-    partIndex?: number
-    durationMinutes?: number
-  }) => {
-    const params = new URLSearchParams()
-    params.set('mode', resolveTestMode(payload.mode))
-    if (payload.partIndex) params.set('part', String(payload.partIndex))
-    if (payload.durationMinutes) params.set('minutes', String(payload.durationMinutes))
-    params.set('source', 'ai')
-
-    navigate(`/test/${payload.track}/${payload.testId}?${params.toString()}`, {
-      state: {
-        entry: 'ai-analysis',
-        from: location.pathname,
-      },
-    })
-  }
-
-  const dispatchSpeakingModeAction = (payload: {
-    mode: 'conversation' | 'mock'
-    part?: SpeakingPartMode
-    englishOnly: boolean
-  }) => {
-    const params = new URLSearchParams()
-    params.set('panel', 'speaking')
-    params.set('mode', payload.mode)
-    if (payload.part) params.set('part', payload.part)
-    if (payload.englishOnly) params.set('lang', 'en')
-    params.set('source', 'ai')
-
-    navigate(`/ai-coach?${params.toString()}`, {
-      state: {
-        entry: 'ai-speaking',
-        from: location.pathname,
-      },
-    })
+    if (action.type === 'open_writing_test' && action.payload?.testId) {
+      navigate(`/ielts/writing/test/${action.payload.testId}`, {
+        state: {
+          autoStart: true,
+          timerEnabled: action.payload.timerEnabled ?? true,
+          durationMinutes: action.payload.durationMinutes,
+        },
+      })
+    }
   }
 
   const sendMessage = async (rawText: string) => {
@@ -249,44 +157,23 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
 
     const history = [...messages, userMessage]
       .filter((message) => message.role === 'user' || message.role === 'assistant')
-      .slice(-12)
-      .map((message) => ({
-        role: message.role,
-        content: message.content,
-      }))
+      .slice(-10)
+      .map((message) => ({ role: message.role, content: message.content }))
 
     const currentLocale = detectLocaleFromMessage(trimmed, preferredLocale)
     setPreferredLocale(currentLocale)
-    const currentContextMode = resolveContextMode(location.pathname, location.search, contextMode)
 
     try {
-      const payload = await apiClient.post<AiChatResponse>(
-        '/profile/ai-chat',
-        buildRequestPayload({
-          message: trimmed,
-          history,
-          pathname: location.pathname,
-          locale: currentLocale,
-          contextMode: currentContextMode,
-        }),
-      )
+      const response = await chatWithAssistant(trimmed, history, currentLocale, location.pathname)
+      pushMessage(createMessage('assistant', response.reply))
 
-      pushMessage(createMessage('assistant', payload.reply))
-
-      for (const action of payload.actions) {
-        if (action.type === 'navigate') {
-          dispatchNavigationAction(action.target)
-          continue
-        }
-
-        if (action.type === 'open_test') {
-          dispatchOpenTestAction(action.payload)
-          continue
-        }
-
-        if (action.type === 'speaking_mode') {
-          dispatchSpeakingModeAction(action.payload)
-        }
+      // Give the reply a beat to render before navigating away.
+      if (response.actions.length > 0) {
+        window.setTimeout(() => {
+          for (const action of response.actions) {
+            dispatchAction(action)
+          }
+        }, 600)
       }
     } catch (requestError) {
       const message = requestError instanceof Error ? requestError.message : 'Unable to process your request.'
@@ -295,8 +182,8 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
         createMessage(
           'assistant',
           preferredLocale === 'uz'
-            ? "Hozir AI'ga ulanishda muammo bor. Qayta urinib ko'ring yoki testni ochish uchun aniq buyruq yuboring."
-            : 'I could not reach the AI provider right now. Retry or ask me to open a test directly.',
+            ? "Kechirasiz, hozir ulanishda muammo bo'ldi. Iltimos, qayta urinib ko'ring."
+            : 'Sorry, I had a connection issue just now. Please try again.',
         ),
       )
     } finally {
@@ -318,9 +205,9 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
             : 'border-red-100 bg-white text-slate-900'
         }`}
       >
-        <h3 className="text-sm font-semibold">AI Copilot</h3>
+        <h3 className="text-sm font-semibold">AI Study Buddy</h3>
         <p className={`mt-1 text-xs ${isFloating || isAnalysis ? 'text-slate-300' : 'text-slate-600'}`}>
-          Sign in to use AI Copilot.
+          Sign in to chat with your AI study buddy.
         </p>
       </section>
     )
@@ -337,10 +224,10 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
       >
         <div className="flex items-center gap-2">
           <Lock className={`h-4 w-4 ${isFloating || isAnalysis ? 'text-rose-300' : 'text-red-600'}`} />
-          <h3 className="text-sm font-semibold">Premium AI Copilot</h3>
+          <h3 className="text-sm font-semibold">Premium AI Study Buddy</h3>
         </div>
         <p className={`mt-2 text-xs leading-5 ${isFloating || isAnalysis ? 'text-slate-300' : 'text-slate-600'}`}>
-          AI chat is available for Premium users only.
+          The AI study buddy is available for Premium users only.
         </p>
       </section>
     )
@@ -354,27 +241,33 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
         isAnalysis
           ? 'border-slate-700/80 bg-[radial-gradient(circle_at_0%_0%,rgba(255,255,255,0.11),transparent_45%),linear-gradient(155deg,#06080f_0%,#0d111b_58%,#141926_100%)] text-slate-100 shadow-[0_34px_80px_rgba(2,6,23,0.62)]'
           : isFloating
-            ? 'border-slate-700 bg-[radial-gradient(circle_at_8%_0%,rgba(248,113,113,0.22),transparent_48%),linear-gradient(155deg,#0b1020_0%,#101828_52%,#111827_100%)] text-slate-100 shadow-[0_18px_36px_rgba(2,6,23,0.45)]'
+            ? 'border-rose-500/40 bg-[radial-gradient(circle_at_8%_0%,rgba(248,113,113,0.28),transparent_50%),linear-gradient(155deg,#0b1020_0%,#101828_52%,#111827_100%)] text-slate-100 shadow-[0_24px_50px_rgba(2,6,23,0.5)]'
             : 'border-red-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.08)]'
       }`}
     >
       <header
         className={`flex items-center justify-between px-4 py-3 ${
-          isAnalysis || isFloating ? 'border-b border-slate-700' : 'border-b border-red-100'
+          isAnalysis || isFloating ? 'border-b border-slate-700/80' : 'border-b border-red-100'
         }`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <span
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${
-              isAnalysis || isFloating ? 'bg-rose-500/20 text-rose-200' : 'bg-red-50 text-red-700'
+            className={`relative inline-flex h-9 w-9 items-center justify-center rounded-xl ${
+              isAnalysis || isFloating
+                ? 'bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-lg shadow-rose-500/30'
+                : 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-500/25'
             }`}
           >
-            <Bot className="h-4 w-4" />
+            <Bot className="h-5 w-5" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-slate-900 bg-emerald-400" />
           </span>
           <div>
-            <p className={`${isAnalysis ? 'text-base font-semibold' : 'text-sm font-semibold'}`}>AI Copilot</p>
+            <p className={`flex items-center gap-1.5 ${isAnalysis ? 'text-base font-bold' : 'text-sm font-bold'}`}>
+              AI Study Buddy
+              <Sparkles className={`h-3 w-3 ${isAnalysis || isFloating ? 'text-rose-300' : 'text-red-500'}`} />
+            </p>
             <p className={`text-[11px] ${isAnalysis || isFloating ? 'text-slate-300' : 'text-slate-500'}`}>
-              {reportUpdatedAt ? 'Context synced' : 'Live coaching + navigation'}
+              {reportUpdatedAt ? 'Synced · ready to help' : 'IELTS & SAT companion'}
             </p>
           </div>
         </div>
@@ -409,7 +302,7 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
           isAnalysis
             ? 'min-h-[16rem] max-h-[30rem] bg-slate-950/25'
             : isFloating
-              ? 'max-h-[20rem] bg-slate-950/25'
+              ? 'max-h-[22rem] bg-slate-950/25'
               : 'max-h-[20rem] bg-white'
         }`}
       >
@@ -417,13 +310,13 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
           <div className="rounded-3xl border border-slate-700/80 bg-[radial-gradient(circle_at_0%_0%,rgba(255,255,255,0.08),transparent_35%),linear-gradient(155deg,rgba(3,7,18,0.94)_0%,rgba(15,23,42,0.92)_55%,rgba(6,10,20,0.96)_100%)] p-6 shadow-[0_30px_80px_rgba(2,6,23,0.55)]">
             <div className="inline-flex items-center gap-2 rounded-full border border-rose-400/30 bg-rose-500/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-rose-200">
               <Sparkles className="h-3.5 w-3.5" />
-              Study Copilot
+              Study Buddy
             </div>
             <h3 className="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl">
               {preferredName ? `Hi ${preferredName},` : 'Hi Learner,'} where should we start?
             </h3>
             <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
-              Ask naturally. I can discuss any topic, open SAT/IELTS tests, start speaking mode, and support vocabulary with training-safe rules.
+              Ask me anything about IELTS or SAT. I can open tests, set timers, share band-boosting tips, and guide your study — all in one place.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {quickChips.map((chip) => (
@@ -444,14 +337,14 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
           {viewMessages.map((message) => (
             <article
               key={message.id}
-              className={`rounded-xl border px-3 py-2 text-sm leading-6 ${
+              className={`rounded-2xl border px-3.5 py-2.5 text-sm leading-6 ${
                 message.role === 'assistant'
                   ? isAnalysis || isFloating
                     ? 'border-slate-700 bg-slate-900/70 text-slate-100'
                     : 'border-red-100 bg-red-50/50 text-slate-800'
                   : isAnalysis || isFloating
-                    ? 'ml-auto border-rose-400/30 bg-rose-500/20 text-rose-50'
-                    : 'ml-auto border-red-200 bg-red-100 text-red-900'
+                    ? 'ml-auto max-w-[85%] border-rose-400/30 bg-gradient-to-br from-rose-500/25 to-red-500/15 text-rose-50'
+                    : 'ml-auto max-w-[85%] border-red-200 bg-red-100 text-red-900'
               }`}
             >
               {message.content}
@@ -486,7 +379,7 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
                 type="button"
                 onClick={() => void sendMessage(chip)}
                 disabled={isSending}
-                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold transition ${
                   isAnalysis || isFloating
                     ? 'border-slate-600 bg-slate-900/70 text-slate-100 hover:bg-slate-800'
                     : 'border-red-200 bg-red-50 text-red-700 hover:bg-red-100'
@@ -503,8 +396,8 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
               onChange={(event) => setDraft(event.target.value)}
               placeholder={
                 preferredLocale === 'uz'
-                  ? "Menga erkin yozing: suhbat, test ochish, speaking yoki lug'at..."
-                  : 'Type naturally: chat, open tests, speaking mode, or vocabulary help...'
+                  ? "Yozing: test ochish, writing maslahati, savol..."
+                  : 'Ask me: open a test, writing tips, a question...'
               }
               className={`${isAnalysis ? 'h-14 rounded-2xl' : 'h-10 rounded-xl'} flex-1 border px-3 text-sm outline-none focus:ring-2 ${
                 isAnalysis || isFloating
@@ -516,10 +409,10 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
             <button
               type="submit"
               disabled={isSending || !draft.trim()}
-              className={`inline-flex ${isAnalysis ? 'h-14 w-14 rounded-2xl' : 'h-10 rounded-xl px-3'} items-center justify-center text-sm font-semibold ${
+              className={`inline-flex ${isAnalysis ? 'h-14 w-14 rounded-2xl' : 'h-10 rounded-xl px-3'} items-center justify-center text-sm font-semibold transition ${
                 isAnalysis || isFloating
-                  ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white disabled:opacity-50'
-                  : 'bg-gradient-to-r from-red-600 to-red-700 text-white disabled:opacity-50'
+                  ? 'bg-gradient-to-r from-rose-500 to-red-500 text-white hover:brightness-110 disabled:opacity-50'
+                  : 'bg-gradient-to-r from-red-600 to-red-700 text-white hover:brightness-110 disabled:opacity-50'
               }`}
             >
               <Send className="h-4 w-4" />
@@ -529,7 +422,7 @@ export function AIChatWindow({ variant = 'panel', onClose, contextMode }: AIChat
 
         {isAnalysis ? (
           <p className="mt-2 px-1 text-[11px] text-slate-400">
-            Study-first policy: training mode supports vocabulary only, exam mode blocks tutoring.
+            Study-first buddy: I stay focused on your IELTS & SAT prep.
           </p>
         ) : null}
 

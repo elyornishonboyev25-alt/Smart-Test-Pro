@@ -13,21 +13,29 @@ import {
   removeReadingAnalysisAttempt,
   type ReadingAnalysisHistoryEntry,
 } from '@/utils/readingAnalysisStorage'
+import {
+  clearWritingAnalysisHistory,
+  getWritingAnalysisHistory,
+  removeWritingAnalysisAttempt,
+  type WritingAnalysisEntry,
+} from '@/utils/writingAnalysisStorage'
 import { resolveIeltsTestById } from '@/utils/ieltsTestCatalog'
 import { saveReviewState } from '@/utils/resultsReviewState'
+import WritingResultModal from '@/components/WritingResultModal'
 
 type UnifiedAttempt = {
   id: string
   title: string
   category: string
   savedAt: string
-  source: 'reading-local' | 'backend'
+  source: 'reading-local' | 'writing-local' | 'backend'
   score: string
   accuracy: string
   mistakes: string
   reviewable: boolean
   backendAttemptId?: string
   readingEntry?: ReadingAnalysisHistoryEntry
+  writingEntry?: WritingAnalysisEntry
 }
 
 type ConfirmState =
@@ -57,6 +65,21 @@ function buildReadingAttempt(entry: ReadingAnalysisHistoryEntry): UnifiedAttempt
   }
 }
 
+function buildWritingAttempt(entry: WritingAnalysisEntry): UnifiedAttempt {
+  return {
+    id: `writing-${entry.attemptKey}`,
+    title: entry.testTitle,
+    category: `IELTS Writing · ${entry.taskType === 'task1' ? 'Task 1' : 'Task 2'}`,
+    savedAt: entry.savedAt,
+    source: 'writing-local',
+    score: `Band ${entry.overallBand.toFixed(1)}`,
+    accuracy: `${entry.wordCount} words`,
+    mistakes: `${entry.errors.length} fixes · +${entry.xpAwarded} XP`,
+    reviewable: true,
+    writingEntry: entry,
+  }
+}
+
 function buildBackendAttempt(entry: ProfileOverview['recentAttempts'][number]): UnifiedAttempt {
   return {
     id: `backend-${entry.id}`,
@@ -76,15 +99,18 @@ export default function AnalyzeMistakes() {
   const navigate = useNavigate()
   const user = useAuthStore((state: AuthState) => state.user)
   const [readingHistory, setReadingHistory] = useState<ReadingAnalysisHistoryEntry[]>([])
+  const [writingHistory, setWritingHistory] = useState<WritingAnalysisEntry[]>([])
   const [overview, setOverview] = useState<ProfileOverview | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [busyAttemptId, setBusyAttemptId] = useState<string | null>(null)
   const [isClearingAll, setIsClearingAll] = useState(false)
   const [confirmState, setConfirmState] = useState<ConfirmState>(null)
+  const [writingModalEntry, setWritingModalEntry] = useState<WritingAnalysisEntry | null>(null)
 
   useEffect(() => {
     setReadingHistory(getReadingAnalysisHistory(user?.id))
+    setWritingHistory(getWritingAnalysisHistory(user?.id))
   }, [user?.id])
 
   useEffect(() => {
@@ -141,17 +167,23 @@ export default function AnalyzeMistakes() {
 
   const attempts = useMemo(() => {
     const localReading = readingHistory.map(buildReadingAttempt)
+    const localWriting = writingHistory.map(buildWritingAttempt)
     const backendAttempts = (overview?.recentAttempts ?? []).map(buildBackendAttempt)
 
-    return [...localReading, ...backendAttempts]
+    return [...localReading, ...localWriting, ...backendAttempts]
       .sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime())
-  }, [overview?.recentAttempts, readingHistory])
+  }, [overview?.recentAttempts, readingHistory, writingHistory])
 
-  const localAttemptCount = readingHistory.length
+  const localAttemptCount = readingHistory.length + writingHistory.length
   const backendAttemptCount = overview?.recentAttempts.length ?? 0
   const clearableAttemptCount = localAttemptCount + backendAttemptCount
 
   const openReview = (attempt: UnifiedAttempt) => {
+    if (attempt.source === 'writing-local' && attempt.writingEntry) {
+      setWritingModalEntry(attempt.writingEntry)
+      return
+    }
+
     if (attempt.source !== 'reading-local' || !attempt.readingEntry) return
     const resolvedTest = resolveIeltsTestById(attempt.readingEntry.testId)
     if (!resolvedTest) return
@@ -194,6 +226,12 @@ export default function AnalyzeMistakes() {
         return
       }
 
+      if (attempt.source === 'writing-local' && attempt.writingEntry) {
+        const next = removeWritingAnalysisAttempt(attempt.writingEntry.attemptKey, user?.id)
+        setWritingHistory(next)
+        return
+      }
+
       if (attempt.source === 'backend' && attempt.backendAttemptId) {
         await apiClient.delete(`/profile/attempts/${attempt.backendAttemptId}`)
         removeBackendAttemptFromState(attempt.backendAttemptId)
@@ -214,7 +252,9 @@ export default function AnalyzeMistakes() {
     try {
       if (localAttemptCount > 0) {
         clearReadingAnalysisHistory(user?.id)
+        clearWritingAnalysisHistory(user?.id)
         setReadingHistory([])
+        setWritingHistory([])
       }
 
       const backendIds = (overview?.recentAttempts ?? []).map((entry) => entry.id)
@@ -316,7 +356,7 @@ export default function AnalyzeMistakes() {
               <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-red-600">Premium Lab</p>
               <h1 className="mt-2 text-3xl font-black text-slate-900">Analyze Mistakes</h1>
               <p className="mt-1 text-sm text-slate-600">
-                Recent solved tests sorted by latest activity. Open IELTS Reading attempts in full review mode.
+                Recent solved tests sorted by latest activity. Review IELTS Reading attempts and AI-evaluated Writing tasks in detail.
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-end gap-2">
@@ -415,6 +455,10 @@ export default function AnalyzeMistakes() {
       </div>
 
       {typeof document !== 'undefined' && confirmModal ? createPortal(confirmModal, document.body) : confirmModal}
+
+      {writingModalEntry ? (
+        <WritingResultModal entry={writingModalEntry} onClose={() => setWritingModalEntry(null)} />
+      ) : null}
     </>
   )
 }

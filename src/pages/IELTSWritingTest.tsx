@@ -1,12 +1,20 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { ArrowLeft, Clock3 } from 'lucide-react'
 import { getWritingTaskById } from '@/data/writingTestData'
 import IELTSWritingTestInterface from '@/components/IELTSWritingTestInterface'
 
+type WritingTestNavState = {
+  autoStart?: boolean
+  timerEnabled?: boolean
+  durationMinutes?: number
+} | null
+
 export default function IELTSWritingTest() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
+  const navState = location.state as WritingTestNavState
 
   const task = useMemo(() => (id ? getWritingTaskById(id) : null), [id])
 
@@ -43,5 +51,13 @@ export default function IELTSWritingTest() {
     )
   }
 
-  return <IELTSWritingTestInterface task={task} onExit={handleExit} />
+  return (
+    <IELTSWritingTestInterface
+      task={task}
+      onExit={handleExit}
+      autoStart={navState?.autoStart}
+      autoTimerEnabled={navState?.timerEnabled}
+      autoDurationMinutes={navState?.durationMinutes}
+    />
+  )
 }

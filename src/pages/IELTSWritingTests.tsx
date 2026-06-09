@@ -5,10 +5,8 @@ import {
   ArrowLeft,
   BookOpenText,
   CalendarDays,
-  CheckCircle2,
   Clock3,
   FileEdit,
-  Flame,
   Layers3,
   Lock,
   PenLine,
@@ -16,14 +14,11 @@ import {
   Search,
   Sparkles,
   Target,
-  Trophy,
 } from 'lucide-react'
 
 import {
   getWritingDayCatalog,
   getWritingFullTestCatalog,
-  type WritingTask,
-  type WritingFullTest,
 } from '@/data/writingTestData'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 

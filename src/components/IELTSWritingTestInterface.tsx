@@ -174,6 +174,26 @@ function countWords(text: string): number {
   return trimmed.split(/\s+/).length
 }
 
+function bandLabel(band: number): string {
+  if (band >= 9) return 'Expert User'
+  if (band >= 8) return 'Very Good User'
+  if (band >= 7) return 'Good User'
+  if (band >= 6) return 'Competent User'
+  if (band >= 5) return 'Modest User'
+  if (band >= 4) return 'Limited User'
+  if (band >= 3) return 'Extremely Limited'
+  return 'Intermittent User'
+}
+
+const ERROR_CATEGORY_META: Record<string, { label: string; color: string }> = {
+  grammar: { label: 'Grammar', color: 'bg-red-100 text-red-700 border-red-200' },
+  vocabulary: { label: 'Vocabulary', color: 'bg-violet-100 text-violet-700 border-violet-200' },
+  spelling: { label: 'Spelling', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+  punctuation: { label: 'Punctuation', color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  coherence: { label: 'Coherence', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  task: { label: 'Task', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+}
+
 function BandScoreRing({ score, label, size = 'md' }: { score: number; label: string; size?: 'lg' | 'md' }) {
   const isLg = size === 'lg'
   const r = isLg ? 42 : 28
@@ -627,9 +647,12 @@ export default function IELTSWritingTestInterface({
                         <Sparkles className="h-3 w-3" />
                         AI Evaluation
                       </div>
-                      <h2 className="mt-2 text-2xl font-black text-slate-900">
-                        Band {ev.overallBand.toFixed(1)}
-                      </h2>
+                      <div className="mt-2 flex items-baseline gap-2">
+                        <h2 className="text-2xl font-black text-slate-900">Band {ev.overallBand.toFixed(1)}</h2>
+                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+                          {bandLabel(ev.overallBand)}
+                        </span>
+                      </div>
                       <p className="mt-1 text-sm leading-relaxed text-slate-600">{ev.summary}</p>
                     </div>
                   </div>
@@ -710,9 +733,27 @@ export default function IELTSWritingTestInterface({
                     <AlertCircle className="h-5 w-5 text-red-500" />
                     Mistake Analysis
                   </h3>
-                  <p className="text-xs text-slate-500 mb-4">
+                  <p className="text-xs text-slate-500 mb-3">
                     Tap each item to see the correction and explanation. {ev.errors.length} issues found.
                   </p>
+                  <div className="mb-4 flex flex-wrap gap-1.5">
+                    {Object.entries(
+                      ev.errors.reduce<Record<string, number>>((acc, e) => {
+                        acc[e.category] = (acc[e.category] || 0) + 1
+                        return acc
+                      }, {}),
+                    ).map(([cat, count]) => {
+                      const meta = ERROR_CATEGORY_META[cat] || ERROR_CATEGORY_META.grammar
+                      return (
+                        <span
+                          key={cat}
+                          className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${meta.color}`}
+                        >
+                          {meta.label} · {count}
+                        </span>
+                      )
+                    })}
+                  </div>
                   <div className="space-y-2">
                     {ev.errors.map((error, i) => (
                       <ErrorCard key={i} error={error} index={i} />

@@ -46,36 +46,51 @@ export interface GeminiChatResponse {
   actions: GeminiChatAction[]
 }
 
-const WRITING_EVALUATION_PROMPT = `You are an expert IELTS Writing examiner with 20+ years of experience. You score IELTS writing tasks with extreme precision following the official IELTS band descriptors.
+const WRITING_EVALUATION_PROMPT = `You are a senior IELTS Writing examiner and certified IELTS trainer with 20+ years of experience marking official exams. You apply the public IELTS band descriptors with the same rigour as a real examiner. Your feedback is precise, fair, and genuinely useful — never generic.
 
-TASK: Evaluate the student's IELTS writing response below. You MUST return a valid JSON object and NOTHING else — no markdown, no explanation outside JSON.
+TASK: Evaluate the student's IELTS writing response. Return a SINGLE valid JSON object and NOTHING else — no markdown fences, no text outside the JSON.
 
-SCORING RULES:
-- Use official IELTS band descriptors (0.0 to 9.0, in 0.5 increments)
-- Task 1: minimum 150 words expected. Score harshly if under 120 words.
-- Task 2: minimum 250 words expected. Score harshly if under 200 words.
-- Be realistic — most students score 5.0-7.0. Only give 8.0+ for near-native quality.
-- Each criterion scored independently.
+SCORE EACH OF THE 4 CRITERIA (0.0–9.0, in 0.5 steps), then the overall band.
 
-ERROR ANALYSIS RULES:
-- Find EVERY grammar, vocabulary, spelling, punctuation, and coherence error.
-- For each error, show the original text, the corrected version, and a clear explanation.
-- Categorize errors precisely: "grammar", "vocabulary", "spelling", "punctuation", "coherence", or "task".
-- Include at least the top 10 most important errors (or all if fewer than 10).
+1) Task Achievement / Task Response (taskAchievement):
+   - Task 1: Does it have a clear overview of main trends? Are key features + accurate data selected? (Min 150 words — penalise heavily if under 120.)
+   - Task 2: Does it fully address all parts of the prompt with a clear position, developed ideas, and relevant examples? (Min 250 words — penalise heavily if under 200.)
+
+2) Coherence & Cohesion (coherenceCohesion):
+   - Logical paragraphing, clear progression, accurate linking devices (not over/under-used), referencing.
+
+3) Lexical Resource (lexicalResource):
+   - Range and precision of vocabulary, collocation, word formation, appropriacy. Penalise repetition and misused words.
+
+4) Grammatical Range & Accuracy (grammaticalRange):
+   - Range of structures (simple vs complex), accuracy, punctuation, error density and how much errors impede communication.
+
+SCORING DISCIPLINE:
+- Be realistic and consistent with real exams: most genuine attempts land 5.0–6.5. Award 7.0+ only for clearly strong writing, 8.0+ only for near-native control.
+- overallBand = average of the 4 criteria, rounded to the nearest 0.5 (IELTS rounding).
+- Score each criterion INDEPENDENTLY based on evidence in the text.
+
+ERROR ANALYSIS — THE MOST IMPORTANT PART (read carefully):
+- List ONLY genuine errors. For EVERY item, "corrected" MUST be meaningfully DIFFERENT from "original".
+- ❌ ABSOLUTELY FORBIDDEN: listing a sentence whose corrected version is identical (or near-identical) to the original. NEVER mark correct text as an error. If a sentence is already correct, DO NOT include it at all.
+- ❌ Do NOT include items where the explanation says the text "is accurate / is correct / is fine". Those are not errors — omit them.
+- "original" = the exact erroneous fragment copied from the student (keep it short — just the part that is wrong, not the whole sentence when possible).
+- "corrected" = the minimally-fixed version of that same fragment.
+- "explanation" = WHY it is wrong and the rule, in one or two clear sentences a learner understands.
+- Categorise precisely: "grammar", "vocabulary", "spelling", "punctuation", "coherence", or "task".
+- Order errors by importance (most impactful first). Include every real error, up to ~15. If the writing is genuinely error-free, return an empty errors array.
 
 CORRECTED VERSION RULES:
-- Rewrite the entire response with ALL errors fixed.
-- Maintain the student's ideas and structure, only fix language errors.
-- Improve word choice where the student used weak/repetitive vocabulary.
+- Rewrite the FULL response at a clean Band 7–7.5 level: fix every error, upgrade weak/repetitive vocabulary, and improve cohesion — while keeping the student's original ideas, structure, and meaning.
 
-XP CALCULATION:
-- Band 0-3.0: 5-15 XP
-- Band 3.5-4.5: 20-35 XP
-- Band 5.0-5.5: 40-55 XP
-- Band 6.0-6.5: 60-75 XP
-- Band 7.0-7.5: 80-100 XP
-- Band 8.0-8.5: 110-130 XP
-- Band 9.0: 150 XP
+STRENGTHS / IMPROVEMENTS:
+- "strengths": 3 specific things the student did well (reference the actual text, not generic praise).
+- "improvements": 3 concrete, prioritised, actionable steps that would raise the band (e.g. "Add a one-sentence overview before details", not "improve grammar").
+
+SUMMARY: 2–3 sentences — honest overall assessment naming the biggest lever for improvement.
+
+XP CALCULATION (set xpAwarded by overall band):
+- 0–3.0: 10 | 3.5–4.5: 25 | 5.0–5.5: 45 | 6.0–6.5: 65 | 7.0–7.5: 90 | 8.0–8.5: 120 | 9.0: 150
 
 RESPONSE FORMAT (strict JSON, no markdown):
 {
@@ -85,17 +100,17 @@ RESPONSE FORMAT (strict JSON, no markdown):
   "lexicalResource": <number>,
   "grammaticalRange": <number>,
   "summary": "<2-3 sentence overall assessment>",
-  "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
-  "improvements": ["<improvement 1>", "<improvement 2>", "<improvement 3>"],
+  "strengths": ["<specific strength>", "<specific strength>", "<specific strength>"],
+  "improvements": ["<actionable step>", "<actionable step>", "<actionable step>"],
   "errors": [
     {
-      "original": "<exact text from student>",
-      "corrected": "<corrected version>",
-      "explanation": "<clear explanation of the error>",
+      "original": "<exact erroneous fragment from the student>",
+      "corrected": "<fixed version — MUST differ from original>",
+      "explanation": "<why it is wrong + the rule>",
       "category": "<grammar|vocabulary|spelling|punctuation|coherence|task>"
     }
   ],
-  "correctedVersion": "<full corrected essay>",
+  "correctedVersion": "<full corrected essay at band 7+>",
   "xpAwarded": <number>
 }`
 
@@ -116,26 +131,36 @@ ${lang}
 
 SITE NAVIGATION — You can control the SmartTest Pro website. The user's current page is: ${pathname}
 
-Available routes you can navigate to:
-- /dashboard — Main dashboard
-- /tests — Test library
-- /ielts — IELTS hub
-- /ielts/writing/tests — IELTS Writing tests catalog
-- /ielts/writing/test/writing-day-1 — Writing Day 1 (Task 1, the only live writing test)
-- /ielts/reading/tests — IELTS Reading tests
-- /ielts/listening/tests — IELTS Listening tests
-- /sat — SAT prep
+You can take the user ANYWHERE on the site. Full route map:
+- /dashboard — Main dashboard / home
+- /tests — Test library (all tests)
+- /ielts — IELTS hub (Reading, Listening, Writing, Speaking)
+- /ielts/writing/tests — IELTS Writing tests catalog (Day 1–30 + 20 full mocks)
+- /ielts/writing/test/writing-day-1 — Writing Day 1 (Task 1 — the ONLY live writing test)
+- /ielts/reading/tests — IELTS Reading tests catalog
+- /ielts/listening/tests — IELTS Listening tests catalog
+- /sat — SAT prep hub
+- /sat/calculator — SAT score calculator
 - /vocabulary — Vocabulary training
-- /speaking-lab — Speaking practice
-- /mock — Mock tests
-- /leaderboard — XP leaderboard
-- /analyze-mistakes — Analyze past mistakes
-- /account — Account settings
+- /speaking-lab — Speaking practice lab
+- /shadowing-lab — Shadowing (pronunciation) lab
+- /writing-lab — Writing lab
+- /mock — Mock tests hub
+- /mock/ielts — Full IELTS mock exams
+- /mock/sat — Full SAT mock exams
+- /leaderboard — XP leaderboard / ranking
+- /analyze-mistakes — Review past mistakes & AI writing evaluations
+- /articles — Study articles & guides
+- /premium — Premium / upgrade page
+- /account — Account & profile settings
+
+You may navigate to any path above. To open a route, return a navigate action with that exact "target" path. Pick the single best-matching route for the user's intent (e.g. "I want to practise essays" → /ielts/writing/tests; "show my ranking" → /leaderboard; "where are my mistakes" → /analyze-mistakes; "let's do a full IELTS exam" → /mock/ielts).
 
 NAVIGATION RULE — Only include an action when the user EXPLICITLY asks to open, go to,
-start, or show a page/test (e.g. "open writing tests", "start Day 1", "go to leaderboard").
-For questions, tips, explanations, greetings, or general chat, return an EMPTY actions array
-and just reply with text. Never navigate as a side effect of answering a question.
+start, show, or take them somewhere (e.g. "open writing tests", "start Day 1", "go to leaderboard",
+"take me to vocabulary"). For questions, tips, explanations, greetings, or general chat, return an
+EMPTY actions array and reply with text only. Never navigate as a side effect of answering a question.
+You may return multiple actions only if the user clearly asks for a sequence.
 
 RESPONSE FORMAT — Return ONLY valid JSON:
 {
@@ -299,12 +324,22 @@ Evaluate this response now. Return ONLY valid JSON.`
       strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 5) : [],
       improvements: Array.isArray(parsed.improvements) ? parsed.improvements.slice(0, 5) : [],
       errors: Array.isArray(parsed.errors)
-        ? parsed.errors.map((e) => ({
-            original: e.original || '',
-            corrected: e.corrected || '',
-            explanation: e.explanation || '',
-            category: validateCategory(e.category),
-          }))
+        ? parsed.errors
+            .map((e) => ({
+              original: (e.original || '').trim(),
+              corrected: (e.corrected || '').trim(),
+              explanation: (e.explanation || '').trim(),
+              category: validateCategory(e.category),
+            }))
+            // Defensive: drop false positives where the model flagged correct text
+            // (original identical to correction, or an empty/“is accurate” note).
+            .filter((e) => {
+              if (!e.original || !e.corrected) return false
+              const norm = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').replace(/[.,;:!?]+$/g, '').trim()
+              if (norm(e.original) === norm(e.corrected)) return false
+              if (/\b(is|are|looks?|seems?)\s+(accurate|correct|fine|good|appropriate)\b/i.test(e.explanation)) return false
+              return true
+            })
         : [],
       correctedVersion: parsed.correctedVersion || '',
       xpAwarded: typeof parsed.xpAwarded === 'number' ? Math.round(parsed.xpAwarded) : calculateXP(parsed.overallBand),

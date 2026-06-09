@@ -1,4 +1,6 @@
-const GEMINI_API_KEY = 'AIzaSyChwSI9B6ovI-8si5gscbb5oogNlz2vKoQ'
+// The API key is read from an environment variable so it is never committed to the repo.
+// Set VITE_GEMINI_API_KEY in your .env (local) and in Railway's environment variables (deploy).
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY ?? ''
 const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
 
@@ -163,6 +165,10 @@ async function callGeminiAPI(
   userMessage: string,
   maxOutputTokens = 2048,
 ): Promise<string> {
+  if (!GEMINI_API_KEY) {
+    throw new Error('AI is not configured yet. Add VITE_GEMINI_API_KEY to your environment and restart.')
+  }
+
   const body = {
     contents: [
       {

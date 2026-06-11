@@ -77,6 +77,7 @@ model User {
   email          String             @unique
   passwordHash   String
   fullName       String
+  nickname       String?            @unique
   role           Role               @default(USER)
   xp             Int                @default(0)
   level          Int                @default(1)
@@ -101,10 +102,29 @@ model User {
   aiConversationThreads AiConversationThread[]
   vocabularyNotebooks VocabularyNotebook[]
   speakingEvaluations SpeakingEvaluation[]
+  speakingSessions SpeakingSession[]
   createdTests   Test[]             @relation("TestAuthor")
 
   @@index([xp, level])
   @@index([createdAt])
+}
+
+model SpeakingSession {
+  id                String   @id @default(cuid())
+  userId            String
+  mode              String
+  modeLabel         String
+  overallBand       Float
+  fluencyBand       Float
+  lexicalBand       Float
+  grammarBand       Float
+  pronunciationBand Float
+  durationSec       Int      @default(0)
+  wordCount         Int      @default(0)
+  createdAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model UserAiPreference {

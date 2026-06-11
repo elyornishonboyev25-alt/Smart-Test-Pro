@@ -9,6 +9,8 @@ export type AuthUser = {
   xp: number
   level: number
   currentStreak: number
+  /** Public unique handle shown to other users instead of the email-derived name. */
+  nickname?: string | null
 }
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'OLYMPIAD'

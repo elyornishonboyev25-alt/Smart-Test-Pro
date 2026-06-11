@@ -1316,5 +1316,178 @@ router.post(
   }),
 )
 
+// ── Nickname + speaking community (public, nickname-only — never exposes email) ─
+const ONLINE_WINDOW_MS = 3 * 60 * 1000
+const NICKNAME_RE = /^[A-Za-z][A-Za-z0-9_]{2,19}$/
+
+const nicknameSetSchema = z.object({
+  nickname: z.string().trim().regex(NICKNAME_RE),
+})
+
+const speakingSessionSchema = z.object({
+  mode: z.string().max(40),
+  modeLabel: z.string().max(80),
+  overallBand: z.coerce.number().min(0).max(9),
+  fluencyBand: z.coerce.number().min(0).max(9),
+  lexicalBand: z.coerce.number().min(0).max(9),
+  grammarBand: z.coerce.number().min(0).max(9),
+  pronunciationBand: z.coerce.number().min(0).max(9),
+  durationSec: z.coerce.number().int().min(0).max(36000),
+  wordCount: z.coerce.number().int().min(0).max(100000),
+})
+
+function isOnline(lastActiveDate: Date | null) {
+  return lastActiveDate ? Date.now() - new Date(lastActiveDate).getTime() < ONLINE_WINDOW_MS : false
+}
+
+router.get(
+  '/nickname/check',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const value = String(req.query.value ?? '').trim()
+    if (!NICKNAME_RE.test(value)) {
+      return res.json({ available: false, reason: 'invalid' })
+    }
+    const existing = await prisma.user.findFirst({
+      where: { nickname: { equals: value, mode: 'insensitive' }, NOT: { id: req.user!.id } },
+      select: { id: true },
+    })
+    return res.json({ available: !existing })
+  }),
+)
+
+router.put(
+  '/nickname',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { nickname } = nicknameSetSchema.parse(req.body ?? {})
+    const taken = await prisma.user.findFirst({
+      where: { nickname: { equals: nickname, mode: 'insensitive' }, NOT: { id: req.user!.id } },
+      select: { id: true },
+    })
+    if (taken) return res.status(409).json({ message: 'That nickname is already taken.' })
+    try {
+      const updated = await prisma.user.update({
+        where: { id: req.user!.id },
+        data: { nickname },
+        select: { nickname: true },
+      })
+      return res.json(updated)
+    } catch {
+      return res.status(409).json({ message: 'That nickname is already taken.' })
+    }
+  }),
+)
+
+router.post(
+  '/heartbeat',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    await prisma.user.update({ where: { id: req.user!.id }, data: { lastActiveDate: new Date() } }).catch(() => {})
+    return res.status(204).send()
+  }),
+)
+
+router.post(
+  '/speaking/session',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const data = speakingSessionSchema.parse(req.body ?? {})
+    const session = await prisma.speakingSession.create({
+      data: { userId: req.user!.id, ...data },
+      select: { id: true, createdAt: true },
+    })
+    await prisma.user.update({ where: { id: req.user!.id }, data: { lastActiveDate: new Date() } }).catch(() => {})
+    return res.status(201).json(session)
+  }),
+)
+
+// Only users who have actually used the speaking studio. Nickname + presence only.
+router.get(
+  '/speaking/community',
+  requireAuth,
+  asyncHandler(async (_req, res) => {
+    const grouped = await prisma.speakingSession.groupBy({
+      by: ['userId'],
+      _count: { _all: true },
+      _avg: { overallBand: true },
+      _sum: { durationSec: true },
+      _max: { createdAt: true },
+    })
+    const users = await prisma.user.findMany({
+      where: { id: { in: grouped.map((g) => g.userId) } },
+      select: { id: true, nickname: true, fullName: true, lastActiveDate: true, currentStreak: true },
+    })
+    const speakers = grouped
+      .map((g) => {
+        const u = users.find((x) => x.id === g.userId)
+        if (!u) return null
+        return {
+          id: u.id,
+          nickname: u.nickname,
+          displayName: u.nickname ?? u.fullName,
+          online: isOnline(u.lastActiveDate),
+          lastSeen: u.lastActiveDate,
+          streak: u.currentStreak,
+          sessionCount: g._count._all,
+          averageBand: g._avg.overallBand ? Math.round(g._avg.overallBand * 10) / 10 : 0,
+          totalMinutes: Math.round((g._sum.durationSec ?? 0) / 60),
+        }
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+      .sort((a, b) => b.averageBand - a.averageBand || b.totalMinutes - a.totalMinutes)
+    return res.json({ speakers })
+  }),
+)
+
+// Public speaker profile by nickname — returns real speaking data, never the email.
+router.get(
+  '/speaking/by-nickname/:nickname',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const nickname = String(req.params.nickname ?? '').trim()
+    const user = await prisma.user.findFirst({
+      where: { nickname: { equals: nickname, mode: 'insensitive' } },
+      select: {
+        id: true, nickname: true, fullName: true, lastActiveDate: true,
+        currentStreak: true, longestStreak: true, level: true, xp: true, createdAt: true,
+      },
+    })
+    if (!user) return res.status(404).json({ message: 'Speaker not found.' })
+
+    const sessions = await prisma.speakingSession.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true, modeLabel: true, overallBand: true, fluencyBand: true, lexicalBand: true,
+        grammarBand: true, pronunciationBand: true, durationSec: true, wordCount: true, createdAt: true,
+      },
+    })
+
+    // Real speaking rank: position among all speakers by average band.
+    const grouped = await prisma.speakingSession.groupBy({ by: ['userId'], _avg: { overallBand: true } })
+    const myAvg = sessions.length ? sessions.reduce((a, s) => a + s.overallBand, 0) / sessions.length : 0
+    const rank = 1 + grouped.filter((g) => (g._avg.overallBand ?? 0) > myAvg).length
+
+    return res.json({
+      profile: {
+        id: user.id,
+        nickname: user.nickname,
+        displayName: user.nickname ?? user.fullName,
+        online: isOnline(user.lastActiveDate),
+        lastSeen: user.lastActiveDate,
+        streak: user.currentStreak,
+        longestStreak: user.longestStreak,
+        level: user.level,
+        xp: user.xp,
+        memberSince: user.createdAt,
+        rank: sessions.length ? rank : null,
+        totalSpeakers: grouped.length,
+      },
+      sessions,
+    })
+  }),
+)
+
 export default router
 

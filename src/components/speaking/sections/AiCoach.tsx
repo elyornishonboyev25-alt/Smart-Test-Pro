@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { MessageCircle, Sparkles, Trophy, Wand2 } from 'lucide-react'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useSpeakingStore } from '@/store/speakingStore'
+import { saveSpeakingSession } from '@/lib/speakingApi'
 import ExaminerSession, { type SessionConfig } from '@/components/speaking/ExaminerSession'
 
 const FREE_TALK_TOPICS = [
@@ -49,6 +50,20 @@ export default function AiCoach() {
             fillerCount: evaluation.stats.fillerCount,
             summary: evaluation.summary,
           })
+          // Persist to the backend so it powers the real public profile + community.
+          if (user) {
+            void saveSpeakingSession({
+              mode: config.mode,
+              modeLabel: labelFor(config),
+              overallBand: evaluation.overallBand,
+              fluencyBand: evaluation.fluencyBand,
+              lexicalBand: evaluation.lexicalBand,
+              grammarBand: evaluation.grammarBand,
+              pronunciationBand: evaluation.pronunciationBand,
+              durationSec: evaluation.stats.durationSec,
+              wordCount: evaluation.stats.wordCount,
+            })
+          }
         }}
       />
     )

@@ -12,6 +12,8 @@ import { ToastViewport } from '@/components/common/ToastViewport'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import RegisterModal from '@/components/auth/RegisterModal'
 import FloatingAIAssistant from '@/components/ai/FloatingAIAssistant'
+import NicknameGate from '@/components/speaking/NicknameGate'
+import { sendHeartbeat } from '@/lib/speakingApi'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { addTrackedMinutes, routeToActivityKey } from '@/utils/weeklyPlanner'
@@ -169,11 +171,22 @@ function App() {
     }
   }, [pathname, user?.id])
 
+  // Presence heartbeat — keeps "online now" / "last seen" accurate for the community.
+  useEffect(() => {
+    if (!user) return
+    void sendHeartbeat()
+    const id = window.setInterval(() => {
+      if (!document.hidden) void sendHeartbeat()
+    }, 60000)
+    return () => window.clearInterval(id)
+  }, [user?.id])
+
   return (
     <div className="app-shell relative min-h-screen text-[#1E293B] selection:bg-red-100">
       <AnimatedBackground />
       <ToastViewport />
       <RegisterModal />
+      <NicknameGate />
       <FloatingAIAssistant />
 
       <div className="relative z-10 flex min-h-screen flex-col">

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Bell, CalendarClock, CheckCircle2, Crown, Gem, Globe, Lock, Mail, Phone, Save, ShieldCheck, SlidersHorizontal, Sparkles, Target, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, type AuthState } from '@/store/authStore'
-import { useSpeakerSocialStore, speakerHandle } from '@/store/speakerSocialStore'
+import { setNickname as apiSetNickname } from '@/lib/speakingApi'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -128,18 +128,30 @@ export default function AccountProfile() {
   const pushToast = useToastStore((state: ToastState) => state.pushToast)
   const { allowHoverMotion, minimalMotion } = useMotionPreferences()
 
-  const nicknames = useSpeakerSocialStore((state) => state.nicknames)
-  const setNickname = useSpeakerSocialStore((state) => state.setNickname)
-  const savedNickname = user?.id ? nicknames[user.id] ?? '' : ''
+  const setUserNickname = useAuthStore((state) => state.setUserNickname)
+  const savedNickname = user?.nickname ?? ''
   const [nicknameDraft, setNicknameDraft] = useState(savedNickname)
+  const [savingNickname, setSavingNickname] = useState(false)
   useEffect(() => {
     setNicknameDraft(savedNickname)
   }, [savedNickname])
 
-  const saveNickname = () => {
-    if (!user?.id) return
-    setNickname(user.id, nicknameDraft || user.fullName)
-    pushToast({ type: 'success', title: 'Nickname saved', message: 'Your public speaking handle has been updated.' })
+  const saveNickname = async () => {
+    const value = nicknameDraft.trim()
+    if (!/^[A-Za-z][A-Za-z0-9_]{2,19}$/.test(value)) {
+      pushToast({ type: 'error', title: 'Invalid nickname', message: '3–20 characters: letters, numbers or underscore, starting with a letter.' })
+      return
+    }
+    setSavingNickname(true)
+    try {
+      await apiSetNickname(value)
+      setUserNickname(value)
+      pushToast({ type: 'success', title: 'Nickname saved', message: 'Your public handle has been updated.' })
+    } catch (error) {
+      pushToast({ type: 'error', title: 'Could not save', message: error instanceof Error ? error.message : 'That nickname may be taken.' })
+    } finally {
+      setSavingNickname(false)
+    }
   }
 
   const initialProfile = useMemo<ProfileDraft>(
@@ -484,17 +496,17 @@ export default function AccountProfile() {
             Nickname / handle
             <input
               value={nicknameDraft}
-              onChange={(event) => setNicknameDraft(event.target.value)}
+              onChange={(event) => setNicknameDraft(event.target.value.replace(/\s/g, ''))}
               className="input mt-1"
-              placeholder={user?.fullName ? speakerHandle(user.id, user.fullName, nicknames) : 'your_handle'}
-              maxLength={24}
+              placeholder="your_handle"
+              maxLength={20}
             />
           </label>
-          <button type="button" onClick={saveNickname} disabled={!user} className="arena-primary-btn justify-center disabled:opacity-50">
+          <button type="button" onClick={() => void saveNickname()} disabled={!user || savingNickname} className="arena-primary-btn justify-center disabled:opacity-50">
             <Save className="mr-2 h-4 w-4" />
-            Save nickname
+            {savingNickname ? 'Saving…' : 'Save nickname'}
           </button>
-          <button type="button" onClick={() => navigate('/speaker/me')} className="arena-secondary-btn justify-center">
+          <button type="button" onClick={() => navigate(user?.nickname ? `/speaker/${user.nickname}` : '/speaker/me')} className="arena-secondary-btn justify-center">
             View my profile
           </button>
         </div>

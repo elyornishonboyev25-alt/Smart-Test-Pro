@@ -351,7 +351,7 @@ export function invalidateLeaderboardCache() {
 function buildUserAggregates(params: {
   attempts: UserAttemptSnapshot[]
   period: PeriodInput
-  usersById: Map<string, { fullName: string; avatarUrl: string | null; xp: number; currentStreak: number }>
+  usersById: Map<string, { fullName: string; nickname?: string | null; avatarUrl: string | null; xp: number; currentStreak: number }>
   focusStatsByUser: Map<string, { focusConsistency: number; dailyCompletionRate: number }>
 }) {
   const attemptsByUser = new Map<string, UserAttemptSnapshot[]>()
@@ -450,7 +450,7 @@ function buildUserAggregates(params: {
 
     rows.push({
       userId,
-      fullName: user.fullName,
+      fullName: user.nickname ?? user.fullName,
       avatarUrl: user.avatarUrl,
       totalXp: Math.round(xpTotal),
       testsCompleted,
@@ -573,6 +573,7 @@ export async function generateLeaderboard(params: {
     select: {
       id: true,
       fullName: true,
+      nickname: true,
       avatarUrl: true,
       xp: true,
       currentStreak: true,

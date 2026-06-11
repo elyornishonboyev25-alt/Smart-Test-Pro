@@ -10,6 +10,7 @@ export type AuthState = {
   hydrated: boolean
   setSession: (payload: { user: AuthUser; accessToken: string; refreshToken: string }) => void
   updateUserProgress: (payload: { xp?: number; level?: number; currentStreak?: number }) => void
+  setUserNickname: (nickname: string) => void
   clearSession: () => void
   setHydrated: (value: boolean) => void
 }
@@ -48,6 +49,8 @@ export const useAuthStore = create<AuthState>()(
             },
           }
         }),
+      setUserNickname: (nickname: string) =>
+        set((state) => (state.user ? { user: { ...state.user, nickname } } : {})),
       clearSession: () =>
         set({
           user: null,

@@ -14,9 +14,31 @@ type Client = {
   ws: WebSocket
   bucket: string | null
   peer: Client | null
+  debateRoom: DebateRoom | null
 }
 
+type DebateRoom = { id: string; topic: string; members: Client[] }
+
 const waiting = new Map<string, Client[]>()
+const debateRooms = new Map<string, DebateRoom>()
+
+const DEBATE_ROOM_SIZE = 5
+const DEBATE_MOTIONS = [
+  'Social media does more harm than good.',
+  'University education should be free for everyone.',
+  'Working from home is better than working in an office.',
+  'Technology is making people less social.',
+  'Exams are not a fair way to measure ability.',
+  'Tourism harms more than it helps local communities.',
+  'A four-day working week should be the standard.',
+  'Online learning is as effective as classroom learning.',
+  'Cities should ban private cars from their centres.',
+  'Celebrities have a responsibility to be good role models.',
+]
+
+function pickMotion() {
+  return DEBATE_MOTIONS[Math.floor(Math.random() * DEBATE_MOTIONS.length)]
+}
 
 function genId() {
   return `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
@@ -85,6 +107,59 @@ function unpair(client: Client, notify: boolean) {
   client.peer = null
 }
 
+// ── Debate rooms (group voice, up to 5) ─────────────────────────────────────
+// Fill an open room or open a fresh one; when someone leaves, the next searcher
+// naturally lands in the room with free space (back-fill). Audio is a peer-to-peer
+// mesh; the server only relays SDP/ICE between members.
+function joinDebate(client: Client) {
+  leaveDebate(client, true)
+
+  let room: DebateRoom | undefined
+  for (const r of debateRooms.values()) {
+    const live = r.members.filter((m) => m.ws.readyState === WebSocket.OPEN).length
+    if (live < DEBATE_ROOM_SIZE) {
+      room = r
+      break
+    }
+  }
+  if (!room) {
+    room = { id: genId(), topic: pickMotion(), members: [] }
+    debateRooms.set(room.id, room)
+  }
+
+  // Tell the joiner who is already here (so it can dial them), then announce the
+  // joiner to everyone already in the room.
+  send(client, {
+    type: 'debateRoom',
+    roomId: room.id,
+    topic: room.topic,
+    members: room.members.map((m) => ({ id: m.id, userId: m.userId, name: m.name })),
+  })
+  for (const m of room.members) {
+    send(m, { type: 'debatePeerJoined', peer: { id: client.id, userId: client.userId, name: client.name } })
+  }
+  room.members.push(client)
+  client.debateRoom = room
+}
+
+function leaveDebate(client: Client, notify: boolean) {
+  const room = client.debateRoom
+  if (!room) return
+  room.members = room.members.filter((m) => m.id !== client.id)
+  client.debateRoom = null
+  if (notify) {
+    for (const m of room.members) send(m, { type: 'debatePeerLeft', peerId: client.id })
+  }
+  if (room.members.length === 0) debateRooms.delete(room.id)
+}
+
+function relayDebateSignal(client: Client, to: string, data: unknown) {
+  const room = client.debateRoom
+  if (!room) return
+  const target = room.members.find((m) => m.id === to)
+  if (target) send(target, { type: 'debateSignal', from: client.id, data })
+}
+
 function attach(server: Server) {
   const wss = new WebSocketServer({ server, path: '/ws/speaking' })
 
@@ -96,10 +171,11 @@ function attach(server: Server) {
       ws,
       bucket: null,
       peer: null,
+      debateRoom: null,
     }
 
     ws.on('message', (raw) => {
-      let msg: { type?: string; userId?: string; name?: string; part?: number; level?: string; data?: unknown }
+      let msg: { type?: string; userId?: string; name?: string; part?: number; level?: string; to?: string; data?: unknown }
       try {
         msg = JSON.parse(raw.toString())
       } catch {
@@ -124,19 +200,27 @@ function attach(server: Server) {
           unpair(client, true)
           client.bucket = null
           break
+        case 'joinDebate':
+          joinDebate(client)
+          break
+        case 'debateSignal':
+          if (typeof msg.to === 'string') relayDebateSignal(client, msg.to, msg.data)
+          break
+        case 'leaveDebate':
+          leaveDebate(client, true)
+          break
         default:
           break
       }
     })
 
-    ws.on('close', () => {
+    const cleanup = () => {
       removeFromQueue(client)
       unpair(client, true)
-    })
-    ws.on('error', () => {
-      removeFromQueue(client)
-      unpair(client, true)
-    })
+      leaveDebate(client, true)
+    }
+    ws.on('close', cleanup)
+    ws.on('error', cleanup)
   })
 
   return wss

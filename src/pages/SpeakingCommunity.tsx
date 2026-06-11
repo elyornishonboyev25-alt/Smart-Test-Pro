@@ -47,6 +47,7 @@ import {
 import { xpForBand } from '@/lib/speakingScoring'
 import { CountUp, Reveal } from '@/components/fx'
 import ExaminerSession, { type SessionConfig } from '@/components/speaking/ExaminerSession'
+import SpeakerDirectory from '@/components/speaking/SpeakerDirectory'
 import type { InterviewKind } from '@/data/speakingQuestions'
 
 type View = 'hub' | 'examiner' | 'session' | 'live'
@@ -195,9 +196,9 @@ export default function SpeakingCommunity() {
                 icon={<BarChart3 className="h-6 w-6" />}
                 title="My Progress"
                 subtitle="Charts, streaks & rank"
-                description="Track your band trend, skill radar, speaking time and achievements over time."
-                cta="View dashboard"
-                onClick={() => dashboardRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                description="Open your full speaking profile — band trend, skill radar, achievements and your global rank."
+                cta="View my profile"
+                onClick={() => navigate('/speaker/me')}
               />
             </section>
 
@@ -217,6 +218,11 @@ export default function SpeakingCommunity() {
                 />
               )}
             </div>
+
+            {/* Community directory */}
+            <Reveal>
+              <SpeakerDirectory />
+            </Reveal>
           </>
         ) : null}
 

@@ -29,6 +29,7 @@ const VocabularyActivity = lazy(() => import('@/pages/VocabularyActivity'))
 const WritingLab = lazy(() => import('@/pages/WritingLab'))
 const SpeakingLab = lazy(() => import('@/pages/SpeakingLab'))
 const SpeakingCommunity = lazy(() => import('@/pages/SpeakingCommunity'))
+const SpeakerProfile = lazy(() => import('@/pages/SpeakerProfile'))
 const Mock = lazy(() => import('@/pages/Mock'))
 const MockIELTS = lazy(() => import('@/pages/MockIELTS'))
 const MockSAT = lazy(() => import('@/pages/MockSAT'))
@@ -112,6 +113,7 @@ function App() {
     isStandaloneMode ||
     pathname.startsWith('/mock') ||
     pathname === '/speaking-community' ||
+    pathname.startsWith('/speaker/') ||
     pathname.startsWith('/sat') ||
     pathname.startsWith('/ielts') ||
     pathname === '/writing-lab' ||
@@ -331,6 +333,14 @@ function App() {
                               <SpeakingCommunity />
                             </AnimatedRoute>
                           </PremiumRoute>
+                        }
+                      />
+                      <Route
+                        path="/speaker/:id"
+                        element={
+                          <AnimatedRoute>
+                            <SpeakerProfile />
+                          </AnimatedRoute>
                         }
                       />
                       <Route

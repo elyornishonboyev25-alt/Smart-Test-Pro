@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, Bell, CalendarClock, CheckCircle2, Crown, Gem, Globe, Lock, Mail, Phone, Save, ShieldCheck, SlidersHorizontal, Sparkles, Target, UserRound } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, type AuthState } from '@/store/authStore'
+import { useSpeakerSocialStore, speakerHandle } from '@/store/speakerSocialStore'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -126,6 +127,20 @@ export default function AccountProfile() {
   const user = useAuthStore((state: AuthState) => state.user)
   const pushToast = useToastStore((state: ToastState) => state.pushToast)
   const { allowHoverMotion, minimalMotion } = useMotionPreferences()
+
+  const nicknames = useSpeakerSocialStore((state) => state.nicknames)
+  const setNickname = useSpeakerSocialStore((state) => state.setNickname)
+  const savedNickname = user?.id ? nicknames[user.id] ?? '' : ''
+  const [nicknameDraft, setNicknameDraft] = useState(savedNickname)
+  useEffect(() => {
+    setNicknameDraft(savedNickname)
+  }, [savedNickname])
+
+  const saveNickname = () => {
+    if (!user?.id) return
+    setNickname(user.id, nicknameDraft || user.fullName)
+    pushToast({ type: 'success', title: 'Nickname saved', message: 'Your public speaking handle has been updated.' })
+  }
 
   const initialProfile = useMemo<ProfileDraft>(
     () => ({
@@ -449,6 +464,39 @@ export default function AccountProfile() {
               />
             </div>
           </article>
+        </div>
+      </section>
+
+      <section className="mt-6 surface-card p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="inline-flex items-center gap-2 text-xl font-semibold text-slate-900">
+            <Sparkles className="h-5 w-5 text-red-600" />
+            Public Speaking Identity
+          </h2>
+          <span className="soft-chip">Shown on your speaker profile</span>
+        </div>
+        <p className="mt-2 text-sm text-slate-600">
+          Choose a nickname other learners see when they find you in the Speaking Community. This is your public handle —
+          no messaging, speaking practice only.
+        </p>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <label className="flex-1 text-sm font-medium text-slate-700">
+            Nickname / handle
+            <input
+              value={nicknameDraft}
+              onChange={(event) => setNicknameDraft(event.target.value)}
+              className="input mt-1"
+              placeholder={user?.fullName ? speakerHandle(user.id, user.fullName, nicknames) : 'your_handle'}
+              maxLength={24}
+            />
+          </label>
+          <button type="button" onClick={saveNickname} disabled={!user} className="arena-primary-btn justify-center disabled:opacity-50">
+            <Save className="mr-2 h-4 w-4" />
+            Save nickname
+          </button>
+          <button type="button" onClick={() => navigate('/speaker/me')} className="arena-secondary-btn justify-center">
+            View my profile
+          </button>
         </div>
       </section>
 

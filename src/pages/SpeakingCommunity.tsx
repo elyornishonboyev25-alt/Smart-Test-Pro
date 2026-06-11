@@ -48,6 +48,7 @@ import { xpForBand } from '@/lib/speakingScoring'
 import { CountUp, Reveal } from '@/components/fx'
 import ExaminerSession, { type SessionConfig } from '@/components/speaking/ExaminerSession'
 import SpeakerDirectory from '@/components/speaking/SpeakerDirectory'
+import LivePartnerSession from '@/components/speaking/LivePartnerSession'
 import type { InterviewKind } from '@/data/speakingQuestions'
 
 type View = 'hub' | 'examiner' | 'session' | 'live'
@@ -231,8 +232,8 @@ export default function SpeakingCommunity() {
           <ExaminerPicker onPick={launch} onBack={() => setView('hub')} />
         ) : null}
 
-        {/* Live partner (Phase 3 placeholder) */}
-        {view === 'live' ? <LivePartnerComingSoon onBack={() => setView('hub')} navigateLeaderboard={() => navigate('/leaderboard')} /> : null}
+        {/* Live partner — real-time peer practice */}
+        {view === 'live' ? <LivePartnerSession onExit={() => setView('hub')} /> : null}
       </div>
     </div>
   )
@@ -529,44 +530,6 @@ function EmptyDashboard({ onStart }: { onStart: () => void }) {
         <button onClick={onStart} className="arena-primary-btn cta-sheen mt-6 px-6 py-3">
           <Wand2 className="mr-2 h-5 w-5" /> Start your first session
         </button>
-      </section>
-    </Reveal>
-  )
-}
-
-// ── Live partner placeholder (real version arrives in Phase 3) ────────────────
-function LivePartnerComingSoon({ onBack, navigateLeaderboard }: { onBack: () => void; navigateLeaderboard: () => void }) {
-  return (
-    <Reveal>
-      <section className="surface-card p-6 sm:p-10">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="inline-flex items-center gap-2 text-2xl font-black text-slate-900">
-            <Users className="h-6 w-6 text-red-600" /> Live Partner Practice
-          </h2>
-          <button onClick={onBack} className="arena-secondary-btn text-sm">Back</button>
-        </div>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-          Real-time, microphone-only speaking with another learner is coming in the next update. You’ll be matched
-          automatically with someone searching at the same time, practise a shared question set, then rate each other’s
-          fluency and pronunciation — no chat, just speaking.
-        </p>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {[
-            { icon: <Users className="h-5 w-5" />, t: 'Auto-matchmaking', d: 'Two people searching get paired instantly.' },
-            { icon: <Mic className="h-5 w-5" />, t: 'Voice only', d: 'Microphone-only, camera disabled by design.' },
-            { icon: <Trophy className="h-5 w-5" />, t: 'Peer rating', d: 'Score each other and view profiles afterwards.' },
-          ].map((f) => (
-            <div key={f.t} className="rounded-2xl border border-red-100 bg-red-50/40 p-4">
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-red-600">{f.icon}</span>
-              <p className="mt-2 text-sm font-bold text-slate-900">{f.t}</p>
-              <p className="text-xs text-slate-600">{f.d}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <button onClick={onBack} className="arena-primary-btn">Practice with AI meanwhile</button>
-          <button onClick={navigateLeaderboard} className="arena-secondary-btn">See the leaderboard</button>
-        </div>
       </section>
     </Reveal>
   )

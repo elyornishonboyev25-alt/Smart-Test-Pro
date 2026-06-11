@@ -1,13 +1,20 @@
+import http from 'http'
 import { app } from './app.js'
 import { env } from './config/env.js'
 import { prisma } from './lib/prisma.js'
 import { runStartupHealthChecks } from './lib/startupHealth.js'
+import { attachSpeakingSignaling } from './realtime/speakingSignaling.js'
 
 async function bootstrap() {
   await runStartupHealthChecks()
 
-  const server = app.listen(env.PORT, () => {
+  const httpServer = http.createServer(app)
+  // Live-partner speaking matchmaking + WebRTC signaling at ws://<host>/ws/speaking
+  attachSpeakingSignaling(httpServer)
+
+  const server = httpServer.listen(env.PORT, () => {
     console.log(`ProfAI API running on http://localhost:${env.PORT}`)
+    console.log('Speaking signaling WebSocket ready at /ws/speaking')
   })
 
   const shutdown = async () => {

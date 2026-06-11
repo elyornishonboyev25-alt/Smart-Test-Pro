@@ -221,7 +221,7 @@ RULES:
 - Keep responses under 150 words unless the user asks for detailed explanation.`
 }
 
-async function callGeminiAPI(
+export async function callGeminiAPI(
   systemPrompt: string,
   userMessage: string,
   maxOutputTokens = 2048,
@@ -317,7 +317,7 @@ async function callGeminiAPI(
   throw new Error(lastError || 'The AI did not return a response. Please try again.')
 }
 
-function extractJSON(raw: string): string {
+export function extractJSON(raw: string): string {
   const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
   if (fenceMatch) return fenceMatch[1].trim()
   const braceStart = raw.indexOf('{')

@@ -1,4 +1,5 @@
 import { IELTSTest, Section, Question } from '../types/ieltsTypes'
+import { listeningFullTest2 } from './listeningFullTest2'
 
 const AUDIO_BASE = '/audio/ielts-listening'
 const IMAGE_BASE = '/images/ielts-listening'
@@ -23,12 +24,31 @@ function createQuestion(
 
 const listeningPart1: Section = {
   id: 'ielts-listening-test1-part1',
-  title: 'Part 1: Cycling Holiday in Austria',
+  title: 'Cycling Holiday in Austria',
   audioUrl: `${AUDIO_BASE}/test1-part1.mp3`,
   visualAidUrl: `${IMAGE_BASE}/test1-part1.png`,
   duration: 380,
-  content:
-    'Questions 1-10. Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.',
+  partLabel: 'Part 1',
+  partInstruction: 'Listen and answer questions 1 - 10.',
+  groups: [
+    {
+      range: 'Questions 1 - 10',
+      instruction: 'Complete the notes below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.',
+      blocks: [
+        { kind: 'title', text: 'Cycling Holiday in Austria' },
+        { kind: 'note', segments: ['Holiday begins on ', { blank: 1, width: 'md' }] },
+        { kind: 'note', segments: ['No more than ', { blank: 2, width: 'sm' }, ' people in cycling group'] },
+        { kind: 'note', segments: ['Each day, group cycles ', { blank: 3, width: 'md' }, ' on average'] },
+        { kind: 'note', segments: ['Some of the hotels have a ', { blank: 4, width: 'lg' }] },
+        { kind: 'note', segments: ['Holiday costs GBP ', { blank: 5, width: 'sm' }, ' per person without flights'] },
+        { kind: 'note', segments: ['All food included except ', { blank: 6, width: 'md' }] },
+        { kind: 'note', segments: ['Essential to bring a ', { blank: 7, width: 'lg' }] },
+        { kind: 'note', segments: ['Discount possible on equipment at www.', { blank: 8, width: 'md' }, '.com'] },
+        { kind: 'note', segments: ['Possible that the ', { blank: 9, width: 'md' }, ' may change'] },
+        { kind: 'note', segments: ['Guided tour of a ', { blank: 10, width: 'md' }, ' is arranged'] },
+      ],
+    },
+  ],
   questions: [
     createQuestion('ls1-q1', 1, 'Holiday begins on', 'note-completion', 'Saturday'),
     createQuestion('ls1-q2', 2, 'No more than ____ people in cycling group', 'note-completion', '12'),
@@ -43,108 +63,183 @@ const listeningPart1: Section = {
   ],
 }
 
+const harbourAdvantageOptions = [
+  { letter: 'A', text: 'great views' },
+  { letter: 'B', text: 'private booths' },
+  { letter: 'C', text: 'good for vegetarians' },
+  { letter: 'D', text: 'reasonable prices' },
+  { letter: 'E', text: 'tables outside' },
+  { letter: 'F', text: 'serves food all day' },
+  { letter: 'G', text: 'live music' },
+  { letter: 'H', text: 'specialises in seafood' },
+]
+
 const listeningPart2: Section = {
   id: 'ielts-listening-test1-part2',
-  title: 'Part 2: Harbour Area and Restaurants',
+  title: 'Harbour Area and Restaurants',
   audioUrl: `${AUDIO_BASE}/test1-part2.mp3`,
   visualAidUrl: `${IMAGE_BASE}/test1-part2.png`,
   duration: 420,
-  content:
-    'Questions 11-14: choose the correct letter A, B or C. Questions 15-20: choose SIX answers from the box and write the correct letter A-H.',
-  questions: [
-    createQuestion(
-      'ls1-q11',
-      11,
-      'The market is now situated',
-      'multiple-choice',
-      '2',
-      ['A. under a car park.', 'B. beside the cathedral.', 'C. near the river.'],
-    ),
-    createQuestion(
-      'ls1-q12',
-      12,
-      'On only one day a week the market sells',
-      'multiple-choice',
-      '2',
-      ['A. antique furniture.', 'B. local produce.', 'C. hand-made items.'],
-    ),
-    createQuestion(
-      'ls1-q13',
-      13,
-      'The area is well known for',
-      'multiple-choice',
-      '1',
-      ['A. ice cream.', 'B. a cake.', 'C. a fish dish.'],
-    ),
-    createQuestion(
-      'ls1-q14',
-      14,
-      'What change has taken place in the harbour area?',
-      'multiple-choice',
-      '1',
-      [
-        'A. Fish can now be bought from the fishermen.',
-        'B. The restaurants have moved to a different part.',
-        'C. There are fewer restaurants than there used to be.',
+  partLabel: 'Part 2',
+  partInstruction: 'Listen and answer questions 11 - 20.',
+  groups: [
+    {
+      range: 'Questions 11 - 14',
+      instruction: 'Choose the correct answer.',
+      blocks: [
+        { kind: 'mcq', blank: 11, prompt: 'The market is now situated', options: ['under a car park.', 'beside the cathedral.', 'near the river.'] },
+        { kind: 'mcq', blank: 12, prompt: 'On only one day a week the market sells', options: ['antique furniture.', 'local produce.', 'hand-made items.'] },
+        { kind: 'mcq', blank: 13, prompt: 'The area is well known for', options: ['ice cream.', 'a cake.', 'a fish dish.'] },
+        { kind: 'mcq', blank: 14, prompt: 'What change has taken place in the harbour area?', options: ['Fish can now be bought from the fishermen.', 'The restaurants have moved to a different part.', 'There are fewer restaurants than there used to be.'] },
       ],
-    ),
-    createQuestion(
-      'ls1-q15',
-      15,
-      'Merrivales - advantage letter (A-H)',
-      'short-answer',
-      '2',
-    ),
-    createQuestion('ls1-q16', 16, 'The Lobster Pot - advantage letter (A-H)', 'short-answer', '5'),
-    createQuestion(
-      'ls1-q17',
-      17,
-      'Elliots - advantage letter (A-H)',
-      'short-answer',
-      '1',
-    ),
-    createQuestion('ls1-q18', 18, 'The Cabin - advantage letter (A-H)', 'short-answer', '6'),
-    createQuestion('ls1-q19', 19, 'The Olive Tree - advantage letter (A-H)', 'short-answer', '7'),
-    createQuestion(
-      'ls1-q20',
-      20,
-      'The Old School Restaurant - advantage letter (A-H)',
-      'short-answer',
-      '0',
-    ),
+    },
+    {
+      range: 'Questions 15 - 20',
+      instruction: 'What advantage is mentioned for each of the following restaurants? Choose SIX answers from the box and write the correct letter A-H next to each restaurant.',
+      blocks: [
+        {
+          kind: 'grid',
+          columns: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+          rows: [
+            { blank: 15, label: 'Merrivales' },
+            { blank: 16, label: 'The Lobster Pot' },
+            { blank: 17, label: 'Elliots' },
+            { blank: 18, label: 'The Cabin' },
+            { blank: 19, label: 'The Olive Tree' },
+            { blank: 20, label: 'The Old School Restaurant' },
+          ],
+          options: harbourAdvantageOptions,
+        },
+      ],
+    },
+  ],
+  questions: [
+    createQuestion('ls1-q11', 11, 'The market is now situated', 'multiple-choice', 'C', ['under a car park.', 'beside the cathedral.', 'near the river.']),
+    createQuestion('ls1-q12', 12, 'On only one day a week the market sells', 'multiple-choice', 'C', ['antique furniture.', 'local produce.', 'hand-made items.']),
+    createQuestion('ls1-q13', 13, 'The area is well known for', 'multiple-choice', 'B', ['ice cream.', 'a cake.', 'a fish dish.']),
+    createQuestion('ls1-q14', 14, 'What change has taken place in the harbour area?', 'multiple-choice', 'B', ['Fish can now be bought from the fishermen.', 'The restaurants have moved to a different part.', 'There are fewer restaurants than there used to be.']),
+    createQuestion('ls1-q15', 15, 'Merrivales', 'matching-information', 'C'),
+    createQuestion('ls1-q16', 16, 'The Lobster Pot', 'matching-information', 'F'),
+    createQuestion('ls1-q17', 17, 'Elliots', 'matching-information', 'B'),
+    createQuestion('ls1-q18', 18, 'The Cabin', 'matching-information', 'G'),
+    createQuestion('ls1-q19', 19, 'The Olive Tree', 'matching-information', 'H'),
+    createQuestion('ls1-q20', 20, 'The Old School Restaurant', 'matching-information', 'A'),
   ],
 }
 
+const filmTaskOptions = [
+  { letter: 'A', text: 'sponsors' },
+  { letter: 'B', text: 'costumes' },
+  { letter: 'C', text: 'lighting' },
+  { letter: 'D', text: 'locations' },
+  { letter: 'E', text: 'council' },
+  { letter: 'F', text: 'schedule' },
+  { letter: 'G', text: 'actors' },
+  { letter: 'H', text: 'crew' },
+  { letter: 'I', text: 'equipment' },
+]
+
 const listeningPart3: Section = {
   id: 'ielts-listening-test1-part3',
-  title: 'Part 3: Film Project and Old Water-mill Map',
+  title: 'Film Project Planning',
   audioUrl: `${AUDIO_BASE}/test1-part3.mp3`,
   visualAidUrl: `${IMAGE_BASE}/test1-part3.png`,
   duration: 470,
-  content:
-    'Questions 21-26: choose SIX answers from the box A-I. Questions 27-30: choose four answers from the box A-G for the map.',
+  partLabel: 'Part 3',
+  partInstruction: 'Listen and answer questions 21 - 30.',
+  groups: [
+    {
+      range: 'Questions 21 - 26',
+      instruction: 'What needs to be done for each stage of the film project? Choose SIX answers from the box A-I.',
+      blocks: [
+        {
+          kind: 'grid',
+          columns: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
+          rows: [
+            { blank: 21, label: 'Visit locations and discuss' },
+            { blank: 22, label: 'Contact the ____ about roadworks' },
+            { blank: 23, label: 'Plan the' },
+            { blank: 24, label: 'Hold auditions and recheck availability of the' },
+            { blank: 25, label: 'Choose the ____ from the volunteers' },
+            { blank: 26, label: 'Collect ____ and organise food and transport' },
+          ],
+          options: filmTaskOptions,
+        },
+      ],
+    },
+    {
+      range: 'Questions 27 - 30',
+      instruction: 'Label the map below. Choose four answers from the box A-G and write the correct letter next to questions 27-30.',
+      blocks: [
+        {
+          kind: 'grid',
+          columns: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+          rows: [
+            { blank: 27, label: 'Storage room' },
+            { blank: 28, label: 'Editing suite' },
+            { blank: 29, label: 'Sound studio' },
+            { blank: 30, label: 'Green room' },
+          ],
+        },
+      ],
+    },
+  ],
   questions: [
-    createQuestion('ls1-q21', 21, 'Visit locations and discuss', 'short-answer', '4'),
-    createQuestion('ls1-q22', 22, 'Contact the ____ about roadworks', 'short-answer', '5'),
-    createQuestion('ls1-q23', 23, 'Plan the', 'short-answer', '7'),
-    createQuestion('ls1-q24', 24, 'Hold auditions and recheck availability of the', 'short-answer', '1'),
-    createQuestion('ls1-q25', 25, 'Choose the ____ from the volunteers', 'short-answer', '8'),
-    createQuestion('ls1-q26', 26, 'Collect ____ and organise food and transport', 'short-answer', '9'),
-    createQuestion('ls1-q27', 27, 'Map label 27 (A-G)', 'short-answer', '1'),
-    createQuestion('ls1-q28', 28, 'Map label 28 (A-G)', 'short-answer', '5'),
-    createQuestion('ls1-q29', 29, 'Map label 29 (A-G)', 'short-answer', '4'),
-    createQuestion('ls1-q30', 30, 'Map label 30 (A-G)', 'short-answer', '7'),
+    createQuestion('ls1-q21', 21, 'Visit locations and discuss', 'matching-information', 'D'),
+    createQuestion('ls1-q22', 22, 'Contact the ____ about roadworks', 'matching-information', 'E'),
+    createQuestion('ls1-q23', 23, 'Plan the', 'matching-information', 'F'),
+    createQuestion('ls1-q24', 24, 'Hold auditions and recheck availability of the', 'matching-information', 'B'),
+    createQuestion('ls1-q25', 25, 'Choose the ____ from the volunteers', 'matching-information', 'H'),
+    createQuestion('ls1-q26', 26, 'Collect ____ and organise food and transport', 'matching-information', 'I'),
+    createQuestion('ls1-q27', 27, 'Storage room', 'matching-information', 'B'),
+    createQuestion('ls1-q28', 28, 'Editing suite', 'matching-information', 'E'),
+    createQuestion('ls1-q29', 29, 'Sound studio', 'matching-information', 'D'),
+    createQuestion('ls1-q30', 30, 'Green room', 'matching-information', 'F'),
   ],
 }
 
 const listeningPart4: Section = {
   id: 'ielts-listening-test1-part4',
-  title: 'Part 4: Exotic Pests Table Completion',
+  title: 'Exotic Pests',
   audioUrl: `${AUDIO_BASE}/test1-part4.mp3`,
   visualAidUrl: `${IMAGE_BASE}/test1-part4.png`,
   duration: 520,
-  content:
-    'Questions 31-40. Complete the table below. Write NO MORE THAN TWO WORDS for each answer.',
+  partLabel: 'Part 4',
+  partInstruction: 'Listen and answer questions 31 - 40.',
+  groups: [
+    {
+      range: 'Questions 31 - 40',
+      instruction: 'Complete the table below. Write NO MORE THAN TWO WORDS for each answer.',
+      blocks: [
+        {
+          kind: 'table',
+          columns: ['Pest', 'Origin', 'New habitat / notes'],
+          rows: [
+            [
+              { segments: ['Rabbit'] },
+              { segments: ['England (for ', { blank: 32, width: 'md' }, ')'] },
+              { segments: ['Even on island in middle of ', { blank: 31, width: 'md' }, '; parks in Brisbane (', { blank: 33, width: 'md' }, ')'] },
+            ],
+            [
+              { segments: [{ blank: 34, width: 'md' }] },
+              { segments: ['Australia'] },
+              { segments: ['Introduced to improve ', { blank: 35, width: 'lg' }] },
+            ],
+            [
+              { segments: [{ blank: 38, width: 'md' }] },
+              { segments: ['Japan'] },
+              { segments: [{ blank: 36, width: 'md' }, ' Europe; arrived inside imported ', { blank: 37, width: 'md' }] },
+            ],
+            [
+              { segments: ['Budgerigar'] },
+              { segments: ['—'] },
+              { segments: ['Urban areas of south-east ', { blank: 39, width: 'md' }, '; smaller flocks after arrival of ', { blank: 40, width: 'md' }] },
+            ],
+          ],
+        },
+      ],
+    },
+  ],
   questions: [
     createQuestion('ls1-q31', 31, 'Even on island in middle of', 'note-completion', 'Pacific'),
     createQuestion('ls1-q32', 32, 'Imported into England to be used for', 'note-completion', 'food'),
@@ -166,40 +261,17 @@ const listeningFullTest1Sections: Section[] = [
   listeningPart4,
 ]
 
-function cloneSection(section: Section, suffix: string): Section {
-  return {
-    ...section,
-    id: `${section.id}-${suffix}`,
-    questions: section.questions.map((question) => ({
-      ...question,
-      id: `${question.id}-${suffix}`,
-      correctAnswer: Array.isArray(question.correctAnswer)
-        ? [...question.correctAnswer]
-        : question.correctAnswer,
-      options: question.options ? [...question.options] : undefined,
-    })),
-  }
+const listeningFullTest1: IELTSTest = {
+  id: 'ielts-listening-1',
+  title: 'IELTS Listening Full Test 1',
+  type: 'Academic',
+  module: 'Listening',
+  duration: 32,
+  totalQuestions: 40,
+  sections: listeningFullTest1Sections,
 }
 
-const listeningFullTest2Sections = listeningFullTest1Sections.map((section) => cloneSection(section, 't2'))
-
 export const mockListeningTests: IELTSTest[] = [
-  {
-    id: 'ielts-listening-1',
-    title: 'IELTS Listening Full Test 1',
-    type: 'Academic',
-    module: 'Listening',
-    duration: 30,
-    totalQuestions: 40,
-    sections: listeningFullTest1Sections,
-  },
-  {
-    id: 'ielts-listening-2',
-    title: 'IELTS Listening Full Test 2',
-    type: 'General Training',
-    module: 'Listening',
-    duration: 30,
-    totalQuestions: 40,
-    sections: listeningFullTest2Sections,
-  },
+  listeningFullTest1,
+  listeningFullTest2,
 ]

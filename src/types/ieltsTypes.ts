@@ -24,6 +24,36 @@ export interface Question {
     instruction?: string // e.g., "Which paragraph contains..."
 }
 
+// ---- Listening rich layout (OneIELTS / Cambridge CD-style rendering) ----
+// A segment is either plain text or a numbered blank bound to a question number.
+export type ListeningSegment =
+    | string
+    | { blank: number; before?: string; after?: string; width?: 'sm' | 'md' | 'lg' | 'xl' }
+
+export interface ListeningOption {
+    letter: string // 'A', 'B', ...
+    text: string
+}
+
+// One renderable block inside a question group.
+export type ListeningBlock =
+    | { kind: 'title'; text: string } // centred section heading e.g. "Car Rental Inquiry"
+    | { kind: 'subhead'; text: string } // bold sub-heading e.g. "Special requirements for the room:"
+    | { kind: 'text'; text: string } // plain paragraph / caption line
+    | { kind: 'example'; segments: ListeningSegment[] } // italic "Example" line
+    | { kind: 'note'; segments: ListeningSegment[]; bullet?: boolean; indent?: boolean }
+    | { kind: 'flow'; boxes: { segments: ListeningSegment[] }[] } // vertical flow chart with arrows
+    | { kind: 'grid'; columns: string[]; rows: { blank: number; label: string }[]; options?: ListeningOption[] }
+    | { kind: 'mcq'; blank: number; prompt: string; options: string[] }
+    | { kind: 'table'; columns: string[]; rows: { segments: ListeningSegment[] }[][] }
+    | { kind: 'space' }
+
+export interface ListeningGroup {
+    range: string // "Questions 1 - 10"
+    instruction: string // "Complete the notes. Write ONE WORD ONLY/OR A NUMBER for each answer."
+    blocks: ListeningBlock[]
+}
+
 export interface Section {
     id: string
     title: string
@@ -33,6 +63,10 @@ export interface Section {
     visualAidUrl?: string // Optional prompt/diagram image for Listening
     audioTranscript?: string // Optional transcript for practice mode review
     duration?: number // Audio duration in seconds
+    // Listening exam chrome + rich layout (optional; falls back to simple rendering when absent)
+    partLabel?: string // "Part 1"
+    partInstruction?: string // "Listen and answer questions 1 - 10."
+    groups?: ListeningGroup[] // OneIELTS-style rendered question groups
     questions: Question[]
 }
 

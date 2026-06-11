@@ -1,26 +1,29 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  ArrowLeft,
-  CheckCircle2,
-  CirclePause,
-  CirclePlay,
-  Clock3,
+  AlertTriangle,
+  ChevronRight,
   Headphones,
-  Lock,
-  RotateCcw,
+  Maximize2,
+  Menu,
+  Minimize2,
+  PencilLine,
+  Play,
   Send,
-  Sparkles,
   Volume2,
-  VolumeX,
+  Wifi,
+  X,
 } from 'lucide-react'
-import { IELTSTest, Question, Section, TestResult } from '../types/ieltsTypes'
-import { AnimatedBackground } from './AnimatedBackground'
-import Timer from './Timer'
-import QuestionNavigation from './QuestionNavigation'
-import { calculateBandScore, checkAnswer, formatQuestionTypeLabel } from '../utils/ieltsUtils'
-
-type ListeningMode = 'practice' | 'full-test'
+import {
+  IELTSTest,
+  Question,
+  Section,
+  TestResult,
+  ListeningBlock,
+  ListeningSegment,
+} from '../types/ieltsTypes'
+import { BrandMark } from './brand/BrandLogo'
+import { calculateBandScore, checkAnswer } from '../utils/ieltsUtils'
 
 interface IELTSListeningInterfaceProps {
   test: IELTSTest
@@ -33,47 +36,24 @@ interface IELTSListeningInterfaceProps {
   }
 }
 
-const SESSION_VERSION = 2
-const PRACTICE_TIME_PRESETS = [15, 20, 30, 40, -1]
-
-function sanitizeSelectedParts(value: number[] | undefined, sectionCount: number): number[] {
-  if (sectionCount <= 0) return []
-  const fallback = [0]
-  if (!value || value.length === 0) return fallback
-
-  const normalized = Array.from(new Set(value))
-    .filter((entry) => Number.isInteger(entry) && entry >= 0 && entry < sectionCount)
-    .sort((left, right) => left - right)
-
-  return normalized.length > 0 ? normalized : fallback
+const WIDTHS: Record<string, string> = {
+  sm: 'w-16',
+  md: 'w-28',
+  lg: 'w-44',
+  xl: 'w-60',
 }
 
-function formatTime(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds < 0) return '00:00'
-  const minutes = Math.floor(seconds / 60)
-  const rest = Math.floor(seconds % 60)
-  return `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`
-}
-
-function evaluateQuestion(question: Question, answer: string | number | string[] | undefined): boolean {
-  const checked = checkAnswer(answer, question.correctAnswer, question.options)
-  if (typeof checked === 'number') return checked > 0
-  return checked
-}
-
-function getTotalQuestionCount(sections: Section[]) {
-  return sections.reduce((sum, section) => sum + section.questions.length, 0)
-}
-
-function hasAnswer(answer: string | number | string[] | undefined): boolean {
-  if (answer === undefined || answer === null) return false
-  if (typeof answer === 'string') return answer.trim().length > 0
-  if (Array.isArray(answer)) return answer.some((entry) => String(entry ?? '').trim().length > 0)
+function isAnswered(value: string | number | string[] | undefined): boolean {
+  if (value === undefined || value === null) return false
+  if (typeof value === 'string') return value.trim().length > 0
+  if (Array.isArray(value)) return value.some((entry) => String(entry ?? '').trim().length > 0)
   return true
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value))
+function evaluate(question: Question, answer: string | number | string[] | undefined): boolean {
+  const checked = checkAnswer(answer, question.correctAnswer, question.options)
+  if (typeof checked === 'number') return checked > 0
+  return checked
 }
 
 export default function IELTSListeningInterface({
@@ -82,428 +62,518 @@ export default function IELTSListeningInterface({
   onExit,
   launchPreset,
 }: IELTSListeningInterfaceProps) {
-  const [mode, setMode] = useState<ListeningMode>('full-test')
-  const [selectedParts, setSelectedParts] = useState<number[]>(() =>
-    sanitizeSelectedParts([0], test.sections.length),
-  )
-  const [customTimeMinutes, setCustomTimeMinutes] = useState(20)
-  const [isTestActive, setIsTestActive] = useState(false)
-  const [timeRemaining, setTimeRemaining] = useState(test.duration * 60)
-  const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({})
-  const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [lockedSections, setLockedSections] = useState<Record<string, boolean>>({})
+  const sections = test.sections
+  const durationMinutes = launchPreset?.durationMinutes ?? test.duration ?? 32
+
+  const initialPart = useMemo(() => {
+    const candidate = (launchPreset?.partIndex ?? 1) - 1
+    return Math.min(Math.max(0, candidate), Math.max(0, sections.length - 1))
+  }, [launchPreset?.partIndex, sections.length])
+
+  const [started, setStarted] = useState(false)
+  const [currentPartIndex, setCurrentPartIndex] = useState(initialPart)
+  const [currentAudioIndex, setCurrentAudioIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(1)
-  const [isMuted, setIsMuted] = useState(false)
-  const [playbackSpeed, setPlaybackSpeed] = useState(1)
+  const [audioDone, setAudioDone] = useState(false)
   const [audioFailed, setAudioFailed] = useState(false)
-  const [visualFailed, setVisualFailed] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState(durationMinutes * 60)
+  const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({})
+  const [activeNumber, setActiveNumber] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [confirmSubmit, setConfirmSubmit] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [notesOpen, setNotesOpen] = useState(false)
+  const [notesText, setNotesText] = useState('')
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const startedAtRef = useRef<number | null>(null)
-  const launchPresetAppliedRef = useRef(false)
-  const listeningSessionKey = `ielts-listening-session-${test.id}`
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null)
 
-  const isFullTestMode = mode === 'full-test'
-  const activeSections = useMemo(() => {
-    if (isFullTestMode) return test.sections
-    return test.sections.filter((_, index) => selectedParts.includes(index))
-  }, [isFullTestMode, selectedParts, test.sections])
-  const totalQuestions = useMemo(() => getTotalQuestionCount(activeSections), [activeSections])
+  const audioSources = useMemo(() => sections.map((section) => section.audioUrl ?? ''), [sections])
 
-  const sectionMeta = useMemo(() => {
-    let globalIndex = 0
-    return activeSections.map((section) => {
-      const startIndex = globalIndex
-      const questionIds = section.questions.map((question) => question.id)
-      const questionNumbers = section.questions.map((question) => question.number)
-      globalIndex += questionIds.length
-      return {
-        id: section.id,
-        title: section.title,
-        startIndex,
-        questionCount: questionIds.length,
-        questionIds,
-        questionNumbers,
-      }
-    })
-  }, [activeSections])
+  // number -> question and number -> part lookups
+  const questionByNumber = useMemo(() => {
+    const map = new Map<number, Question>()
+    sections.forEach((section) => section.questions.forEach((question) => map.set(question.number, question)))
+    return map
+  }, [sections])
 
-  const currentSection = activeSections[currentSectionIndex] ?? activeSections[0]
-  const currentSectionLocked = Boolean(currentSection && lockedSections[currentSection.id])
-  const allQuestions = useMemo(() => activeSections.flatMap((section) => section.questions), [activeSections])
-  const currentQuestion = allQuestions[currentQuestionIndex]
-  const answeredCount = useMemo(
-    () =>
-      allQuestions.reduce((count, question) => {
-        return count + (hasAnswer(answers[question.id]) ? 1 : 0)
-      }, 0),
-    [allQuestions, answers],
+  const partByNumber = useMemo(() => {
+    const map = new Map<number, number>()
+    sections.forEach((section, index) => section.questions.forEach((question) => map.set(question.number, index)))
+    return map
+  }, [sections])
+
+  const partNumbers = useMemo(
+    () => sections.map((section) => section.questions.map((question) => question.number).sort((a, b) => a - b)),
+    [sections],
   )
-  const progressPercent = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0
-  const sectionStartIndex = sectionMeta[currentSectionIndex]?.startIndex ?? 0
 
+  const totalQuestions = useMemo(
+    () => sections.reduce((sum, section) => sum + section.questions.length, 0),
+    [sections],
+  )
+
+  const answeredPerPart = useMemo(
+    () =>
+      sections.map((section) =>
+        section.questions.reduce((sum, question) => sum + (isAnswered(answers[question.id]) ? 1 : 0), 0),
+      ),
+    [answers, sections],
+  )
+
+  const answeredTotal = useMemo(() => answeredPerPart.reduce((a, b) => a + b, 0), [answeredPerPart])
+
+  const currentSection = sections[currentPartIndex] ?? sections[0]
+  const isLastPart = currentPartIndex >= sections.length - 1
+
+  // ----- audio playback (continuous playlist, no user controls) -----
   useEffect(() => {
-    const saved = localStorage.getItem(listeningSessionKey)
-    if (!saved) return
-
-    try {
-      const parsed = JSON.parse(saved) as {
-        version?: number
-        mode?: ListeningMode
-        selectedParts?: number[]
-        customTimeMinutes?: number
-        isTestActive?: boolean
-        timeRemaining?: number
-        answers?: Record<string, string | number | string[]>
-        currentSectionIndex?: number
-        currentQuestionIndex?: number
-        lockedSections?: Record<string, boolean>
-        startedAt?: number
-        volume?: number
-        isMuted?: boolean
-      }
-
-      if (parsed.version !== SESSION_VERSION) return
-
-      const restoredMode = parsed.mode ?? 'full-test'
-      setMode(restoredMode)
-      setSelectedParts(sanitizeSelectedParts(parsed.selectedParts, test.sections.length))
-      setCustomTimeMinutes(parsed.customTimeMinutes ?? 20)
-      setIsTestActive(Boolean(parsed.isTestActive))
-      setTimeRemaining(parsed.timeRemaining ?? test.duration * 60)
-      setAnswers(parsed.answers ?? {})
-      setCurrentSectionIndex(parsed.currentSectionIndex ?? 0)
-      setCurrentQuestionIndex(parsed.currentQuestionIndex ?? 0)
-      setLockedSections(parsed.lockedSections ?? {})
-      setVolume(typeof parsed.volume === 'number' ? Math.min(1, Math.max(0, parsed.volume)) : 1)
-      setIsMuted(Boolean(parsed.isMuted))
-      startedAtRef.current = typeof parsed.startedAt === 'number' ? parsed.startedAt : null
-    } catch {
-      // Ignore corrupted session payload.
-    }
-  }, [listeningSessionKey, test.duration, test.sections.length])
-
-  useEffect(() => {
-    if (!isTestActive) {
-      setTimeRemaining(isFullTestMode ? test.duration * 60 : customTimeMinutes === -1 ? -1 : customTimeMinutes * 60)
-    }
-  }, [customTimeMinutes, isFullTestMode, isTestActive, test.duration])
-
-  useEffect(() => {
-    setSelectedParts((current) => sanitizeSelectedParts(current, test.sections.length))
-  }, [test.sections.length])
-
-  useEffect(() => {
-    if (!isTestActive) return
-
-    const payload = {
-      version: SESSION_VERSION,
-      mode,
-      selectedParts,
-      customTimeMinutes,
-      isTestActive,
-      timeRemaining,
-      answers,
-      currentSectionIndex,
-      currentQuestionIndex,
-      lockedSections,
-      startedAt: startedAtRef.current,
-      volume,
-      isMuted,
-    }
-    localStorage.setItem(listeningSessionKey, JSON.stringify(payload))
-  }, [
-    answers,
-    currentQuestionIndex,
-    currentSectionIndex,
-    customTimeMinutes,
-    isMuted,
-    isTestActive,
-    listeningSessionKey,
-    lockedSections,
-    mode,
-    selectedParts,
-    timeRemaining,
-    volume,
-  ])
-
-  useEffect(() => {
-    if (activeSections.length === 0) {
-      setCurrentSectionIndex(0)
-      setCurrentQuestionIndex(0)
-      return
-    }
-
-    if (currentSectionIndex >= activeSections.length) {
-      setCurrentSectionIndex(0)
-    }
-  }, [activeSections.length, currentSectionIndex])
-
-  useEffect(() => {
-    if (totalQuestions <= 0) {
-      setCurrentQuestionIndex(0)
-      return
-    }
-    if (currentQuestionIndex >= totalQuestions) {
-      setCurrentQuestionIndex(totalQuestions - 1)
-    }
-  }, [currentQuestionIndex, totalQuestions])
-
-  useEffect(() => {
-    if (!currentSection) return
-    setIsPlaying(false)
-    setCurrentTime(0)
-    setDuration(0)
-    setAudioFailed(false)
-    setVisualFailed(false)
-    setPlaybackSpeed(1)
+    if (!started) return
     const audio = audioRef.current
     if (!audio) return
-    audio.pause()
-    audio.currentTime = 0
-    audio.playbackRate = 1
-  }, [currentSection?.id])
+    audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+  }, [started, currentAudioIndex])
 
-  useEffect(() => {
-    if (!audioRef.current) return
-    audioRef.current.volume = volume
-  }, [volume])
-
-  useEffect(() => {
-    if (!audioRef.current) return
-    audioRef.current.muted = isMuted
-  }, [isMuted])
-
-  const clearSession = useCallback(() => {
-    localStorage.removeItem(listeningSessionKey)
-    startedAtRef.current = null
-  }, [listeningSessionKey])
-
-  const togglePartSelection = useCallback(
-    (partIndex: number) => {
-      setSelectedParts((previous) => {
-        const exists = previous.includes(partIndex)
-        if (exists) {
-          if (previous.length === 1) return previous
-          return previous.filter((entry) => entry !== partIndex)
-        }
-        return [...previous, partIndex].sort((left, right) => left - right)
-      })
-    },
-    [],
-  )
-
-  const startTest = useCallback(
-    (preset?: {
-      mode?: ListeningMode
-      selectedParts?: number[]
-      customTimeMinutes?: number
-    }) => {
-      const effectiveMode = preset?.mode ?? mode
-      const effectiveParts = sanitizeSelectedParts(
-        preset?.selectedParts ?? selectedParts,
-        test.sections.length,
-      )
-      const effectiveCustomTime = preset?.customTimeMinutes ?? customTimeMinutes
-      const startingTime =
-        effectiveMode === 'full-test' ? test.duration * 60 : effectiveCustomTime === -1 ? -1 : effectiveCustomTime * 60
-
-      setMode(effectiveMode)
-      setCustomTimeMinutes(effectiveCustomTime)
-      setSelectedParts(effectiveParts)
-      setTimeRemaining(startingTime)
-      setAnswers({})
-      setCurrentSectionIndex(0)
-      setCurrentQuestionIndex(0)
-      setLockedSections({})
-      setAudioFailed(false)
-      setVisualFailed(false)
-      setIsTestActive(true)
-      setIsSubmitting(false)
-      startedAtRef.current = Date.now()
-    },
-    [customTimeMinutes, mode, selectedParts, test.duration, test.sections.length],
-  )
-
-  useEffect(() => {
-    if (isTestActive || launchPresetAppliedRef.current || !launchPreset) return
-
-    const desiredMode: ListeningMode = launchPreset.mode === 'practice' ? 'practice' : 'full-test'
-    const desiredPart =
-      typeof launchPreset.partIndex === 'number'
-        ? clamp(Math.round(launchPreset.partIndex), 1, test.sections.length)
-        : undefined
-    const desiredDuration =
-      typeof launchPreset.durationMinutes === 'number'
-        ? clamp(Math.round(launchPreset.durationMinutes), 5, 180)
-        : undefined
-
-    launchPresetAppliedRef.current = true
-    startTest({
-      mode: desiredMode,
-      selectedParts: desiredMode === 'practice' && desiredPart ? [desiredPart - 1] : undefined,
-      customTimeMinutes: desiredMode === 'practice' && desiredDuration ? desiredDuration : undefined,
-    })
-  }, [isTestActive, launchPreset, startTest, test.sections.length])
-
-  const onAudioEnded = useCallback(() => {
+  const handleAudioEnded = () => {
     setIsPlaying(false)
-    if (!currentSection) return
-    if (isFullTestMode) {
-      setLockedSections((previous) => ({ ...previous, [currentSection.id]: true }))
+    const next = currentAudioIndex + 1
+    if (next < audioSources.length && audioSources[next]) {
+      // Audio plays through continuously in the background. We never move the
+      // user's view automatically — navigation stays manual (Next Section / nav),
+      // exactly like a real CD listening exam.
+      setCurrentAudioIndex(next)
+    } else {
+      setAudioDone(true)
     }
-  }, [currentSection, isFullTestMode])
+  }
 
-  const togglePlay = useCallback(async () => {
-    if (!audioRef.current || !currentSection?.audioUrl) return
-    if (isFullTestMode && currentSectionLocked) return
-
-    try {
-      if (isPlaying) {
-        audioRef.current.pause()
-        setIsPlaying(false)
-      } else {
-        if (!isFullTestMode) {
-          audioRef.current.playbackRate = playbackSpeed
-        }
-        await audioRef.current.play()
-        setIsPlaying(true)
-      }
-    } catch {
-      setAudioFailed(true)
-      setIsPlaying(false)
-    }
-  }, [currentSection?.audioUrl, currentSectionLocked, isFullTestMode, isPlaying, playbackSpeed])
-
-  const restartAudio = useCallback(() => {
-    if (!audioRef.current || isFullTestMode) return
-    audioRef.current.currentTime = 0
-    setCurrentTime(0)
-  }, [isFullTestMode])
-
-  const handleSeek = useCallback(
-    (value: number) => {
-      if (!audioRef.current || isFullTestMode) return
-      audioRef.current.currentTime = value
-      setCurrentTime(value)
-    },
-    [isFullTestMode],
-  )
-
-  const toggleMute = useCallback(() => {
-    setIsMuted((previous) => !previous)
-  }, [])
-
-  const setVolumeValue = useCallback((value: number) => {
-    const normalized = Math.min(1, Math.max(0, value))
-    setVolume(normalized)
-    if (normalized > 0) {
-      setIsMuted(false)
-    }
-  }, [])
-
-  const cycleSpeed = useCallback(() => {
-    if (!audioRef.current || isFullTestMode) return
-    const speeds = [0.75, 1, 1.25, 1.5]
-    const currentIndex = speeds.indexOf(playbackSpeed)
-    const nextSpeed = speeds[(currentIndex + 1) % speeds.length]
-    audioRef.current.playbackRate = nextSpeed
-    setPlaybackSpeed(nextSpeed)
-  }, [isFullTestMode, playbackSpeed])
-
-  const handleQuestionNavigate = useCallback(
-    (index: number) => {
-      const boundedIndex = Math.max(0, Math.min(totalQuestions - 1, index))
-      setCurrentQuestionIndex(boundedIndex)
-      const sectionIndex = sectionMeta.findIndex(
-        (section) => boundedIndex >= section.startIndex && boundedIndex < section.startIndex + section.questionCount,
-      )
-      if (sectionIndex >= 0 && sectionIndex !== currentSectionIndex) {
-        setCurrentSectionIndex(sectionIndex)
-      }
-    },
-    [currentSectionIndex, sectionMeta, totalQuestions],
-  )
-
-  const handleSectionChange = useCallback(
-    (index: number) => {
-      if (index < 0 || index >= sectionMeta.length) return
-      setCurrentSectionIndex(index)
-      const startIndex = sectionMeta[index]?.startIndex ?? 0
-      setCurrentQuestionIndex(startIndex)
-    },
-    [sectionMeta],
-  )
-
-  const handleAnswerChange = useCallback((questionId: string, value: string | number | string[]) => {
-    setAnswers((previous) => ({
-      ...previous,
-      [questionId]: value,
-    }))
-  }, [])
+  // ----- master countdown -----
+  useEffect(() => {
+    if (!started || isSubmitting) return
+    const id = window.setInterval(() => {
+      setTimeRemaining((value) => (value <= 1 ? 0 : value - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [started, isSubmitting])
 
   const handleSubmit = useCallback(() => {
     if (isSubmitting) return
     setIsSubmitting(true)
+    setConfirmSubmit(false)
 
-    const correctAnswers = activeSections.reduce((sum, section) => {
-      const sectionCorrect = section.questions.reduce((sectionSum, question) => {
-        return sectionSum + (evaluateQuestion(question, answers[question.id]) ? 1 : 0)
-      }, 0)
-      return sum + sectionCorrect
+    const correctAnswers = sections.reduce((sum, section) => {
+      return (
+        sum +
+        section.questions.reduce((inner, question) => inner + (evaluate(question, answers[question.id]) ? 1 : 0), 0)
+      )
     }, 0)
 
-    const score = calculateBandScore(correctAnswers)
     const timeSpent =
       startedAtRef.current !== null
         ? Math.max(1, Math.round((Date.now() - startedAtRef.current) / 1000))
-        : Math.max(1, test.duration * 60 - Math.max(0, timeRemaining))
+        : Math.max(1, durationMinutes * 60 - Math.max(0, timeRemaining))
 
     const result: TestResult = {
       testId: test.id,
       date: new Date().toISOString(),
-      score,
+      score: calculateBandScore(correctAnswers),
       correctAnswers,
       totalQuestions,
       timeSpent,
       answers,
-      detailedBreakdown: {
-        activeSectionIds: activeSections.map((section) => section.id),
-      },
+      detailedBreakdown: { activeSectionIds: sections.map((section) => section.id) },
     }
 
-    clearSession()
+    const audio = audioRef.current
+    if (audio) {
+      audio.pause()
+    }
     onComplete(result)
-  }, [
-    activeSections,
-    answers,
-    clearSession,
-    isSubmitting,
-    onComplete,
-    test.duration,
-    test.id,
-    timeRemaining,
-    totalQuestions,
-  ])
+  }, [answers, durationMinutes, isSubmitting, onComplete, sections, test.id, timeRemaining, totalQuestions])
+
+  useEffect(() => {
+    if (started && timeRemaining === 0 && !isSubmitting) {
+      handleSubmit()
+    }
+  }, [handleSubmit, isSubmitting, started, timeRemaining])
+
+  // ----- fullscreen -----
+  const toggleFullscreen = useCallback(() => {
+    if (typeof document === 'undefined') return
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().catch(() => undefined)
+    } else {
+      document.exitFullscreen?.().catch(() => undefined)
+    }
+  }, [])
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(Boolean(document.fullscreenElement))
+    document.addEventListener('fullscreenchange', handler)
+    return () => document.removeEventListener('fullscreenchange', handler)
+  }, [])
+
+  // ----- answer helpers -----
+  const setAnswerForNumber = useCallback(
+    (number: number, value: string) => {
+      const question = questionByNumber.get(number)
+      if (!question) return
+      setAnswers((prev) => ({ ...prev, [question.id]: value }))
+    },
+    [questionByNumber],
+  )
+
+  const getAnswerForNumber = useCallback(
+    (number: number): string => {
+      const question = questionByNumber.get(number)
+      if (!question) return ''
+      const value = answers[question.id]
+      return typeof value === 'string' ? value : value === undefined ? '' : String(value)
+    },
+    [answers, questionByNumber],
+  )
+
+  const scrollToNumber = useCallback(
+    (number: number) => {
+      const targetPart = partByNumber.get(number)
+      if (targetPart !== undefined && targetPart !== currentPartIndex) {
+        setCurrentPartIndex(targetPart)
+      }
+      setActiveNumber(number)
+      window.setTimeout(() => {
+        const el = document.getElementById(`blank-${number}`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          if (el instanceof HTMLInputElement) el.focus()
+        }
+      }, targetPart !== currentPartIndex ? 80 : 0)
+    },
+    [currentPartIndex, partByNumber],
+  )
+
+  const goToPart = useCallback(
+    (index: number) => {
+      const bounded = Math.min(Math.max(0, index), sections.length - 1)
+      setCurrentPartIndex(bounded)
+      if (scrollAreaRef.current) scrollAreaRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+    [sections.length],
+  )
+
+  const startTest = useCallback(() => {
+    startedAtRef.current = Date.now()
+    setStarted(true)
+  }, [])
+
+  // ----- segment + block renderers -----
+  const renderSegments = (segments: ListeningSegment[]) =>
+    segments.map((segment, index) => {
+      if (typeof segment === 'string') {
+        return <span key={index}>{segment}</span>
+      }
+      const number = segment.blank
+      const active = activeNumber === number
+      return (
+        <Fragment key={index}>
+          {segment.before ? <span>{segment.before}</span> : null}
+          <span className="relative mx-1 inline-flex align-middle">
+            <input
+              id={`blank-${number}`}
+              data-qnum={number}
+              value={getAnswerForNumber(number)}
+              disabled={isSubmitting}
+              onChange={(event) => setAnswerForNumber(number, event.target.value)}
+              onFocus={() => setActiveNumber(number)}
+              placeholder={String(number)}
+              autoComplete="off"
+              spellCheck={false}
+              className={`${WIDTHS[segment.width ?? 'md']} h-9 rounded-[3px] border px-2 text-center text-[15px] font-medium text-slate-900 outline-none transition placeholder:font-semibold placeholder:text-slate-300 ${
+                active
+                  ? 'border-red-500 bg-red-50/50 ring-2 ring-red-200'
+                  : 'border-slate-400 bg-white hover:border-slate-500'
+              } focus:border-red-500 focus:ring-2 focus:ring-red-200`}
+            />
+          </span>
+          {segment.after ? <span>{segment.after}</span> : null}
+        </Fragment>
+      )
+    })
+
+  const renderGridRadio = (number: number, letter: string) => {
+    const selected = getAnswerForNumber(number) === letter
+    return (
+      <button
+        key={letter}
+        type="button"
+        disabled={isSubmitting}
+        onClick={() => {
+          setAnswerForNumber(number, letter)
+          setActiveNumber(number)
+        }}
+        aria-label={`Question ${number} option ${letter}`}
+        className="flex items-center justify-center py-2"
+      >
+        <span
+          className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition ${
+            selected ? 'border-red-600 bg-red-600' : 'border-slate-400 bg-white hover:border-red-400'
+          }`}
+        >
+          {selected ? <span className="h-2 w-2 rounded-full bg-white" /> : null}
+        </span>
+      </button>
+    )
+  }
+
+  const renderBlock = (block: ListeningBlock, key: number) => {
+    switch (block.kind) {
+      case 'title':
+        return (
+          <h3 key={key} className="my-3 text-center text-lg font-bold text-slate-900">
+            {block.text}
+          </h3>
+        )
+      case 'subhead':
+        return (
+          <p key={key} className="mt-4 mb-1 text-[15px] font-bold text-slate-900">
+            {block.text}
+          </p>
+        )
+      case 'text':
+        return (
+          <p key={key} className="mt-2 text-[15px] text-slate-800">
+            {block.text}
+          </p>
+        )
+      case 'example':
+        return (
+          <div key={key} className="mt-1 mb-2">
+            <p className="text-[13px] italic text-slate-500">Example</p>
+            <p className="text-[15px] italic text-slate-700">
+              {block.segments.map((segment, index) =>
+                typeof segment === 'string' ? (
+                  index === block.segments.length - 1 ? (
+                    <span key={index} className="font-bold underline underline-offset-2">
+                      {segment}
+                    </span>
+                  ) : (
+                    <span key={index}>{segment}</span>
+                  )
+                ) : null,
+              )}
+            </p>
+          </div>
+        )
+      case 'note':
+        return (
+          <div
+            key={key}
+            id={typeof block.segments[0] !== 'string' ? `blank-anchor-${(block.segments[0] as { blank: number }).blank}` : undefined}
+            className={`flex flex-wrap items-center gap-y-2 text-[15px] leading-9 text-slate-800 ${
+              block.bullet ? 'ml-6' : ''
+            }`}
+          >
+            {block.bullet ? <span className="mr-2 text-slate-500">•</span> : null}
+            {renderSegments(block.segments)}
+          </div>
+        )
+      case 'flow':
+        return (
+          <div key={key} className="mx-auto my-2 flex max-w-2xl flex-col items-center">
+            {block.boxes.map((box, index) => (
+              <Fragment key={index}>
+                <div className="flex w-full flex-wrap items-center justify-center gap-y-2 rounded-md border border-slate-400 bg-white px-4 py-4 text-center text-[15px] text-slate-800">
+                  {renderSegments(box.segments)}
+                </div>
+                {index < block.boxes.length - 1 ? (
+                  <span className="my-1 text-2xl leading-none text-slate-500">↓</span>
+                ) : null}
+              </Fragment>
+            ))}
+          </div>
+        )
+      case 'grid':
+        return (
+          <div key={key} className="my-3">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-[15px]">
+                <thead>
+                  <tr>
+                    <th className="border border-slate-300 bg-slate-50 px-3 py-2 text-left" />
+                    {block.columns.map((col) => (
+                      <th key={col} className="border border-slate-300 bg-slate-50 px-3 py-2 text-center font-bold text-slate-800">
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {block.rows.map((row) => (
+                    <tr key={row.blank} id={`blank-${row.blank}`} className={activeNumber === row.blank ? 'bg-red-50/60' : ''}>
+                      <td className="border border-slate-300 px-3 py-2 text-slate-800">
+                        <span className="font-bold">{row.blank}</span>
+                        <span className="ml-2">{row.label}</span>
+                      </td>
+                      {block.columns.map((col) => (
+                        <td key={col} className="border border-slate-300 text-center">
+                          {renderGridRadio(row.blank, col)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {block.options && block.options.length > 0 ? (
+              <div className="mt-3 inline-block rounded-md border border-slate-300">
+                <table className="text-[14px]">
+                  <tbody>
+                    {block.options.map((option) => (
+                      <tr key={option.letter}>
+                        <td className="border-b border-slate-200 px-3 py-1.5 font-bold text-slate-800">{option.letter}</td>
+                        <td className="border-b border-l border-slate-200 px-3 py-1.5 text-slate-700">{option.text}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : null}
+          </div>
+        )
+      case 'mcq': {
+        const selected = getAnswerForNumber(block.blank)
+        return (
+          <div key={key} id={`blank-${block.blank}`} className={`mt-4 rounded-md p-2 ${activeNumber === block.blank ? 'bg-red-50/60' : ''}`}>
+            <p className="text-[15px] font-semibold text-slate-900">
+              <span className="mr-2 font-bold">{block.blank}</span>
+              {block.prompt}
+            </p>
+            <div className="mt-2 space-y-1.5">
+              {block.options.map((option, index) => {
+                const letter = String.fromCharCode(65 + index)
+                const isSel = selected === letter
+                return (
+                  <button
+                    key={letter}
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      setAnswerForNumber(block.blank, letter)
+                      setActiveNumber(block.blank)
+                    }}
+                    className="flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left transition hover:bg-slate-50"
+                  >
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition ${
+                        isSel ? 'border-red-600 bg-red-600' : 'border-slate-400 bg-white'
+                      }`}
+                    >
+                      {isSel ? <span className="h-2 w-2 rounded-full bg-white" /> : null}
+                    </span>
+                    <span className="text-[15px] text-slate-800">{option}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      }
+      case 'table':
+        return (
+          <div key={key} className="my-3 overflow-x-auto">
+            <table className="w-full border-collapse text-[15px]">
+              <thead>
+                <tr>
+                  {block.columns.map((col) => (
+                    <th key={col} className="border border-slate-300 bg-slate-50 px-3 py-2 text-center font-bold text-slate-800">
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {block.rows.map((row, rowIndex) => (
+                  <tr key={rowIndex}>
+                    {row.map((cell, cellIndex) => (
+                      <td
+                        key={cellIndex}
+                        id={typeof cell.segments[0] !== 'string' ? `blank-${(cell.segments[0] as { blank: number }).blank}` : undefined}
+                        className="border border-slate-300 px-3 py-3 align-top text-slate-800"
+                      >
+                        <span className="inline-flex flex-wrap items-center gap-y-1 leading-9">{renderSegments(cell.segments)}</span>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      case 'space':
+        return <div key={key} className="h-3" />
+      default:
+        return null
+    }
+  }
+
+  // ----- fallback rendering for sections without rich layout -----
+  const renderFallback = (section: Section) => (
+    <div className="space-y-4">
+      {section.content ? (
+        <p className="rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-[15px] text-slate-700">{section.content}</p>
+      ) : null}
+      {section.questions.map((question) => {
+        const selected = getAnswerForNumber(question.number)
+        return (
+          <div key={question.id} id={`blank-${question.number}`} className="rounded-md border border-slate-200 p-3">
+            <p className="text-[15px] font-semibold text-slate-900">
+              <span className="mr-2 font-bold text-red-600">{question.number}</span>
+              {question.text}
+            </p>
+            {question.type === 'multiple-choice' && question.options ? (
+              <div className="mt-2 space-y-1.5">
+                {question.options.map((option, index) => {
+                  const letter = String.fromCharCode(65 + index)
+                  const isSel = selected === letter
+                  return (
+                    <button
+                      key={letter}
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => setAnswerForNumber(question.number, letter)}
+                      className="flex w-full items-center gap-3 rounded-md px-2 py-1.5 text-left hover:bg-slate-50"
+                    >
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${isSel ? 'border-red-600 bg-red-600' : 'border-slate-400'}`}>
+                        {isSel ? <span className="h-2 w-2 rounded-full bg-white" /> : null}
+                      </span>
+                      <span className="text-[15px] text-slate-800">{option}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              <input
+                value={selected}
+                disabled={isSubmitting}
+                onChange={(event) => setAnswerForNumber(question.number, event.target.value)}
+                placeholder="Type your answer"
+                className="mt-2 h-9 w-full max-w-xs rounded-[3px] border border-slate-400 px-2 text-[15px] outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200"
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
 
   if (!currentSection) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,#ffe4e6_0%,#fff_45%,#fff6ed_100%)] px-4">
-        <AnimatedBackground />
-        <div className="relative z-10 max-w-md rounded-3xl border border-red-200 bg-white/90 p-8 text-center shadow-[0_24px_60px_rgba(220,38,38,0.18)] backdrop-blur-xl">
-          <h2 className="text-2xl font-black text-slate-900">Listening content not ready</h2>
-          <p className="mt-2 text-sm text-slate-600">No sections are currently attached to this listening test.</p>
-          <button
-            type="button"
-            onClick={onExit}
-            className="mt-5 inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-red-50"
-          >
-            <ArrowLeft className="h-4 w-4" />
+      <div className="flex min-h-screen items-center justify-center bg-white px-4">
+        <div className="max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow">
+          <h2 className="text-xl font-black text-slate-900">Listening content not ready</h2>
+          <p className="mt-2 text-sm text-slate-600">No sections are attached to this test.</p>
+          <button onClick={onExit} className="mt-4 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
             Back
           </button>
         </div>
@@ -511,541 +581,304 @@ export default function IELTSListeningInterface({
     )
   }
 
-  if (!isTestActive) {
-    return (
-      <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,#ffe4e6_0%,#fff_45%,#fff6ed_100%)] px-4 py-6 sm:px-6 lg:px-8">
-        <AnimatedBackground />
-        <div className="relative z-10 mx-auto max-w-6xl space-y-5">
-          <div className="rounded-3xl border border-red-200/70 bg-white/80 p-4 shadow-[0_30px_80px_-45px_rgba(220,38,38,0.6)] backdrop-blur-xl sm:p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <button
-                  type="button"
-                  onClick={onExit}
-                  className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-slate-700 hover:bg-red-50"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Back
-                </button>
-                <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-200 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-red-600">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  IELTS Listening Premium Console
-                </p>
-                <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
-                  Listening Full Test 1
-                </h1>
-                <p className="mt-2 max-w-3xl text-sm text-slate-600 sm:text-base">
-                  Reading flowiga o&apos;xshash ikki rejim: Practice va Full Test. Full Test rejimida audio qaytarish
-                  bloklanadi, faqat real exam kabi progressiv tinglash qoladi.
-                </p>
-              </div>
-              <div className="grid gap-2 sm:min-w-[240px]">
-                <div className="rounded-2xl border border-red-100 bg-white px-4 py-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-red-600">Sections</p>
-                  <p className="mt-1 text-2xl font-black text-slate-900">{test.sections.length}</p>
-                </div>
-                <div className="rounded-2xl border border-red-100 bg-white px-4 py-3">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-red-600">Questions</p>
-                  <p className="mt-1 text-2xl font-black text-slate-900">{test.totalQuestions}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <div className="rounded-3xl border border-red-200/70 bg-white/85 p-4 shadow-[0_20px_48px_-30px_rgba(220,38,38,0.55)] backdrop-blur-xl sm:p-5">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Mode</p>
-              <div className="mt-3 space-y-2">
-                <button
-                  type="button"
-                  onClick={() => setMode('practice')}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                    mode === 'practice'
-                      ? 'border-red-500 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_18px_30px_-18px_rgba(220,38,38,0.7)]'
-                      : 'border-red-100 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50/60'
-                  }`}
-                >
-                  <p className="text-base font-black">Practice Mode</p>
-                  <p className={`text-xs ${mode === 'practice' ? 'text-red-50' : 'text-slate-500'}`}>
-                    O&apos;zingiz time va part tanlaysiz.
-                  </p>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode('full-test')}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${
-                    mode === 'full-test'
-                      ? 'border-red-500 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_18px_30px_-18px_rgba(220,38,38,0.7)]'
-                      : 'border-red-100 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50/60'
-                  }`}
-                >
-                  <p className="text-base font-black">Full Test Mode</p>
-                  <p className={`text-xs ${mode === 'full-test' ? 'text-red-50' : 'text-slate-500'}`}>
-                    IELTS CD style: no rewind, no seek.
-                  </p>
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-3xl border border-red-200/70 bg-white/85 p-4 shadow-[0_20px_48px_-30px_rgba(220,38,38,0.55)] backdrop-blur-xl sm:p-5">
-              <AnimatePresence mode="wait">
-                {mode === 'practice' ? (
-                  <motion.div
-                    key="practice"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.25 }}
-                    className="space-y-5"
-                  >
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Select parts</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {test.sections.map((section, index) => {
-                          const active = selectedParts.includes(index)
-                          return (
-                            <button
-                              key={section.id}
-                              type="button"
-                              onClick={() => togglePartSelection(index)}
-                              className={`rounded-xl border px-4 py-2 text-sm font-bold transition ${
-                                active
-                                  ? 'border-red-500 bg-red-600 text-white shadow-[0_12px_20px_-14px_rgba(220,38,38,0.9)]'
-                                  : 'border-red-100 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50'
-                              }`}
-                            >
-                              Part {index + 1}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Time target</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {PRACTICE_TIME_PRESETS.map((preset) => {
-                          const active = customTimeMinutes === preset
-                          const label = preset === -1 ? 'Unlimited' : `${preset} min`
-                          return (
-                            <button
-                              key={label}
-                              type="button"
-                              onClick={() => setCustomTimeMinutes(preset)}
-                              className={`rounded-xl border px-4 py-2 text-sm font-bold transition ${
-                                active
-                                  ? 'border-red-500 bg-red-600 text-white shadow-[0_12px_20px_-14px_rgba(220,38,38,0.9)]'
-                                  : 'border-red-100 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50'
-                              }`}
-                            >
-                              {label}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-emerald-700">Preview</p>
-                      <p className="mt-1 text-sm font-semibold text-emerald-900">
-                        Parts: {sanitizeSelectedParts(selectedParts, test.sections.length).map((entry) => entry + 1).join(', ')}
-                        {' '}| Time: {customTimeMinutes === -1 ? 'Unlimited' : `${customTimeMinutes} minutes`}
-                      </p>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="full-test"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.25 }}
-                    className="space-y-4"
-                  >
-                    <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Full test policy</p>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <div className="rounded-2xl border border-red-100 bg-white px-4 py-3">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-red-600">Timer</p>
-                        <p className="mt-1 text-xl font-black text-slate-900">{test.duration} min</p>
-                      </div>
-                      <div className="rounded-2xl border border-red-100 bg-white px-4 py-3">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-red-600">Questions</p>
-                        <p className="mt-1 text-xl font-black text-slate-900">{test.totalQuestions}</p>
-                      </div>
-                    </div>
-                    <ul className="space-y-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                      <li className="flex items-start gap-2">
-                        <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-                        Audio rewind va seek bloklangan.
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-                        Har bir part yakunlangach replay yopiladi.
-                      </li>
-                    </ul>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <button
-                type="button"
-                onClick={() => startTest()}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-600 bg-gradient-to-r from-red-600 via-rose-600 to-orange-500 px-4 py-3 text-sm font-black text-white shadow-[0_20px_30px_-18px_rgba(220,38,38,0.7)] transition hover:from-red-500 hover:via-rose-500 hover:to-orange-400"
-              >
-                <Headphones className="h-4 w-4" />
-                Start {mode === 'practice' ? 'Practice Session' : 'Full Test'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const minutesLabel =
+    timeRemaining >= 60
+      ? `${Math.ceil(timeRemaining / 60)} minutes remaining`
+      : `${Math.max(0, timeRemaining)} seconds remaining`
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,#ffe4e6_0%,#fff_45%,#fff6ed_100%)] px-3 pb-24 pt-3 sm:px-4 lg:px-6">
-      <AnimatedBackground />
+    <div className="flex h-screen flex-col bg-white text-slate-900">
       <audio
         ref={audioRef}
-        src={currentSection.audioUrl}
-        preload="metadata"
-        onLoadedMetadata={(event) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0)}
-        onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-        onEnded={onAudioEnded}
+        src={audioSources[currentAudioIndex] || undefined}
+        preload="auto"
+        onEnded={handleAudioEnded}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
-        onError={() => setAudioFailed(true)}
+        onError={() => {
+          if (started) setAudioFailed(true)
+        }}
       />
 
-      <div className="relative z-10 mx-auto max-w-7xl space-y-4">
-        <header className="rounded-3xl border border-red-200/70 bg-white/85 p-4 shadow-[0_24px_52px_-32px_rgba(220,38,38,0.6)] backdrop-blur-xl sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex min-w-[220px] flex-col">
-              <button
-                type="button"
-                onClick={onExit}
-                className="inline-flex w-fit items-center gap-2 rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-slate-700 hover:bg-red-50"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                Exit
-              </button>
-              <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">IELTS Listening</h1>
-              <p className="mt-1 text-sm text-slate-600">
-                {isFullTestMode ? 'Full Test Simulation' : 'Practice Mode'} | Part {currentSectionIndex + 1}
-              </p>
-            </div>
-
-            <div className="grid w-full gap-2 sm:w-auto sm:grid-cols-3">
-              <div className="rounded-2xl border border-red-100 bg-white px-4 py-2.5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-red-600">Timer</p>
-                <div className="mt-1 flex items-center gap-2 text-lg font-black text-slate-900">
-                  <Clock3 className="h-4 w-4 text-red-500" />
-                  <Timer
-                    duration={isFullTestMode ? test.duration * 60 : customTimeMinutes === -1 ? -1 : customTimeMinutes * 60}
-                    timeLeft={timeRemaining}
-                    setTimeLeft={setTimeRemaining}
-                    onTimeUp={handleSubmit}
-                    isActive={isTestActive && !isSubmitting && timeRemaining !== -1}
-                    showWarning
-                    variant="readingCompact"
-                  />
-                </div>
-              </div>
-              <div className="rounded-2xl border border-red-100 bg-white px-4 py-2.5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-red-600">Progress</p>
-                <p className="mt-1 text-lg font-black text-slate-900">{answeredCount}/{totalQuestions}</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className={`rounded-2xl border px-4 py-2.5 text-left transition ${
-                  isSubmitting
-                    ? 'cursor-not-allowed border-red-200 bg-red-100 text-red-800'
-                    : 'border-red-600 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_16px_25px_-16px_rgba(220,38,38,0.75)] hover:from-red-500 hover:to-rose-500'
-                }`}
-              >
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em]">Submit</p>
-                <p className="mt-1 inline-flex items-center gap-2 text-sm font-black">
-                  <Send className="h-4 w-4" />
-                  Finish Test
-                </p>
-              </button>
-            </div>
+      {/* ---------------- Top bar ---------------- */}
+      <header className="z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+        <div className="flex items-center gap-3">
+          <BrandMark size={36} />
+          <div className="leading-tight">
+            <p className="text-[15px] font-black tracking-tight text-slate-900">
+              Prof<span className="text-red-600">AI</span>
+            </p>
+            <p className="text-[11px] font-semibold text-slate-500">IELTS Listening</p>
           </div>
-
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-red-100">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-red-600 via-rose-500 to-orange-400"
-              animate={{ width: `${progressPercent}%` }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-            />
-          </div>
-        </header>
-
-        <section className="rounded-3xl border border-red-200/70 bg-white/85 p-4 shadow-[0_20px_45px_-30px_rgba(220,38,38,0.55)] backdrop-blur-xl sm:p-5">
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            {activeSections.map((section, index) => {
-              const active = index === currentSectionIndex
-              const sectionLocked = Boolean(lockedSections[section.id])
-              return (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => handleSectionChange(index)}
-                  className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-bold transition ${
-                    active
-                      ? 'border-red-500 bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-[0_12px_20px_-14px_rgba(220,38,38,0.85)]'
-                      : 'border-red-100 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50'
-                  }`}
-                >
-                  Part {index + 1}
-                  {sectionLocked ? <Lock className="h-3.5 w-3.5" /> : null}
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
-            <div className="rounded-2xl border border-red-100 bg-white p-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-red-600">Audio console</p>
-                  <h3 className="mt-1 text-lg font-black text-slate-900">{currentSection.title}</h3>
-                </div>
-                {isFullTestMode ? (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-amber-800">
-                    <Lock className="h-3 w-3" />
-                    Rewind locked
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-emerald-800">
-                    Practice controls
-                  </span>
-                )}
-              </div>
-
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={togglePlay}
-                  disabled={!currentSection.audioUrl || (isFullTestMode && currentSectionLocked)}
-                  className={`inline-flex h-11 items-center gap-2 rounded-xl border px-4 text-sm font-black transition ${
-                    !currentSection.audioUrl || (isFullTestMode && currentSectionLocked)
-                      ? 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
-                      : 'border-red-600 bg-red-600 text-white hover:bg-red-500'
-                  }`}
-                >
-                  {isPlaying ? <CirclePause className="h-4 w-4" /> : <CirclePlay className="h-4 w-4" />}
-                  {isPlaying ? 'Pause' : 'Play'}
-                </button>
-
-                {!isFullTestMode ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={restartAudio}
-                      disabled={!currentSection.audioUrl}
-                      className="inline-flex h-11 items-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-slate-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                      Restart
-                    </button>
-                    <button
-                      type="button"
-                      onClick={cycleSpeed}
-                      disabled={!currentSection.audioUrl}
-                      className="inline-flex h-11 items-center rounded-xl border border-red-200 bg-white px-3 text-sm font-bold text-slate-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {playbackSpeed}x
-                    </button>
-                  </>
-                ) : null}
-              </div>
-
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-500">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(duration)}</span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={duration > 0 ? duration : 100}
-                  step={0.1}
-                  value={duration > 0 ? Math.min(currentTime, duration) : 0}
-                  onChange={(event) => handleSeek(Number(event.target.value))}
-                  disabled={isFullTestMode || duration <= 0 || !currentSection.audioUrl}
-                  className={`h-2 w-full cursor-pointer appearance-none rounded-full ${
-                    isFullTestMode ? 'bg-slate-200' : 'bg-red-100'
-                  }`}
-                />
-              </div>
-
-              <div className="mt-4 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={toggleMute}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-white text-slate-700 hover:bg-red-50"
-                >
-                  {isMuted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                </button>
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={isMuted ? 0 : volume}
-                  onChange={(event) => setVolumeValue(Number(event.target.value))}
-                  className="h-2 w-full cursor-pointer appearance-none rounded-full bg-red-100"
-                />
-              </div>
-
-              {audioFailed ? (
-                <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
-                  Audio topilmadi. `public/audio/ielts-listening/...` papkasiga fayllarni joylang.
-                </p>
+          <div className="ml-4 hidden border-l border-slate-200 pl-4 sm:block">
+            <p className="text-[15px] font-bold text-slate-900">{test.title}</p>
+            <p className="flex items-center gap-2 text-[12px] font-medium text-slate-500">
+              {minutesLabel}
+              {started && isPlaying ? (
+                <span className="inline-flex items-center gap-1 text-red-600">
+                  <Volume2 className="h-3.5 w-3.5" />
+                  Audio is playing
+                </span>
               ) : null}
+              {started && audioDone ? <span className="text-emerald-600">Audio finished</span> : null}
+            </p>
+          </div>
+        </div>
 
-              {isFullTestMode && currentSectionLocked ? (
-                <p className="mt-3 inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-900">
-                  <Lock className="h-4 w-4" />
-                  This section audio is locked after completion.
-                </p>
+        <div className="flex items-center gap-1.5">
+          <Wifi className="hidden h-5 w-5 text-slate-400 sm:block" />
+          <button
+            type="button"
+            onClick={() => setNotesOpen((value) => !value)}
+            className={`rounded-md p-2 transition hover:bg-slate-100 ${notesOpen ? 'text-red-600' : 'text-slate-600'}`}
+            title="Notes"
+          >
+            <PencilLine className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={toggleFullscreen} className="rounded-md p-2 text-slate-600 transition hover:bg-slate-100" title="Fullscreen">
+            {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+          </button>
+          <div className="relative">
+            <button type="button" onClick={() => setMenuOpen((value) => !value)} className="rounded-md p-2 text-slate-600 transition hover:bg-slate-100" title="Menu">
+              <Menu className="h-5 w-5" />
+            </button>
+            <AnimatePresence>
+              {menuOpen ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="absolute right-0 top-full z-40 mt-1 w-44 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      setConfirmSubmit(true)
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Submit test
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      onExit()
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    Exit test
+                  </button>
+                </motion.div>
               ) : null}
-            </div>
+            </AnimatePresence>
+          </div>
+          <button
+            type="button"
+            onClick={() => (isLastPart ? setConfirmSubmit(true) : goToPart(currentPartIndex + 1))}
+            className="ml-1 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:from-red-500 hover:to-rose-500"
+          >
+            {isLastPart ? (
+              <>
+                <Send className="h-4 w-4" />
+                Submit
+              </>
+            ) : (
+              <>
+                Next Section
+                <ChevronRight className="h-4 w-4" />
+              </>
+            )}
+          </button>
+        </div>
+      </header>
 
-            <div className="rounded-2xl border border-red-100 bg-white p-4">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-red-600">Visual aid</p>
-              {currentSection.visualAidUrl && !visualFailed ? (
-                <img
-                  src={currentSection.visualAidUrl}
-                  alt={`${currentSection.title} visual prompt`}
-                  onError={() => setVisualFailed(true)}
-                  className="mt-3 h-[260px] w-full rounded-2xl border border-red-100 object-cover"
-                />
+      {/* ---------------- Body ---------------- */}
+      <div ref={scrollAreaRef} className="relative flex-1 overflow-y-auto">
+        {/* Part band */}
+        <div className="border-b border-slate-200 bg-slate-100 px-5 py-3">
+          <p className="text-[15px] font-bold text-slate-900">{currentSection.partLabel ?? `Part ${currentPartIndex + 1}`}</p>
+          <p className="text-[13px] text-slate-600">
+            {currentSection.partInstruction ?? currentSection.title}
+          </p>
+        </div>
+
+        <div className="mx-auto max-w-4xl px-5 py-5">
+          {currentSection.groups && currentSection.groups.length > 0 ? (
+            currentSection.groups.map((group, groupIndex) => (
+              <section key={groupIndex} className="mb-8">
+                <p className="text-[15px] font-bold text-slate-900">{group.range}</p>
+                <p className="mb-3 text-[14px] text-slate-700">{group.instruction}</p>
+                <div>{group.blocks.map((block, blockIndex) => renderBlock(block, blockIndex))}</div>
+              </section>
+            ))
+          ) : (
+            renderFallback(currentSection)
+          )}
+        </div>
+
+        {audioFailed ? (
+          <div className="mx-auto max-w-4xl px-5 pb-6">
+            <p className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+              <AlertTriangle className="h-4 w-4" />
+              Audio yuklanmadi. Iltimos internetni tekshiring yoki audio fayllarni qayta yuklang.
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      {/* ---------------- Bottom navigation ---------------- */}
+      <nav className="z-30 flex items-stretch gap-1 overflow-x-auto border-t border-slate-200 bg-white px-3 py-2 shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
+        {sections.map((section, index) => {
+          const isActive = index === currentPartIndex
+          const numbers = partNumbers[index] ?? []
+          return (
+            <div key={section.id} className={`flex items-center gap-2 rounded-md px-2 ${isActive ? '' : 'cursor-pointer hover:bg-slate-50'} ${index < sections.length - 1 ? 'border-r border-slate-200' : ''}`} onClick={isActive ? undefined : () => goToPart(index)}>
+              <span className={`whitespace-nowrap text-[13px] font-bold ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
+                Part {index + 1}
+              </span>
+              {isActive ? (
+                <div className="flex items-center gap-1">
+                  {numbers.map((number) => {
+                    const answered = isAnswered(answers[questionByNumber.get(number)?.id ?? ''])
+                    const current = activeNumber === number
+                    return (
+                      <button
+                        key={number}
+                        type="button"
+                        onClick={() => scrollToNumber(number)}
+                        className={`h-7 w-7 rounded-[4px] border text-[12px] font-bold transition ${
+                          current
+                            ? 'border-red-600 bg-red-600 text-white'
+                            : answered
+                              ? 'border-red-300 bg-red-100 text-red-700'
+                              : 'border-slate-300 bg-white text-slate-600 hover:border-red-400'
+                        }`}
+                      >
+                        {number}
+                      </button>
+                    )
+                  })}
+                </div>
               ) : (
-                <div className="mt-3 flex h-[260px] flex-col items-center justify-center rounded-2xl border border-dashed border-red-200 bg-red-50/60 px-4 text-center">
-                  <Headphones className="h-8 w-8 text-red-500" />
-                  <p className="mt-2 text-sm font-bold text-slate-800">Listening prompt image</p>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Part screenshot/image shu yerda ko&apos;rinadi.
-                  </p>
-                </div>
+                <span className="whitespace-nowrap text-[12px] font-medium text-slate-400">
+                  {answeredPerPart[index]} of {numbers.length}
+                </span>
               )}
+            </div>
+          )
+        })}
+        <div className="ml-auto flex items-center gap-2 pl-2">
+          <span className="hidden whitespace-nowrap text-[12px] font-semibold text-slate-500 sm:block">
+            {answeredTotal}/{totalQuestions} answered
+          </span>
+        </div>
+      </nav>
 
-              <div className="mt-3 rounded-xl border border-red-100 bg-red-50/60 px-3 py-2 text-xs text-slate-600">
-                {isFullTestMode
-                  ? 'Exam mode: audio controls are limited to play/pause only.'
-                  : 'Practice mode: restart, speed, and seek are enabled.'}
+      {/* ---------------- Intro / Play overlay ---------------- */}
+      <AnimatePresence>
+        {!started ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/55 px-4 backdrop-blur-[1px]"
+          >
+            <motion.div
+              initial={{ scale: 0.94, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.94, y: 10 }}
+              className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"
+            >
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-900 text-white">
+                <Headphones className="h-10 w-10" />
               </div>
-            </div>
-          </div>
-        </section>
+              <p className="mt-5 text-[15px] leading-relaxed text-slate-700">
+                You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the
+                audio while answering the questions.
+              </p>
+              <p className="mt-4 text-[15px] font-semibold text-slate-900">To continue, click Play.</p>
+              <button
+                type="button"
+                onClick={startTest}
+                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-slate-800"
+              >
+                <Play className="h-5 w-5 fill-white" />
+                Play
+              </button>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
-        <section className="rounded-3xl border border-red-200/70 bg-white/85 p-4 shadow-[0_20px_45px_-30px_rgba(220,38,38,0.55)] backdrop-blur-xl sm:p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-red-600">Questions</p>
-              <h2 className="mt-1 text-xl font-black text-slate-900">{currentSection.title}</h2>
-            </div>
-            <div className="rounded-xl border border-red-100 bg-white px-3 py-2 text-sm font-semibold text-slate-700">
-              Current: #{currentQuestion?.number ?? sectionStartIndex + 1}
-            </div>
-          </div>
-
-          {currentSection.content ? (
-            <div className="mb-4 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-slate-700">
-              {currentSection.content}
-            </div>
-          ) : null}
-
-          <div className="space-y-3">
-            {currentSection.questions.map((question, localIndex) => {
-              const globalIndex = sectionStartIndex + localIndex
-              const active = globalIndex === currentQuestionIndex
-              const answerValue = answers[question.id]
-              const answered = hasAnswer(answerValue)
-
-              return (
-                <motion.article
-                  key={question.id}
-                  layout
-                  onClick={() => handleQuestionNavigate(globalIndex)}
-                  className={`rounded-2xl border p-4 transition ${
-                    active
-                      ? 'border-red-500 bg-red-50/70 shadow-[0_18px_34px_-26px_rgba(220,38,38,0.75)]'
-                      : 'border-red-100 bg-white hover:border-red-300 hover:bg-red-50/50'
-                  }`}
+      {/* ---------------- Submit confirm ---------------- */}
+      <AnimatePresence>
+        {confirmSubmit ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4"
+            onClick={() => setConfirmSubmit(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.94 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.94 }}
+              onClick={(event) => event.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl"
+            >
+              <h3 className="text-lg font-black text-slate-900">Submit your test?</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                You have answered <span className="font-bold text-slate-900">{answeredTotal}</span> of {totalQuestions}{' '}
+                questions. You can&apos;t change answers after submitting.
+              </p>
+              <div className="mt-5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setConfirmSubmit(false)}
+                  className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
                 >
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-[0.12em] text-red-600">Question {question.number}</p>
-                      <p className="mt-1 text-base font-bold text-slate-900">{question.text}</p>
-                    </div>
-                    <span
-                      className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${
-                        answered
-                          ? 'border-emerald-300 bg-emerald-100 text-emerald-800'
-                          : 'border-slate-200 bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      {answered ? 'Answered' : 'Pending'}
-                    </span>
-                  </div>
+                  Keep working
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="flex-1 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2.5 text-sm font-bold text-white hover:from-red-500 hover:to-rose-500"
+                >
+                  Submit now
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
-                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
-                    {formatQuestionTypeLabel(question.type)}
-                  </p>
-
-                  {question.type === 'multiple-choice' && question.options ? (
-                    <div className="mt-3 grid gap-2">
-                      {question.options.map((option, optionIndex) => {
-                        const optionValue = String(optionIndex)
-                        const selected = String(answerValue ?? '') === optionValue
-                        return (
-                          <button
-                            key={`${question.id}-${option}`}
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              handleAnswerChange(question.id, optionValue)
-                            }}
-                            className={`rounded-xl border px-3 py-2 text-left text-sm font-semibold transition ${
-                              selected
-                                ? 'border-red-500 bg-red-600 text-white shadow-[0_14px_24px_-16px_rgba(220,38,38,0.85)]'
-                                : 'border-red-100 bg-white text-slate-700 hover:border-red-300 hover:bg-red-50'
-                            }`}
-                          >
-                            {option}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  ) : (
-                    <input
-                      value={typeof answerValue === 'string' || typeof answerValue === 'number' ? String(answerValue) : ''}
-                      onChange={(event) => handleAnswerChange(question.id, event.target.value)}
-                      onClick={(event) => event.stopPropagation()}
-                      placeholder="Write your answer here..."
-                      className="mt-3 h-11 w-full rounded-xl border border-red-100 bg-white px-3 text-sm font-medium text-slate-800 outline-none transition focus:border-red-300 focus:ring-2 focus:ring-red-100"
-                    />
-                  )}
-                </motion.article>
-              )
-            })}
-          </div>
-        </section>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 z-20">
-        <QuestionNavigation
-          sections={sectionMeta}
-          currentSectionIndex={currentSectionIndex}
-          currentQuestionIndex={currentQuestionIndex}
-          answers={answers}
-          onNavigate={handleQuestionNavigate}
-          onSectionChange={handleSectionChange}
-        />
-      </div>
+      {/* ---------------- Notes scratchpad ---------------- */}
+      <AnimatePresence>
+        {notesOpen ? (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed bottom-20 right-4 z-40 w-72 rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
+          >
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-800">Notes</p>
+              <button type="button" onClick={() => setNotesOpen(false)} className="rounded p-1 text-slate-400 hover:bg-slate-100">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <textarea
+              value={notesText}
+              onChange={(event) => setNotesText(event.target.value)}
+              placeholder="Scratch notes (not graded)…"
+              className="h-40 w-full resize-none rounded-md border border-slate-200 p-2 text-sm outline-none focus:border-red-400"
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   )
 }

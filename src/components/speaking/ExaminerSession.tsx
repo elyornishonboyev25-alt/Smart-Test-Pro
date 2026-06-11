@@ -26,6 +26,8 @@ import SpeakingResult from './SpeakingResult'
 export type SessionConfig = {
   mode: ExaminerMode
   interviewKind?: InterviewKind
+  /** Free Talk topic (only used when mode === 'free_talk'). */
+  topic?: string
 }
 
 type ChatTurn = { id: string; role: 'examiner' | 'candidate'; text: string }
@@ -36,7 +38,15 @@ type Move =
   | { type: 'cuecard'; card: CueCard }
   | { type: 'closing'; text: string }
 
-type Stage = { part: 0 | 1 | 2 | 3; label: string; persona?: string; intro?: string; moves: Move[] }
+type Stage = {
+  part: 0 | 1 | 2 | 3
+  label: string
+  persona?: string
+  intro?: string
+  /** Friendly chat style instead of strict examiner style. */
+  conversational?: boolean
+  moves: Move[]
+}
 
 type Phase = 'idle' | 'examiner_speaking' | 'awaiting_answer' | 'preparing' | 'thinking' | 'evaluating' | 'result'
 
@@ -111,6 +121,29 @@ function buildStages(config: SessionConfig): Stage[] {
         },
       ]
     }
+    case 'free_talk': {
+      const topic = (config.topic ?? '').trim()
+      const opener = topic
+        ? `I’d love to chat about ${topic}. To start, what first got you interested in it?`
+        : 'Let’s just have a relaxed conversation in English. What’s something interesting that’s happened to you recently?'
+      return [
+        {
+          part: 0,
+          label: 'Free Talk',
+          persona: 'a warm, curious and encouraging English-speaking friend having a casual conversation',
+          conversational: true,
+          moves: [
+            { type: 'seed', text: opener },
+            { type: 'followup' },
+            { type: 'followup' },
+            { type: 'followup' },
+            { type: 'followup' },
+            { type: 'followup' },
+            { type: 'followup' },
+          ],
+        },
+      ]
+    }
     default:
       return [part1Stage()]
   }
@@ -121,6 +154,11 @@ const PART2_THEME_WORDS = ['that experience', 'that topic', 'the subject you des
 const GREETINGS = [
   'Hello, and welcome. My name is Alex, and I’ll be your speaking examiner today. Are you ready to begin?',
   'Good to see you. I’m Alex, your examiner for today’s speaking practice. Let’s get started.',
+]
+
+const FRIENDLY_GREETINGS = [
+  'Hey, great to chat with you! I’m Alex. Let’s just talk in English for a bit — relax and speak freely.',
+  'Hi there! I’m Alex, your conversation partner. There’s no exam here — let’s just have a friendly chat.',
 ]
 
 export default function ExaminerSession({
@@ -150,6 +188,7 @@ export default function ExaminerSession({
   const [micStream, setMicStream] = useState<MediaStream | null>(null)
   const [evaluation, setEvaluation] = useState<SpeakingEvaluation | null>(null)
   const [evalError, setEvalError] = useState<string | null>(null)
+  const [examinerLabel, setExaminerLabel] = useState('Examiner')
 
   const stagesRef = useRef<Stage[]>([])
   const stageIdxRef = useRef(0)
@@ -208,19 +247,29 @@ export default function ExaminerSession({
     historyRef.current = [...historyRef.current, { role, text }]
   }, [])
 
-  // Speak an examiner line, show its bubble, then run `next` when audio ends.
+  // Speak an examiner line and reveal its bubble IN SYNC with the voice (onStart),
+  // so text and audio appear together rather than text-first. A short safety timer
+  // reveals it anyway if onStart is slow or TTS is unavailable.
   const speakExaminer = useCallback(
     (text: string, next: () => void) => {
       setPhase('examiner_speaking')
       setCurrentPrompt(text)
-      pushTurn('examiner', text)
       onSpeechEndRef.current = next
+      let shown = false
+      const reveal = () => {
+        if (shown) return
+        shown = true
+        pushTurn('examiner', text)
+      }
       speak(text, {
+        onStart: reveal,
         onEnd: () => {
+          reveal()
           if (onSpeechEndRef.current === next) onSpeechEndRef.current = null
           next()
         },
       })
+      window.setTimeout(reveal, 350)
     },
     [pushTurn],
   )
@@ -285,6 +334,7 @@ export default function ExaminerSession({
         persona: stage.persona,
         history: historyRef.current,
         directive: 'follow_up',
+        style: stage.conversational ? 'friend' : 'examiner',
       }).then((reply) => {
         speakExaminer(reply, () => setPhase('awaiting_answer'))
       })
@@ -331,11 +381,13 @@ export default function ExaminerSession({
     stagesRef.current = buildStages(config)
     stageIdxRef.current = 0
     moveIdxRef.current = 0
-    setActivePart(stagesRef.current[0]?.part ?? 1)
-    speakExaminer(pickRandom(GREETINGS), () => {
-      const stage = stagesRef.current[0]
-      if (stage?.intro) {
-        speakExaminer(stage.intro, () => advance())
+    const firstStage = stagesRef.current[0]
+    setActivePart(firstStage?.part ?? 1)
+    setExaminerLabel(firstStage?.conversational ? 'Alex' : 'Examiner')
+    const greeting = firstStage?.conversational ? pickRandom(FRIENDLY_GREETINGS) : pickRandom(GREETINGS)
+    speakExaminer(greeting, () => {
+      if (firstStage?.intro) {
+        speakExaminer(firstStage.intro, () => advance())
       } else {
         advance()
       }
@@ -475,7 +527,7 @@ export default function ExaminerSession({
             >
               {turn.role === 'examiner' ? (
                 <span className="mb-0.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-red-500">
-                  Examiner
+                  {examinerLabel}
                 </span>
               ) : null}
               {turn.text}

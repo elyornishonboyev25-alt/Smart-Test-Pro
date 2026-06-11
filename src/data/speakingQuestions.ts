@@ -26,7 +26,7 @@ export type Part3Theme = {
 }
 
 /** What the user picks on the hub. `full_mock` runs Part 1 → 2 → 3 back to back. */
-export type ExaminerMode = 'part1' | 'part2' | 'part3' | 'full_mock' | 'interview'
+export type ExaminerMode = 'part1' | 'part2' | 'part3' | 'full_mock' | 'interview' | 'free_talk'
 
 /** Mock-interview personas beyond IELTS (PRD Feature 9). */
 export type InterviewKind = 'university' | 'scholarship' | 'job'

@@ -24,6 +24,8 @@ export type ExaminerReplyParams = {
   /** Topic/question to steer a transition to a fresh area. */
   seedQuestion?: string
   candidateName?: string
+  /** 'examiner' (strict IELTS) or 'friend' (casual Free Talk). Defaults to examiner. */
+  style?: 'examiner' | 'friend'
 }
 
 function buildExaminerSystemPrompt(persona: string): string {
@@ -47,6 +49,20 @@ RESPONSE FORMAT — return ONLY valid JSON, nothing else:
 { "reply": "<exactly what you say aloud>" }`
 }
 
+function buildFriendSystemPrompt(persona: string): string {
+  return `You are ${persona}. You are having a relaxed, natural English conversation with someone who is practising their spoken English. You sound like a real, warm friend — NOT an examiner and NOT a robot.
+
+VOICE & MANNER:
+- Friendly, encouraging and genuinely curious. Natural spoken English.
+- Keep each turn SHORT (1–2 sentences, max ~35 words) because it is read aloud.
+- React to what they say first ("Oh nice!", "That makes sense"), share a brief opinion or relatable comment, THEN ask one natural follow-up question to keep the chat flowing.
+- Build on earlier things they mentioned, like a friend who remembers.
+- Do NOT correct their grammar or give feedback during the chat — just keep the conversation enjoyable and flowing.
+- No markdown, no emojis, no stage directions. Output ONLY the words you would say aloud.
+
+RESPONSE FORMAT — return ONLY valid JSON: { "reply": "<exactly what you say aloud>" }`
+}
+
 const DEFAULT_PERSONA = 'a friendly, experienced British IELTS speaking examiner'
 
 function historyToText(history: ExaminerTurn[], candidateName?: string): string {
@@ -60,10 +76,10 @@ function historyToText(history: ExaminerTurn[], candidateName?: string): string 
 /** Generate the examiner's next spoken line. Falls back to a scripted line on error. */
 export async function getExaminerReply(params: ExaminerReplyParams): Promise<string> {
   const persona = params.persona ?? DEFAULT_PERSONA
-  const system = buildExaminerSystemPrompt(persona)
+  const system = params.style === 'friend' ? buildFriendSystemPrompt(persona) : buildExaminerSystemPrompt(persona)
 
   const partLabel =
-    params.part === 0 ? 'Interview' : `IELTS Speaking Part ${params.part}`
+    params.style === 'friend' ? 'Casual conversation' : params.part === 0 ? 'Interview' : `IELTS Speaking Part ${params.part}`
   const directiveLine =
     params.directive === 'follow_up'
       ? 'Ask a natural follow-up question about the candidate’s last answer.'

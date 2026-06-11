@@ -167,6 +167,9 @@ export class WebSocketTransport implements SignalingTransport {
   private identity: SignalingIdentity
   private listener: ((event: SignalEvent) => void) | null = null
   private pendingQueue: QueueParams | null = null
+  // True once the server has acknowledged us (queued/matched). Used to decide whether
+  // a socket close is a real failure or just a normal end-of-session disconnect.
+  private settled = false
 
   constructor(url: string, identity: SignalingIdentity) {
     this.url = url
@@ -175,7 +178,13 @@ export class WebSocketTransport implements SignalingTransport {
 
   private connect() {
     if (this.ws) return
-    const ws = new WebSocket(this.url)
+    let ws: WebSocket
+    try {
+      ws = new WebSocket(this.url)
+    } catch {
+      this.listener?.({ type: 'error', message: 'Could not reach the live server. Please try again in a moment.' })
+      return
+    }
     this.ws = ws
     ws.onopen = () => {
       ws.send(JSON.stringify({ type: 'hello', userId: this.identity.userId, name: this.identity.name }))
@@ -186,14 +195,23 @@ export class WebSocketTransport implements SignalingTransport {
     ws.onmessage = (ev) => {
       try {
         const msg = JSON.parse(ev.data) as WSInbound
+        if (msg.type === 'queued' || msg.type === 'matched') this.settled = true
         this.listener?.(msg as SignalEvent)
       } catch {
         // ignore malformed
       }
     }
-    ws.onerror = () => this.listener?.({ type: 'error', message: 'Connection error. Falling back may be needed.' })
+    // onerror always precedes onclose; let onclose decide what to surface so we don't
+    // show a scary "connection error" for a transient blip.
+    ws.onerror = () => {}
     ws.onclose = () => {
+      const wasSettled = this.settled
       this.ws = null
+      // Only treat a close as an error if we never even managed to join the queue.
+      // Once matched, audio runs peer-to-peer, so a signaling drop is harmless.
+      if (!wasSettled && this.pendingQueue) {
+        this.listener?.({ type: 'error', message: 'Couldn’t reach the live matchmaking server. Please try again shortly.' })
+      }
     }
   }
 

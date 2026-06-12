@@ -157,7 +157,7 @@ export const EXTRA_PART1_TOPICS: Part1Topic[] = [
     icon: '💪',
     questions: [
       { q: 'Do you do much to stay healthy?', sample: 'I try to. I exercise a few times a week, watch what I eat most of the time, and make a real effort to get enough sleep.' },
-      { q: 'How important is exercise to you?', sample: 'It’s essential — not just physically, but mentally. When I work out regularly I feel calmer, sleep better and concentrate far more easily.' },
+      { q: 'How do you usually relax when you feel stressed?', sample: 'I tend to go for a long walk or listen to music, and switching my phone off for a while helps me unwind far more than I’d expect.' },
       { q: 'Has your diet changed in recent years?', sample: 'It has improved a lot. I cook from scratch more often now and rely far less on processed food, which has made a noticeable difference.' },
       { q: 'Do you think people are healthier now than in the past?', sample: 'It’s mixed. We know far more about health and medicine, yet sedentary lifestyles and fast food have created new problems of their own.' },
     ],

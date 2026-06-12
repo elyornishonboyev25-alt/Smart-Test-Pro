@@ -1,17 +1,30 @@
 // Speaking Day catalog (Day 1–30) + Full Mock catalog (1–20). Days cycle through
 // Part 1 → Part 2 (cue card) → Part 3, then repeat from Part 1 — so Day 1 is Part
 // 1, Day 2 is Part 2, Day 3 is Part 3, Day 4 is Part 1 again, and so on.
-// Each Day pulls from the original IELTS bank, so when the bank grows the catalog
-// grows automatically.
+//
+// The bank now holds 30 of each part. To guarantee NO question is ever reused, the
+// 10 Days of each part use indices 0–9, and the 20 mocks use indices 10–29 — so the
+// Day roadmap and every full mock have completely distinct questions.
 
 import {
-  CUE_CARDS,
-  PART1_TOPICS,
-  PART3_THEMES,
+  CUE_CARDS as BASE_CUE_CARDS,
+  PART1_TOPICS as BASE_PART1_TOPICS,
+  PART3_THEMES as BASE_PART3_THEMES,
   type Part1Topic,
   type Part2Card,
   type Part3Theme,
 } from '@/data/ieltsSpeakingBank'
+import {
+  EXTRA_CUE_CARDS,
+  EXTRA_PART1_TOPICS,
+  EXTRA_PART3_THEMES,
+} from '@/data/ieltsSpeakingBankExtra'
+
+// 30 of each part: first 10 feed the Days, the remaining 20 feed the mocks.
+const PART1_TOPICS: Part1Topic[] = [...BASE_PART1_TOPICS, ...EXTRA_PART1_TOPICS]
+const CUE_CARDS: Part2Card[] = [...BASE_CUE_CARDS, ...EXTRA_CUE_CARDS]
+const PART3_THEMES: Part3Theme[] = [...BASE_PART3_THEMES, ...EXTRA_PART3_THEMES]
+const DAY_BANK_SIZE = 10
 
 export type SpeakingPart = 1 | 2 | 3
 
@@ -82,14 +95,15 @@ function difficultyForDay(day: number): 'Easy' | 'Medium' | 'Hard' {
 
 function buildDayContent(day: number): SpeakingDayContent {
   const part = partForDay(day)
-  const slot = slotForDay(day)
+  // Days only ever use the first 10 of each part (indices 0–9).
+  const slot = slotForDay(day) % DAY_BANK_SIZE
   if (part === 1) {
-    return { kind: 'part1', topic: PART1_TOPICS[slot % PART1_TOPICS.length] }
+    return { kind: 'part1', topic: PART1_TOPICS[slot] }
   }
   if (part === 2) {
-    return { kind: 'part2', card: CUE_CARDS[slot % CUE_CARDS.length] }
+    return { kind: 'part2', card: CUE_CARDS[slot] }
   }
-  return { kind: 'part3', theme: PART3_THEMES[slot % PART3_THEMES.length] }
+  return { kind: 'part3', theme: PART3_THEMES[slot] }
 }
 
 function dayTitle(day: number): string {
@@ -139,13 +153,12 @@ export function getIeltsSpeakingFullMockCatalog(): SpeakingFullMockEntry[] {
       durationMinutes: 14,
       available: true,
       premiumOnly: false,
-      // Offsets push the mocks deeper into the bank so a mock doesn't open with the
-      // exact same topic as the matching Day, and so each mock's Part1/2/3 combo is
-      // distinct from every other mock.
+      // Mocks use indices 10–29 of each part — completely separate from the Days
+      // (0–9) and distinct from one another, so no question is ever reused.
       parts: {
-        part1: PART1_TOPICS[(i - 1 + 5) % PART1_TOPICS.length],
-        part2: CUE_CARDS[(i - 1 + 6) % CUE_CARDS.length],
-        part3: PART3_THEMES[(i - 1 + 3) % PART3_THEMES.length],
+        part1: PART1_TOPICS[DAY_BANK_SIZE + (i - 1)],
+        part2: CUE_CARDS[DAY_BANK_SIZE + (i - 1)],
+        part3: PART3_THEMES[DAY_BANK_SIZE + (i - 1)],
       },
     }
   })

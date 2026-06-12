@@ -165,7 +165,7 @@ export function IeltsSectionView({
       navigate('/ielts/writing/tests')
       return
     }
-    navigate('/speaking-lab')
+    navigate('/ielts/speaking/tests')
   }
 
   const handleSecondaryAction = () => {
@@ -181,7 +181,7 @@ export function IeltsSectionView({
       navigate('/ielts/writing/tests')
       return
     }
-    navigate('/speaking-lab')
+    navigate('/ielts/speaking/tests')
   }
 
   return (

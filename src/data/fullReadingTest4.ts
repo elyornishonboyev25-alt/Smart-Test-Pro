@@ -212,7 +212,7 @@ const pacificQuestions: Question[] = [
   {
     id: 'v4-q24',
     number: 24,
-    type: 'matching-information',
+    type: 'matching-headings',
     groupTitle: 'Questions 24-27',
     instruction:
       'Complete each sentence with the correct ending, A-F, below. Write the correct letter, A-F, in boxes 24-27 on your answer sheet.',
@@ -221,9 +221,9 @@ const pacificQuestions: Question[] = [
     correctAnswer: 'C',
     location: 'Paragraph 8',
   },
-  { id: 'v4-q25', number: 25, type: 'matching-information', text: 'The best thing about this type of research', options: pacificEndingOptions, correctAnswer: 'A', location: 'Paragraph 8' },
-  { id: 'v4-q26', number: 26, type: 'matching-information', text: 'The most important achievement of traditional navigators', options: pacificEndingOptions, correctAnswer: 'D', location: 'Paragraph 8' },
-  { id: 'v4-q27', number: 27, type: 'matching-information', text: 'The migration of people from Asia to the Pacific', options: pacificEndingOptions, correctAnswer: 'E', location: 'Paragraph 8' },
+  { id: 'v4-q25', number: 25, type: 'matching-headings', text: 'The best thing about this type of research', options: pacificEndingOptions, correctAnswer: 'A', location: 'Paragraph 8' },
+  { id: 'v4-q26', number: 26, type: 'matching-headings', text: 'The most important achievement of traditional navigators', options: pacificEndingOptions, correctAnswer: 'D', location: 'Paragraph 8' },
+  { id: 'v4-q27', number: 27, type: 'matching-headings', text: 'The migration of people from Asia to the Pacific', options: pacificEndingOptions, correctAnswer: 'E', location: 'Paragraph 8' },
 ]
 
 const passage2: Section = {
@@ -300,7 +300,7 @@ const dingoQuestions: Question[] = [
   {
     id: 'v4-q35',
     number: 35,
-    type: 'matching-information',
+    type: 'matching-headings',
     groupTitle: 'Questions 35-37',
     instruction:
       'Look at the following statements (Questions 35-37) and the list of people below. Match each statement with the correct person, A, B, C or D. Write the correct letter, A, B, C or D, in boxes 35-37 on your answer sheet.',
@@ -309,8 +309,8 @@ const dingoQuestions: Question[] = [
     correctAnswer: 'D',
     location: 'Paragraph G',
   },
-  { id: 'v4-q36', number: 36, type: 'matching-information', text: 'The presence of dingoes puts the income of some people at risk.', options: dingoPeopleOptions, correctAnswer: 'A', location: 'Paragraph A' },
-  { id: 'v4-q37', number: 37, type: 'matching-information', text: 'Dingoes have had little impact on the dying out of animal species in Australia.', options: dingoPeopleOptions, correctAnswer: 'B', location: 'Paragraph D' },
+  { id: 'v4-q36', number: 36, type: 'matching-headings', text: 'The presence of dingoes puts the income of some people at risk.', options: dingoPeopleOptions, correctAnswer: 'A', location: 'Paragraph A' },
+  { id: 'v4-q37', number: 37, type: 'matching-headings', text: 'Dingoes have had little impact on the dying out of animal species in Australia.', options: dingoPeopleOptions, correctAnswer: 'B', location: 'Paragraph D' },
   {
     id: 'v4-q38',
     number: 38,

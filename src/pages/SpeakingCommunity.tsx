@@ -1,21 +1,19 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart3, BookOpen, MessagesSquare, Mic, Users, Wand2 } from 'lucide-react'
+import { BarChart3, MessagesSquare, Mic, Users, Wand2 } from 'lucide-react'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { computeSummary, selectUserSessions, useSpeakingStore } from '@/store/speakingStore'
 import { Reveal } from '@/components/fx'
 import AiCoach from '@/components/speaking/sections/AiCoach'
-import IeltsSpeaking from '@/components/speaking/sections/IeltsSpeaking'
 import Debate from '@/components/speaking/sections/Debate'
 import Partner from '@/components/speaking/sections/Partner'
 import Progress from '@/components/speaking/sections/Progress'
 import Community from '@/components/speaking/sections/Community'
 
-type Section = 'ai' | 'ielts' | 'debate' | 'partner' | 'progress' | 'community'
+type Section = 'ai' | 'debate' | 'partner' | 'progress' | 'community'
 
 const SECTIONS: Array<{ id: Section; label: string; icon: typeof Wand2; tag: string }> = [
   { id: 'ai', label: 'AI Coach', icon: Wand2, tag: 'Full Mock & Free Talk' },
-  { id: 'ielts', label: 'IELTS Speaking', icon: BookOpen, tag: 'Questions & answers' },
   { id: 'debate', label: 'Debate', icon: MessagesSquare, tag: 'Group rooms' },
   { id: 'partner', label: 'Partner', icon: Users, tag: '1-on-1 voice' },
   { id: 'progress', label: 'My Progress', icon: BarChart3, tag: 'Charts & rank' },
@@ -102,7 +100,6 @@ export default function SpeakingCommunity() {
             <active.icon className="h-5 w-5 text-red-600" /> {active.label}
           </p>
           {section === 'ai' ? <AiCoach /> : null}
-          {section === 'ielts' ? <IeltsSpeaking /> : null}
           {section === 'debate' ? <Debate /> : null}
           {section === 'partner' ? <Partner key={partnerKey} onExit={() => setPartnerKey((k) => k + 1)} /> : null}
           {section === 'progress' ? <Progress onStart={() => setSection('ai')} /> : null}

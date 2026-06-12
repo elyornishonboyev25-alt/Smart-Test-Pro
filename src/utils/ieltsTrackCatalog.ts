@@ -126,7 +126,7 @@ export function getIeltsPassageCatalog(track: IeltsTrackType): IeltsPassageEntry
 }
 
 export function getIeltsFullTestCatalog(track: IeltsTrackType): IeltsFullTestEntry[] {
-  return Array.from({ length: 20 }, (_, index) => createFullTestEntry(track, index + 1))
+  return Array.from({ length: 30 }, (_, index) => createFullTestEntry(track, index + 1))
 }
 
 export function isIeltsTrackCatalogTest(track: IeltsTrackType, testId: string): boolean {

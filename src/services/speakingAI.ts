@@ -233,6 +233,136 @@ Grade the CANDIDATE's spoken English now. Return ONLY valid JSON.`
   }
 }
 
+// ── Grammar analysis (per-answer feedback) ─────────────────────────────────
+// Lightweight, fast prompt used by the Day-by-day IELTS Speaking runner. The user
+// records (or types) one answer to one question; we return: a list of specific
+// grammar mistakes with explanations, a clean AI-corrected version, and a Band 8+
+// model rewrite of their own ideas. Different from evaluateSpeaking (whole exam).
+
+export type GrammarIssue = {
+  original: string
+  corrected: string
+  explanation: string
+  category: 'grammar' | 'vocabulary' | 'pronunciation' | 'cohesion' | 'fluency'
+}
+
+export type SpeakingResponseAnalysis = {
+  correctedVersion: string
+  band8Template: string
+  issues: GrammarIssue[]
+  strengths: string[]
+  suggestions: string[]
+  estimatedBand: number
+  source: 'ai' | 'offline'
+}
+
+const RESPONSE_ANALYSIS_PROMPT = `You are an experienced British IELTS Speaking examiner and English coach. A candidate has just answered a Speaking question. You will receive the question and their full spoken response (transcribed from audio). Your job is to give SHORT, useful, kind feedback that helps them improve.
+
+TASK — return ONE JSON object with these fields:
+
+1. "correctedVersion" — Take the candidate's exact response and fix ONLY clear grammar, word-choice and pronunciation-spelling mistakes. Keep their meaning, ideas, examples and voice exactly the same. This is them, cleaned up. Do NOT rewrite or improve the content — just correct errors. If the response is already clean, return it as-is.
+
+2. "band8Template" — Now write a NEW model answer to the same question, at IELTS Band 8+ level, using the candidate's ideas as inspiration where possible but improving structure, vocabulary range, idiomatic phrases and complex sentences. Length: appropriate for the part (Part 1 ~50–80 words; Part 2 ~180–230 words; Part 3 ~80–130 words). Natural spoken English, not academic prose.
+
+3. "issues" — Up to 6 specific mistakes from the candidate's response. For each item: "original" (exact erroneous fragment from their response), "corrected" (the fix — must be different from original), "explanation" (one sentence: WHY it's wrong + the rule, in plain language), "category" (one of: grammar, vocabulary, pronunciation, cohesion, fluency). If there are no real errors, return an empty array.
+
+4. "strengths" — 2–3 specific things they did well (reference what they actually said).
+
+5. "suggestions" — 2–3 concrete next-step tips (e.g. "Try using past perfect when describing a sequence of events").
+
+6. "estimatedBand" — A rough overall band for this single answer, 0–9 in 0.5 steps. Be realistic: most genuine attempts land 5.0–6.5.
+
+RULES:
+- NEVER include items in "issues" where the original is identical to the corrected text or where the explanation says it is "fine" or "already correct".
+- "correctedVersion" must be plain text, not markdown.
+- Return ONLY valid JSON, no markdown fences.`
+
+function clampBandHalf(value: unknown): number {
+  const num = typeof value === 'number' ? value : Number(value)
+  if (!Number.isFinite(num)) return 5
+  return Math.round(Math.max(0, Math.min(9, num)) * 2) / 2
+}
+
+function validIssueCategory(cat: string): GrammarIssue['category'] {
+  const valid = ['grammar', 'vocabulary', 'pronunciation', 'cohesion', 'fluency'] as const
+  return (valid as readonly string[]).includes(cat) ? (cat as GrammarIssue['category']) : 'grammar'
+}
+
+function normalise(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, ' ').replace(/[.,;:!?]+$/g, '').trim()
+}
+
+export async function analyzeSpeakingResponse(params: {
+  part: 1 | 2 | 3
+  question: string
+  /** Spoken response (already transcribed). */
+  transcript: string
+}): Promise<SpeakingResponseAnalysis> {
+  const text = (params.transcript || '').trim()
+  if (text.length < 5) {
+    return {
+      correctedVersion: text,
+      band8Template: '',
+      issues: [],
+      strengths: [],
+      suggestions: ['Try speaking for longer — develop your answer with a reason and a clear example.'],
+      estimatedBand: 0,
+      source: 'offline',
+    }
+  }
+
+  const userMessage = `IELTS Speaking Part ${params.part}.
+
+QUESTION:
+${params.question}
+
+CANDIDATE'S RESPONSE (transcribed):
+${text}
+
+Analyse and return ONLY valid JSON.`
+
+  try {
+    const raw = await callGeminiAPI(RESPONSE_ANALYSIS_PROMPT, userMessage, 2048)
+    const parsed = JSON.parse(extractJSON(raw)) as Partial<SpeakingResponseAnalysis>
+    const issues = Array.isArray(parsed.issues)
+      ? parsed.issues
+          .map((issue) => ({
+            original: String(issue?.original ?? '').trim(),
+            corrected: String(issue?.corrected ?? '').trim(),
+            explanation: String(issue?.explanation ?? '').trim(),
+            category: validIssueCategory(String(issue?.category ?? 'grammar')),
+          }))
+          .filter((i) => {
+            if (!i.original || !i.corrected) return false
+            if (normalise(i.original) === normalise(i.corrected)) return false
+            if (/\b(is|are|seems?|looks?)\s+(fine|correct|accurate|good)\b/i.test(i.explanation)) return false
+            return true
+          })
+          .slice(0, 6)
+      : []
+
+    return {
+      correctedVersion: String(parsed.correctedVersion ?? text).trim(),
+      band8Template: String(parsed.band8Template ?? '').trim(),
+      issues,
+      strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 4).map(String) : [],
+      suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions.slice(0, 4).map(String) : [],
+      estimatedBand: clampBandHalf(parsed.estimatedBand),
+      source: 'ai',
+    }
+  } catch {
+    return {
+      correctedVersion: text,
+      band8Template: '',
+      issues: [],
+      strengths: ['You attempted a full spoken answer.'],
+      suggestions: ['AI grading is temporarily unavailable. Please try again in a moment.'],
+      estimatedBand: 0,
+      source: 'offline',
+    }
+  }
+}
+
 function offlineEvaluation(params: EvaluateParams): SpeakingEvaluation {
   const bands = estimateBandsFromStats(params.stats)
   const { wordCount, fillerCount, wordsPerMinute } = params.stats

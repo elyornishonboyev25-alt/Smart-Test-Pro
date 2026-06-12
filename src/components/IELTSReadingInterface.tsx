@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect, useRef, type MouseEvent as ReactMouseEvent } from 'react'
+﻿import { useState, useMemo, useEffect, useRef, Fragment, type MouseEvent as ReactMouseEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeftIcon,
@@ -16,10 +16,12 @@ import {
   ArrowsPointingOutIcon,
   Bars3Icon,
   PaperAirplaneIcon,
+  SpeakerWaveIcon,
+  PlayIcon,
 } from '@heroicons/react/24/outline'
 
 // Types
-import { IELTSTest, TestResult, Section, Question } from '../types/ieltsTypes'
+import { IELTSTest, TestResult, Section, Question, ListeningGroup, ListeningBlock, ListeningSegment } from '../types/ieltsTypes'
 
 // Components
 import SplitScreen from './SplitScreen'
@@ -64,6 +66,7 @@ const sectionIdsWithoutParagraphLabels = new Set([
   'day18-great-migrations-p2',
   'day21-fishbourne-palace-p1',
   'day23-food-desert-p3',
+  'pacific-voyaging-p2-v4',
 ])
 
 function sectionHasLabeledParagraphs(section: Section | undefined): boolean {
@@ -205,6 +208,13 @@ export default function IELTSReadingInterface({
   launchPreset,
 }: IELTSReadingInterfaceProps) {
   const isReviewMode = Boolean(reviewPayload?.result)
+  const isListening = test.module === 'Listening'
+  // Listening audio state (continuous, non-controllable playlist)
+  const [audioStarted, setAudioStarted] = useState(false)
+  const [currentAudioIndex, setCurrentAudioIndex] = useState(0)
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false)
+  const [audioDone, setAudioDone] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   // State
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({})
@@ -410,6 +420,42 @@ export default function IELTSReadingInterface({
 
   const currentSection = activeSections[currentSectionIndex] || activeSections[0]
   const isDayOneCurieSection = currentSection?.id === 'day1-curie-p1'
+
+  // ---- Listening: continuous non-controllable audio playlist ----
+  const listeningAudioSources = useMemo(
+    () => (isListening ? activeSections.map((section) => section.audioUrl ?? '') : []),
+    [isListening, activeSections],
+  )
+  const listeningQuestionByNumber = useMemo(() => {
+    const map = new Map<number, Question>()
+    if (isListening) {
+      ;(test.sections as Section[]).forEach((section) =>
+        section.questions.forEach((question) => map.set(question.number, question)),
+      )
+    }
+    return map
+  }, [isListening, test.sections])
+
+  useEffect(() => {
+    if (!isListening || !audioStarted) return
+    const audio = audioRef.current
+    if (!audio) return
+    audio.play().then(() => setIsAudioPlaying(true)).catch(() => setIsAudioPlaying(false))
+  }, [isListening, audioStarted, currentAudioIndex])
+
+  useEffect(() => () => { audioRef.current?.pause() }, [])
+
+  const startListeningAudio = () => setAudioStarted(true)
+
+  const handleListeningAudioEnded = () => {
+    setIsAudioPlaying(false)
+    const next = currentAudioIndex + 1
+    if (next < listeningAudioSources.length && listeningAudioSources[next]) {
+      setCurrentAudioIndex(next)
+    } else {
+      setAudioDone(true)
+    }
+  }
 
   const activeQuestionCount = useMemo(
     () =>
@@ -2468,7 +2514,7 @@ export default function IELTSReadingInterface({
       <div className="max-w-5xl w-full relative z-10">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
           <h1 className="text-5xl lg:text-6xl font-black mb-6 tracking-tight bg-gradient-to-r from-red-600 via-rose-500 to-orange-400 bg-clip-text text-transparent">
-            Academic Reading Test
+            {isListening ? 'Academic Listening Test' : 'Academic Reading Test'}
           </h1>
           <p className="text-slate-600 text-lg font-light max-w-2xl mx-auto italic">
             Experience the authentic IELTS Computer-Delivered environment with SmartTest Pro precision.
@@ -2517,7 +2563,7 @@ export default function IELTSReadingInterface({
             </p>
             <div className="space-y-4 mb-10">
               <div className="flex items-center gap-3 text-xs font-bold text-rose-400">
-                <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" /> Strict 60-minute limit
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" /> Strict {test.duration}-minute limit
               </div>
               <div className="flex items-center gap-3 text-xs font-semibold text-slate-500">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500" /> Official scoring algorithms
@@ -2538,7 +2584,7 @@ export default function IELTSReadingInterface({
     </div>
   )
 
-  const renderLeftPanel = () => (
+  const renderLeftPanel = () => isListening ? renderListeningLeftPanel() : (
     <div className="relative h-full">
       <AnimatePresence>
         {selectionRect && (
@@ -2651,7 +2697,373 @@ export default function IELTSReadingInterface({
     </div>
   )
 
-  const renderRightPanel = () => (
+  // ============================ LISTENING RENDERING ============================
+  // Renders the listening rich-layout blocks (notes / flow / grid / mcq / table)
+  // using the exact same visual language as the Reading question panel.
+  const renderListeningGroup = (group: ListeningGroup, groupKey: number) => {
+    const blankInput = (number: number, width: 'sm' | 'md' | 'lg' | 'xl' = 'md') => {
+      const question = listeningQuestionByNumber.get(number)
+      if (!question) return null
+      const meta = getQuestionReviewMeta(question)
+      const isCorrect = meta?.status === 'correct'
+      const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
+      const widthCls =
+        width === 'sm'
+          ? 'min-w-[60px] max-w-[84px]'
+          : width === 'lg'
+            ? 'min-w-[150px] max-w-[210px]'
+            : width === 'xl'
+              ? 'min-w-[190px] max-w-[260px]'
+              : 'min-w-[104px] max-w-[176px]'
+      return (
+        <span id={`question-card-${question.id}`} className="inline-flex align-middle">
+          <input
+            type="text"
+            value={(answers[question.id] as string) || ''}
+            onChange={(event) => handleAnswerChange(question.id, event.target.value)}
+            onFocus={() => setLastActiveQuestionIndex(getCurrentSectionGlobalIndex(question.id))}
+            disabled={isReviewMode}
+            placeholder={String(number)}
+            className={`mx-1 inline-flex h-9 ${widthCls} rounded-lg border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+              isReviewMode && reviewShowCorrectAnswers
+                ? isWrong
+                  ? 'border-red-300 bg-red-50/70 text-red-700'
+                  : isCorrect
+                    ? 'border-emerald-300 bg-emerald-50/80 text-emerald-700'
+                    : 'border-red-200'
+                : 'border-red-200'
+            }`}
+          />
+        </span>
+      )
+    }
+
+    const segs = (segments: ListeningSegment[]) =>
+      segments.map((segment, index) => {
+        if (typeof segment === 'string') return <span key={index}>{segment}</span>
+        return (
+          <span key={index}>
+            {segment.before ?? ''}
+            {blankInput(segment.blank, segment.width ?? 'md')}
+            {segment.after ?? ''}
+          </span>
+        )
+      })
+
+    const renderGrid = (block: Extract<ListeningBlock, { kind: 'grid' }>) => (
+      <div className="my-2">
+        <div className="overflow-x-auto rounded-xl border border-slate-300">
+          <table className="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b border-slate-300 bg-slate-50">
+                <th className="px-2 py-2 text-base font-black text-slate-900">Item</th>
+                {block.columns.map((col) => (
+                  <th key={col} className="border-l border-slate-300 px-2 py-2 text-center text-base font-black text-slate-900">
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row) => {
+                const question = listeningQuestionByNumber.get(row.blank)
+                if (!question) return null
+                const globalIdx = getCurrentSectionGlobalIndex(question.id)
+                const isFlagged = flaggedQuestions.includes(globalIdx)
+                return (
+                  <tr key={row.blank} id={`question-card-${question.id}`} className="border-b border-slate-300 last:border-b-0">
+                    <td className="px-2 py-2 align-top">
+                      <div className="flex items-start gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleFlagQuestion(globalIdx)}
+                          className={`mt-0.5 rounded-md p-1 transition ${isFlagged ? 'bg-red-100 text-red-700' : 'text-slate-400 hover:bg-red-50 hover:text-red-600'}`}
+                        >
+                          <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
+                        </button>
+                        <p className="text-[15px] leading-snug text-slate-900">
+                          <span className="mr-2 font-black">{row.blank}</span>
+                          {row.label}
+                        </p>
+                      </div>
+                    </td>
+                    {block.columns.map((letter) => {
+                      const state = getChoiceVisualState(question, letter)
+                      const cellTone =
+                        state === 'correct'
+                          ? 'bg-emerald-50/80'
+                          : state === 'wrong'
+                            ? 'bg-red-50/85'
+                            : state === 'missed'
+                              ? 'bg-emerald-50/70'
+                              : state === 'selected'
+                                ? 'bg-red-50/45'
+                                : 'bg-white'
+                      const dotTone =
+                        state === 'correct'
+                          ? 'border-emerald-500'
+                          : state === 'wrong'
+                            ? 'border-red-500'
+                            : state === 'missed'
+                              ? 'border-emerald-500'
+                              : state === 'selected'
+                                ? 'border-red-500'
+                                : 'border-slate-300'
+                      return (
+                        <td
+                          key={letter}
+                          className={`border-l border-slate-300 px-1 py-1 text-center ${cellTone} ${isReviewMode ? '' : 'cursor-pointer'}`}
+                          onClick={() => { if (!isReviewMode) handleAnswerChange(question.id, letter) }}
+                        >
+                          <button
+                            type="button"
+                            disabled={isReviewMode}
+                            onClick={(event) => { event.stopPropagation(); handleAnswerChange(question.id, letter) }}
+                            className="inline-flex h-10 w-full items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 disabled:cursor-not-allowed"
+                            aria-label={`Question ${row.blank}, choose ${letter}`}
+                          >
+                            <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full border-2 transition ${dotTone}`}>
+                              <span
+                                className={`h-2 w-2 rounded-full ${
+                                  state === 'correct' || state === 'missed'
+                                    ? 'bg-emerald-500'
+                                    : state === 'wrong' || state === 'selected'
+                                      ? 'bg-red-500'
+                                      : 'bg-transparent'
+                                }`}
+                              />
+                            </span>
+                          </button>
+                        </td>
+                      )
+                    })}
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+        {block.options && block.options.length > 0 ? (
+          <div className="mt-3 inline-block rounded-xl border border-red-100 bg-red-50/40 p-3">
+            <ul className="space-y-1 text-sm font-semibold text-slate-700">
+              {block.options.map((option) => (
+                <li key={option.letter}>
+                  <span className="mr-2 font-black text-slate-900">{option.letter}</span>
+                  {option.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+    )
+
+    const renderMcq = (block: Extract<ListeningBlock, { kind: 'mcq' }>) => {
+      const question = listeningQuestionByNumber.get(block.blank)
+      if (!question) return null
+      const globalIdx = getCurrentSectionGlobalIndex(question.id)
+      const isFlagged = flaggedQuestions.includes(globalIdx)
+      return (
+        <div id={`question-card-${question.id}`} className="mt-3 rounded-2xl border border-red-100 bg-white p-3">
+          <div className="mb-2 flex items-start gap-2.5">
+            <button
+              type="button"
+              onClick={() => handleFlagQuestion(globalIdx)}
+              className={`mt-0.5 rounded-md p-1 transition ${isFlagged ? 'bg-red-100 text-red-700' : 'text-slate-400 hover:bg-red-50 hover:text-red-600'}`}
+            >
+              <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
+            </button>
+            <p className="text-[15px] font-bold leading-relaxed text-slate-950">
+              <span className="mr-2 font-black">{block.blank}</span>
+              {block.prompt}
+            </p>
+          </div>
+          <div className="space-y-2 pl-8">
+            {block.options.map((opt, i) => {
+              const letter = String.fromCharCode(65 + i)
+              const isSelected = answers[question.id] === letter
+              const state = getChoiceVisualState(question, letter)
+              const tone =
+                state === 'correct'
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                  : state === 'wrong'
+                    ? 'border-red-300 bg-red-50 text-red-700'
+                    : state === 'missed'
+                      ? 'border-emerald-300 bg-emerald-50/70 text-emerald-700'
+                      : isSelected
+                        ? 'border-red-300 bg-red-50 shadow-[0_10px_18px_rgba(220,38,38,0.14)]'
+                        : 'border-red-100 bg-white hover:border-red-300'
+              return (
+                <button
+                  type="button"
+                  key={letter}
+                  disabled={isReviewMode}
+                  onClick={() => { if (!isReviewMode) handleAnswerChange(question.id, letter) }}
+                  className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 ${tone}`}
+                >
+                  <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${isSelected || state === 'correct' || state === 'wrong' ? 'border-current' : 'border-slate-300 text-slate-500'}`}>
+                    {letter}
+                  </span>
+                  <span className="text-[15px] text-slate-900">{opt}</span>
+                </button>
+              )
+            })}
+          </div>
+          {reviewHint(question, 'mt-2 ml-8')}
+        </div>
+      )
+    }
+
+    const renderTable = (block: Extract<ListeningBlock, { kind: 'table' }>) => (
+      <div className="my-2 overflow-x-auto rounded-xl border border-slate-300">
+        <table className="w-full border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-slate-300 bg-slate-50">
+              {block.columns.map((col) => (
+                <th key={col} className="border-l border-slate-300 px-2 py-2 text-base font-black text-slate-900 first:border-l-0">
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {block.rows.map((row, rowIndex) => (
+              <tr key={rowIndex} className="border-b border-slate-300 last:border-b-0">
+                {row.map((cell, cellIndex) => (
+                  <td key={cellIndex} className="border-l border-slate-300 px-2 py-2 align-top text-slate-900 first:border-l-0">
+                    <span className="inline-flex flex-wrap items-center leading-loose">{segs(cell.segments)}</span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+
+    const renderBlock = (block: ListeningBlock, key: number) => {
+      switch (block.kind) {
+        case 'title':
+          return <p key={key} className="mt-1 mb-2 text-center text-2xl font-black tracking-tight text-slate-900">{block.text}</p>
+        case 'subhead':
+          return <p key={key} className="mt-3 text-lg font-black text-slate-900">{block.text}</p>
+        case 'text':
+          return <p key={key} className="mt-2 text-[15px] text-slate-900">{block.text}</p>
+        case 'example':
+          return (
+            <p key={key} className="mt-1 text-[15px] italic text-slate-600">
+              <span className="mr-1 font-bold not-italic text-slate-500">Example:</span>
+              {block.segments.map((segment, index) =>
+                typeof segment === 'string' ? (
+                  <span key={index} className={index === block.segments.length - 1 ? 'font-bold underline underline-offset-2' : ''}>
+                    {segment}
+                  </span>
+                ) : null,
+              )}
+            </p>
+          )
+        case 'note':
+          return (
+            <p key={key} className={`text-[15px] leading-loose text-slate-900 ${block.bullet ? 'pl-6' : ''}`}>
+              {block.bullet ? '• ' : ''}
+              {segs(block.segments)}
+            </p>
+          )
+        case 'flow':
+          return (
+            <div key={key} className="my-2 flex flex-col items-center">
+              {block.boxes.map((box, boxIndex) => (
+                <Fragment key={boxIndex}>
+                  <div className="w-full rounded-xl border border-red-200 bg-red-50/30 px-4 py-3 text-center text-[15px] leading-relaxed text-slate-900">
+                    {segs(box.segments)}
+                  </div>
+                  {boxIndex < block.boxes.length - 1 ? <span className="my-1 text-2xl leading-none text-red-400">↓</span> : null}
+                </Fragment>
+              ))}
+            </div>
+          )
+        case 'grid':
+          return <div key={key}>{renderGrid(block)}</div>
+        case 'mcq':
+          return <div key={key}>{renderMcq(block)}</div>
+        case 'table':
+          return <div key={key}>{renderTable(block)}</div>
+        case 'space':
+          return <div key={key} className="h-2" />
+        default:
+          return null
+      }
+    }
+
+    return (
+      <section key={groupKey} className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
+        <h4 className="text-xl font-black text-slate-900">{group.range}</h4>
+        <p className="mt-1 text-sm text-slate-700">{group.instruction}</p>
+        <div className="mt-2 rounded-xl border border-red-100 bg-white px-3 py-3">
+          {group.blocks.map((block, index) => renderBlock(block, index))}
+        </div>
+      </section>
+    )
+  }
+
+  const renderListeningLeftPanel = () => {
+    const playingSection = activeSections[currentAudioIndex] ?? currentSection
+    return (
+      <div className="reading-pane reading-content h-full overflow-y-auto border-r border-red-100 bg-gradient-to-b from-white via-red-50/30 to-white p-4 font-sans sm:p-5 lg:p-6">
+        <div className="mb-4">
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-red-600 sm:text-sm">
+            {currentSection?.partLabel ?? `PART ${currentSectionIndex + 1}`}
+          </p>
+          <h2 className="mb-1.5 text-lg font-bold text-slate-900 sm:text-xl">IELTS LISTENING</h2>
+          <p className="text-xs italic text-slate-600 sm:text-sm">
+            {currentSection?.partInstruction ?? `Listen and answer the questions for ${currentSection?.title}.`}
+          </p>
+        </div>
+        <div className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-4 py-2.5 text-white shadow-[0_14px_30px_rgba(220,38,38,0.24)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] opacity-90">Audio recording</p>
+          <p className="text-base font-bold sm:text-lg">{playingSection?.title}</p>
+        </div>
+        <div className="rounded-2xl border border-red-100 bg-white p-6 text-center shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
+          <div className={`mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 to-slate-700 text-white ${isAudioPlaying ? 'animate-pulse' : ''}`}>
+            <SpeakerWaveIcon className="h-11 w-11" />
+          </div>
+          <p className="mt-4 text-sm font-bold text-slate-900">
+            {audioDone ? 'Audio finished — review your answers' : isAudioPlaying ? 'Audio is playing…' : 'Audio is loading…'}
+          </p>
+          <p className="mt-1.5 text-xs text-slate-500">You cannot pause, rewind or replay the recording.</p>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            {activeSections.map((section, index) => (
+              <span
+                key={section.id}
+                className={`h-2.5 w-2.5 rounded-full transition ${
+                  index === currentAudioIndex ? 'bg-red-500' : index < currentAudioIndex ? 'bg-red-200' : 'bg-slate-200'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderListeningRightPanel = () => (
+    <div className="reading-pane reading-content reading-question-typography h-full overflow-y-auto border-l border-red-100 bg-white p-4 sm:p-5 lg:p-6 font-sans scrollbar-thin scrollbar-thumb-red-200">
+      <div className="sticky top-0 z-10 -mx-4 mb-5 flex items-center justify-between border-b border-red-100 bg-white/95 px-4 py-2.5 backdrop-blur-sm sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6">
+        <div>
+          <h3 className="text-lg font-black tracking-tight text-slate-900">Questions Workspace</h3>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-500">Answer panel</p>
+        </div>
+        <span className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
+          {sectionMeta[currentSectionIndex]?.questionNumbers[0]}-{sectionMeta[currentSectionIndex]?.questionNumbers[sectionMeta[currentSectionIndex]?.questionNumbers.length - 1]} of {sectionMeta.reduce((acc, s) => acc + s.questionCount, 0)}
+        </span>
+      </div>
+      <div className="space-y-8 pb-20">
+        {(currentSection?.groups ?? []).map((group, groupIndex) => renderListeningGroup(group, groupIndex))}
+      </div>
+    </div>
+  )
+
+  const renderRightPanel = () => isListening ? renderListeningRightPanel() : (
     <div
       id="reading-questions-pane"
       data-reading-markable="1"
@@ -4815,7 +5227,13 @@ export default function IELTSReadingInterface({
               </button>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-black text-red-600">IELTS</span>
-                <span className="text-xl font-semibold text-slate-500">Reading</span>
+                <span className="text-xl font-semibold text-slate-500">{isListening ? 'Listening' : 'Reading'}</span>
+                {isListening && isAudioPlaying ? (
+                  <span className="ml-2 hidden items-center gap-1 rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.08em] text-red-600 sm:inline-flex">
+                    <SpeakerWaveIcon className="h-3.5 w-3.5" />
+                    Audio playing
+                  </span>
+                ) : null}
               </div>
             </div>
 
@@ -4895,6 +5313,54 @@ export default function IELTSReadingInterface({
           </div>
         </>
       )}
+
+      {/* LISTENING AUDIO (continuous, no user controls) */}
+      {isListening ? (
+        <audio
+          ref={audioRef}
+          src={listeningAudioSources[currentAudioIndex] || undefined}
+          preload="auto"
+          onEnded={handleListeningAudioEnded}
+          onPlay={() => setIsAudioPlaying(true)}
+          onPause={() => setIsAudioPlaying(false)}
+        />
+      ) : null}
+
+      {/* LISTENING PLAY OVERLAY */}
+      <AnimatePresence>
+        {isListening && isTestActive && !audioStarted && !isReviewMode ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-900/55 px-4 backdrop-blur-[1px]"
+          >
+            <motion.div
+              initial={{ scale: 0.94, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.94, y: 10 }}
+              className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"
+            >
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-slate-900 text-white">
+                <SpeakerWaveIcon className="h-10 w-10" />
+              </div>
+              <p className="mt-5 text-[15px] leading-relaxed text-slate-700">
+                You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the
+                audio while answering the questions.
+              </p>
+              <p className="mt-4 text-[15px] font-semibold text-slate-900">To continue, click Play.</p>
+              <button
+                type="button"
+                onClick={startListeningAudio}
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-base font-bold text-white shadow-lg transition hover:bg-slate-800"
+              >
+                <PlayIcon className="h-5 w-5" />
+                Play
+              </button>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
 
       {/* REVIEW MODAL */}
       <AnimatePresence>

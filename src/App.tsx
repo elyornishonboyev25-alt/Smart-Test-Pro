@@ -12,6 +12,7 @@ import { ToastViewport } from '@/components/common/ToastViewport'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import RegisterModal from '@/components/auth/RegisterModal'
 import FloatingAIAssistant from '@/components/ai/FloatingAIAssistant'
+import WordLookupLayer from '@/components/vocab/WordLookupLayer'
 import NicknameGate from '@/components/speaking/NicknameGate'
 import { sendHeartbeat } from '@/lib/speakingApi'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -47,8 +48,11 @@ const Premium = lazy(() => import('@/pages/Premium'))
 const Leaderboard = lazy(() => import('@/pages/Leaderboard'))
 const IELTSWritingTests = lazy(() => import('@/pages/IELTSWritingTests'))
 const IELTSWritingTest = lazy(() => import('@/pages/IELTSWritingTest'))
+const IELTSSpeakingTests = lazy(() => import('@/pages/IELTSSpeakingTests'))
+const IELTSSpeakingTest = lazy(() => import('@/pages/IELTSSpeakingTest'))
 const TestRunner = lazy(() => import('@/pages/TestRunner'))
 const Articles = lazy(() => import('@/pages/Articles'))
+const ArticleReader = lazy(() => import('@/pages/ArticleReader'))
 const ShadowingLab = lazy(() => import('@/pages/ShadowingLab'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
@@ -121,7 +125,7 @@ function App() {
     pathname === '/writing-lab' ||
     pathname === '/speaking-lab' ||
     pathname === '/shadowing-lab' ||
-    pathname === '/articles'
+    pathname.startsWith('/articles')
   const isCustomTestMode = /^\/tests\/[^/]+\/attempt$/.test(pathname)
   const isClassicTestMode = pathname.startsWith('/test/') || pathname.startsWith('/results/')
   const isTestMode = isCustomTestMode || isClassicTestMode
@@ -188,6 +192,7 @@ function App() {
       <RegisterModal />
       <NicknameGate />
       <FloatingAIAssistant />
+      <WordLookupLayer />
 
       <div className="relative z-10 flex min-h-screen flex-col">
         {showTopNavigation && <TopNavigation />}
@@ -273,6 +278,8 @@ function App() {
                       <Route path="/sat/calculator" element={<AnimatedRoute><SATCalculator /></AnimatedRoute>} />
                       <Route path="/ielts" element={<AnimatedRoute><IELTS /></AnimatedRoute>} />
                       <Route path="/ielts/writing/tests" element={<AnimatedRoute><IELTSWritingTests /></AnimatedRoute>} />
+                      <Route path="/ielts/speaking/tests" element={<AnimatedRoute><IELTSSpeakingTests /></AnimatedRoute>} />
+                      <Route path="/ielts/speaking/test/:id" element={<AnimatedRoute><IELTSSpeakingTest /></AnimatedRoute>} />
                       <Route path="/ielts/writing/test/:id" element={<AnimatedRoute><IELTSWritingTest /></AnimatedRoute>} />
                       <Route path="/ielts/:section/tests" element={<AnimatedRoute><IELTSSectionTests /></AnimatedRoute>} />
                       <Route path="/ielts/:section" element={<AnimatedRoute><IELTSSection /></AnimatedRoute>} />

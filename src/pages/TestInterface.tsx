@@ -14,7 +14,6 @@ import { fullReadingTest8 } from '../data/fullReadingTest8'
 import { fullReadingTest9 } from '../data/fullReadingTest9'
 import { fullReadingTest10 } from '../data/fullReadingTest10'
 import IELTSReadingInterface from '../components/IELTSReadingInterface'
-import IELTSListeningInterface from '../components/IELTSListeningInterface'
 import { IELTSTest, TestResult } from '../types/ieltsTypes'
 import {
   isAvailableIeltsTrackTest,
@@ -253,15 +252,18 @@ export default function TestInterface() {
     )
   }
   if (type === 'listening') {
+    // Listening now shares the polished Reading interface (same question rendering,
+    // header, navigation) with an added non-controllable audio playlist.
     return (
-      <IELTSListeningInterface
+      <IELTSReadingInterface
         test={testData}
         onComplete={handleComplete}
         onExit={handleExit}
+        reviewPayload={reviewPayload}
         launchPreset={
           launchPreset
             ? {
-                mode: launchPreset.mode === 'simulation' ? 'full-test' : launchPreset.mode,
+                mode: launchPreset.mode === 'full-test' ? 'simulation' : launchPreset.mode,
                 partIndex: launchPreset.partIndex,
                 durationMinutes: launchPreset.durationMinutes,
               }

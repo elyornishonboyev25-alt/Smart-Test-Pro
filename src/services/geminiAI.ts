@@ -73,6 +73,20 @@ export interface GeminiChatResponse {
   actions: GeminiChatAction[]
 }
 
+// Structured word explanation used by the "Ask AI about this word" feature in Reading,
+// Listening, and Article views. The English definition/example/synonym are shaped exactly like
+// a Vocabulary Arena entry so the word can be saved and studied with the same activities, while
+// `explanation` is a friendly, simple teaching written in the language the learner asked for.
+export interface WordExplanation {
+  term: string
+  partOfSpeech: string
+  definition: string
+  example: string
+  synonym: string
+  explanation: string
+  language: string
+}
+
 const WRITING_EVALUATION_PROMPT = `You are a senior IELTS Writing examiner and certified IELTS trainer with 20+ years of experience marking official exams. You apply the public IELTS band descriptors with the same rigour as a real examiner. Your feedback is precise, fair, and genuinely useful — never generic.
 
 TASK: Evaluate the student's IELTS writing response. Return a SINGLE valid JSON object and NOTHING else — no markdown fences, no text outside the JSON.
@@ -436,4 +450,77 @@ function calculateXP(band: number): number {
   if (band >= 5) return 45
   if (band >= 3.5) return 25
   return 10
+}
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  en: 'English',
+  uz: "Uzbek (O'zbek tili)",
+  ru: 'Russian (Русский)',
+  tr: 'Turkish (Türkçe)',
+  ar: 'Arabic (العربية)',
+  es: 'Spanish (Español)',
+  fr: 'French (Français)',
+}
+
+const WORD_EXPLANATION_PROMPT = `You are a warm, expert English vocabulary tutor helping a student who is reading and met a word or phrase they do not understand. Explain it so clearly that a beginner instantly gets it. Never be vague, never invent a meaning — if the phrase is an idiom or has a special sense in the given context, explain THAT exact sense.
+
+You will receive: the WORD/PHRASE, the SENTENCE it appeared in (context), and the LANGUAGE the student wants the friendly explanation written in.
+
+Return a SINGLE valid JSON object and NOTHING else (no markdown fences, no extra text):
+{
+  "term": "<the word/phrase, cleaned up and lowercased unless it is a proper noun>",
+  "partOfSpeech": "<noun | verb | adjective | adverb | phrase | idiom | ...>",
+  "definition": "<one clear, simple ENGLISH definition (this is saved as a flashcard, so keep it self-contained — max ~14 words)>",
+  "example": "<one short, natural ENGLISH example sentence using the word — NOT copied from the student's sentence>",
+  "synonym": "<one common English synonym or a 2-3 word equivalent>",
+  "explanation": "<2-4 friendly sentences that TEACH the meaning, written ENTIRELY in the requested language. Explain what it means here in context, in plain words a learner understands. If the requested language is not English, do NOT write the explanation in English.>"
+}
+
+Rules:
+- "definition", "example", and "synonym" are ALWAYS in English (they become a study flashcard).
+- "explanation" is ALWAYS in the requested language only.
+- Keep everything accurate and beginner-friendly. No filler, no repetition.`
+
+// Ask the AI to explain a word/phrase the learner selected. `language` is a code like 'en' or
+// 'uz' (default English). The result is structured so it can be shown in the popover AND saved
+// to the personal vocabulary store as a study card.
+export async function explainWord(
+  word: string,
+  context: string,
+  language = 'en',
+): Promise<WordExplanation> {
+  const langLabel = LANGUAGE_LABELS[language] ?? language
+  const userMessage = `WORD/PHRASE: ${word}
+SENTENCE (context): ${context || '(no surrounding sentence provided)'}
+EXPLANATION LANGUAGE: ${langLabel}
+
+Explain it now. Return ONLY valid JSON.`
+
+  const raw = await callGeminiAPI(WORD_EXPLANATION_PROMPT, userMessage, 1024)
+  const jsonStr = extractJSON(raw)
+
+  try {
+    const parsed = JSON.parse(jsonStr) as Partial<WordExplanation>
+    const term = (parsed.term || word).trim()
+    return {
+      term,
+      partOfSpeech: (parsed.partOfSpeech || '').trim(),
+      definition: (parsed.definition || '').trim(),
+      example: (parsed.example || '').trim(),
+      synonym: (parsed.synonym || '').trim(),
+      explanation: (parsed.explanation || '').trim(),
+      language,
+    }
+  } catch {
+    // Fall back to showing the raw reply so the learner still gets help.
+    return {
+      term: word.trim(),
+      partOfSpeech: '',
+      definition: '',
+      example: '',
+      synonym: '',
+      explanation: raw.replace(/```json|```/g, '').trim(),
+      language,
+    }
+  }
 }

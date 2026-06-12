@@ -14,7 +14,7 @@ export default function IELTSSection() {
     return <Navigate to="/ielts" replace />
   }
 
-  if (section === 'reading' || section === 'listening') {
+  if (section === 'reading' || section === 'listening' || section === 'speaking') {
     return (
       <Navigate
         to={`/ielts/${section}/tests`}

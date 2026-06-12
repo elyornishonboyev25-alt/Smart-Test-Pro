@@ -489,7 +489,7 @@ const passage3: Section = {
       id: 'history-v6-q37',
       number: 37,
       type: 'yes-no-not-given',
-      groupTitle: 'Questions 37-41',
+      groupTitle: 'Questions 37-40',
       instruction:
         'Do the following statements agree with the claims of the writer in Reading Passage 3? Write YES if the statement reflects the claims of the writer, NO if the statement contradicts the claims of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this.',
       text: 'The needs of students in school have led to improvements in the teaching of history.',
@@ -521,14 +521,6 @@ const passage3: Section = {
       correctAnswer: 'YES',
       location: 'Paragraph D',
     },
-    {
-      id: 'history-v6-q41',
-      number: 41,
-      type: 'yes-no-not-given',
-      text: 'Developments in technology are influencing a range of academic subjects.',
-      correctAnswer: 'NOT GIVEN',
-      location: 'Paragraph C',
-    },
   ],
 }
 
@@ -538,6 +530,6 @@ export const fullReadingTest6: IELTSTest = {
   type: 'Academic',
   module: 'Reading',
   duration: 60,
-  totalQuestions: 41,
+  totalQuestions: 40,
   sections: [passage1, passage2, passage3],
 }

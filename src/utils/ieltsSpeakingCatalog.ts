@@ -139,10 +139,13 @@ export function getIeltsSpeakingFullMockCatalog(): SpeakingFullMockEntry[] {
       durationMinutes: 14,
       available: true,
       premiumOnly: false,
+      // Offsets push the mocks deeper into the bank so a mock doesn't open with the
+      // exact same topic as the matching Day, and so each mock's Part1/2/3 combo is
+      // distinct from every other mock.
       parts: {
-        part1: PART1_TOPICS[(i - 1) % PART1_TOPICS.length],
-        part2: CUE_CARDS[(i - 1) % CUE_CARDS.length],
-        part3: PART3_THEMES[(i - 1) % PART3_THEMES.length],
+        part1: PART1_TOPICS[(i - 1 + 5) % PART1_TOPICS.length],
+        part2: CUE_CARDS[(i - 1 + 6) % CUE_CARDS.length],
+        part3: PART3_THEMES[(i - 1 + 3) % PART3_THEMES.length],
       },
     }
   })

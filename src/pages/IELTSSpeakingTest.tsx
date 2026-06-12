@@ -595,10 +595,20 @@ function FullMockRunner({
   onExit: () => void
   onSaved: (analysis: import('@/services/speakingAI').SpeakingEvaluation) => void
 }) {
+  // Each numbered mock has its own fixed question set (distinct across mocks).
+  const seed = {
+    part1: mock.parts.part1.questions.map((q) => q.q),
+    part2: {
+      title: mock.parts.part2.title,
+      bullets: mock.parts.part2.bullets,
+      followUp: mock.parts.part2.followUp,
+    },
+    part3: mock.parts.part3.questions.map((q) => q.q),
+  }
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
       <ExaminerSession
-        config={{ mode: 'full_mock' }}
+        config={{ mode: 'full_mock', mockSeed: seed }}
         modeLabel={mock.title}
         onExit={onExit}
         onSaved={onSaved}

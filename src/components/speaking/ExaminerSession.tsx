@@ -28,6 +28,16 @@ export type SessionConfig = {
   interviewKind?: InterviewKind
   /** Free Talk topic (only used when mode === 'free_talk'). */
   topic?: string
+  /**
+   * Fixed question set for a numbered full mock (so Mock 1, Mock 2… each have their
+   * own distinct, stable questions instead of a random draw). When omitted, the
+   * full mock picks questions at random.
+   */
+  mockSeed?: {
+    part1: string[]
+    part2: { title: string; bullets: string[]; followUp: string }
+    part3: string[]
+  }
 }
 
 type ChatTurn = { id: string; role: 'examiner' | 'candidate'; text: string }
@@ -51,48 +61,43 @@ type Stage = {
 type Phase = 'idle' | 'examiner_speaking' | 'awaiting_answer' | 'preparing' | 'thinking' | 'evaluating' | 'result'
 
 function buildStages(config: SessionConfig): Stage[] {
-  const part1Stage = (): Stage => {
-    const topic = pickRandom(PART1_TOPICS)
-    return {
-      part: 1,
-      label: PART_LABELS[1],
-      intro: 'Let’s begin with some questions about you.',
-      moves: [
-        { type: 'seed', text: topic.questions[0] },
-        { type: 'followup' },
-        { type: 'seed', text: topic.questions[1] },
-        { type: 'seed', text: topic.questions[2] },
-        { type: 'followup' },
-      ],
-    }
-  }
-  const part2Stage = (): Stage => {
-    const card = pickRandom(CUE_CARDS)
-    return {
-      part: 2,
-      label: PART_LABELS[2],
-      intro: 'Now I’m going to give you a topic, and I’d like you to talk about it for one to two minutes.',
-      moves: [
-        { type: 'cuecard', card },
-        { type: 'seed', text: card.followUp },
-      ],
-    }
-  }
-  const part3Stage = (): Stage => {
-    const theme = pickRandom(PART3_THEMES)
-    return {
-      part: 3,
-      label: PART_LABELS[3],
-      intro: `We’ve been talking about ${pickRandom(PART2_THEME_WORDS)}. I’d like to discuss some broader questions.`,
-      moves: [
-        { type: 'seed', text: theme.questions[0] },
-        { type: 'followup' },
-        { type: 'seed', text: theme.questions[1] },
-        { type: 'seed', text: theme.questions[2] },
-        { type: 'followup' },
-      ],
-    }
-  }
+  const part1StageFrom = (questions: string[]): Stage => ({
+    part: 1,
+    label: PART_LABELS[1],
+    intro: 'Let’s begin with some questions about you.',
+    moves: [
+      { type: 'seed', text: questions[0] },
+      { type: 'followup' },
+      { type: 'seed', text: questions[1] ?? questions[0] },
+      { type: 'seed', text: questions[2] ?? questions[questions.length - 1] },
+      { type: 'followup' },
+    ],
+  })
+  const part2StageFrom = (card: CueCard): Stage => ({
+    part: 2,
+    label: PART_LABELS[2],
+    intro: 'Now I’m going to give you a topic, and I’d like you to talk about it for one to two minutes.',
+    moves: [
+      { type: 'cuecard', card },
+      { type: 'seed', text: card.followUp },
+    ],
+  })
+  const part3StageFrom = (questions: string[]): Stage => ({
+    part: 3,
+    label: PART_LABELS[3],
+    intro: `We’ve been talking about ${pickRandom(PART2_THEME_WORDS)}. I’d like to discuss some broader questions.`,
+    moves: [
+      { type: 'seed', text: questions[0] },
+      { type: 'followup' },
+      { type: 'seed', text: questions[1] ?? questions[0] },
+      { type: 'seed', text: questions[2] ?? questions[questions.length - 1] },
+      { type: 'followup' },
+    ],
+  })
+
+  const part1Stage = (): Stage => part1StageFrom(pickRandom(PART1_TOPICS).questions)
+  const part2Stage = (): Stage => part2StageFrom(pickRandom(CUE_CARDS))
+  const part3Stage = (): Stage => part3StageFrom(pickRandom(PART3_THEMES).questions)
 
   switch (config.mode) {
     case 'part1':
@@ -101,8 +106,19 @@ function buildStages(config: SessionConfig): Stage[] {
       return [part2Stage()]
     case 'part3':
       return [part3Stage()]
-    case 'full_mock':
+    case 'full_mock': {
+      // A numbered mock supplies a fixed seed so each mock has its own distinct,
+      // stable questions; otherwise (e.g. AI Coach) draw a fresh random mock.
+      if (config.mockSeed) {
+        const seed = config.mockSeed
+        return [
+          part1StageFrom(seed.part1),
+          part2StageFrom({ id: 'mock-cue', theme: 'mock', ...seed.part2 }),
+          part3StageFrom(seed.part3),
+        ]
+      }
       return [part1Stage(), part2Stage(), part3Stage()]
+    }
     case 'interview': {
       const pack = INTERVIEW_PACKS.find((p) => p.id === config.interviewKind) ?? INTERVIEW_PACKS[0]
       return [

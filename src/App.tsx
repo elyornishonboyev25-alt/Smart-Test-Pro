@@ -29,6 +29,8 @@ const IELTSSection = lazy(() => import('@/pages/IELTSSection'))
 const IELTSSectionTests = lazy(() => import('@/pages/IELTSSectionTests'))
 const Vocabulary = lazy(() => import('@/pages/Vocabulary'))
 const VocabularyActivity = lazy(() => import('@/pages/VocabularyActivity'))
+const ArticlesVocabulary = lazy(() => import('@/pages/ArticlesVocabulary'))
+const MyWordsVocabulary = lazy(() => import('@/pages/MyWordsVocabulary'))
 const WritingLab = lazy(() => import('@/pages/WritingLab'))
 const SpeakingLab = lazy(() => import('@/pages/SpeakingLab'))
 const SpeakingCommunity = lazy(() => import('@/pages/SpeakingCommunity'))
@@ -343,6 +345,66 @@ function App() {
                           </PremiumRoute>
                         }
                       />
+                      <Route
+                        path="/vocabulary/articles"
+                        element={
+                          <PremiumRoute showGuestBanner>
+                            <AnimatedRoute>
+                              <ArticlesVocabulary />
+                            </AnimatedRoute>
+                          </PremiumRoute>
+                        }
+                      />
+                      <Route
+                        path="/vocabulary/articles/:articleSlug"
+                        element={
+                          <PremiumRoute showGuestBanner>
+                            <AnimatedRoute>
+                              <VocabularyActivity />
+                            </AnimatedRoute>
+                          </PremiumRoute>
+                        }
+                      />
+                      <Route
+                        path="/vocabulary/articles/:articleSlug/:activity"
+                        element={
+                          <PremiumRoute showGuestBanner>
+                            <AnimatedRoute>
+                              <VocabularyActivity />
+                            </AnimatedRoute>
+                          </PremiumRoute>
+                        }
+                      />
+                      <Route
+                        path="/vocabulary/my-words"
+                        element={
+                          <PremiumRoute showGuestBanner>
+                            <AnimatedRoute>
+                              <MyWordsVocabulary />
+                            </AnimatedRoute>
+                          </PremiumRoute>
+                        }
+                      />
+                      <Route
+                        path="/vocabulary/my-words/:wordsContext"
+                        element={
+                          <PremiumRoute showGuestBanner>
+                            <AnimatedRoute>
+                              <MyWordsVocabulary />
+                            </AnimatedRoute>
+                          </PremiumRoute>
+                        }
+                      />
+                      <Route
+                        path="/vocabulary/my-words/:wordsContext/:activity"
+                        element={
+                          <PremiumRoute showGuestBanner>
+                            <AnimatedRoute>
+                              <VocabularyActivity />
+                            </AnimatedRoute>
+                          </PremiumRoute>
+                        }
+                      />
                       <Route path="/writing-lab" element={<AnimatedRoute><WritingLab /></AnimatedRoute>} />
                       <Route path="/speaking-lab" element={<AnimatedRoute><SpeakingLab /></AnimatedRoute>} />
                       <Route
@@ -425,6 +487,7 @@ function App() {
                         }
                       />
                       <Route path="/articles" element={<AnimatedRoute><Articles /></AnimatedRoute>} />
+                      <Route path="/articles/:slug" element={<AnimatedRoute><ArticleReader /></AnimatedRoute>} />
                       <Route path="/shadowing-lab" element={<AnimatedRoute><ShadowingLab /></AnimatedRoute>} />
                       <Route path="/premium" element={<AnimatedRoute><Premium /></AnimatedRoute>} />
                       <Route path="/login" element={<AnimatedRoute><Login /></AnimatedRoute>} />

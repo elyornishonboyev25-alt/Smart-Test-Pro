@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -88,7 +88,7 @@ function renderHighlighted(
   }
   matches.sort((a, b) => a.start - b.start)
 
-  const out: Array<string | JSX.Element> = []
+  const out: ReactNode[] = []
   let cursor = 0
   let key = 0
   for (const m of matches) {
@@ -578,7 +578,7 @@ function BlockView({
   index,
 }: {
   block: ArticleBlock
-  content: React.ReactNode
+  content: ReactNode
   fontScale: number
   theme: ReaderTheme
   index: number

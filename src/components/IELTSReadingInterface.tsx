@@ -18,6 +18,7 @@ import {
   PaperAirplaneIcon,
   SpeakerWaveIcon,
   PlayIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline'
 
 // Types
@@ -28,6 +29,7 @@ import SplitScreen from './SplitScreen'
 import Timer from './Timer'
 import QuestionNavigation from './QuestionNavigation'
 import NotesPanel from './NotesPanel'
+import WordLookupModal from './vocab/WordLookupModal'
 
 // Utils
 import {
@@ -228,6 +230,8 @@ export default function IELTSReadingInterface({
   const [flaggedQuestions, setFlaggedQuestions] = useState<number[]>([])
   const [selectionRect, setSelectionRect] = useState<DOMRect | null>(null)
   const [selectedText, setSelectedText] = useState('')
+  // "Ask AI about this word" lookup (Reading + Listening). Saved words land in My Words.
+  const [aiLookup, setAiLookup] = useState<{ word: string; sentence: string } | null>(null)
   const [lastActiveQuestionIndex, setLastActiveQuestionIndex] = useState(0)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [showReviewModal, setShowReviewModal] = useState(false)
@@ -2616,6 +2620,24 @@ export default function IELTSReadingInterface({
               <ChatBubbleBottomCenterTextIcon className="w-4 h-4 text-red-500" />
               Note
             </button>
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault()
+                const sel = window.getSelection()
+                const word = (selectedText || sel?.toString() || '').trim()
+                if (!word) return
+                const anchor = sel?.anchorNode instanceof Element ? sel.anchorNode : sel?.anchorNode?.parentElement
+                const sentence = (anchor?.closest('p, div, li')?.textContent ?? word).replace(/\s+/g, ' ').trim()
+                setAiLookup({ word, sentence })
+                setSelectionRect(null)
+              }}
+              className="flex h-9 items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-3 text-xs font-bold text-white transition hover:brightness-110"
+              title="Ask AI to explain this word"
+            >
+              <SparklesIcon className="w-4 h-4" />
+              Ask AI
+            </button>
             <div className="absolute -bottom-1.5 left-1/2 -ml-1.5 h-3 w-3 rotate-45 border-b border-r border-red-200 bg-white" />
           </motion.div>
         )}
@@ -3009,7 +3031,11 @@ export default function IELTSReadingInterface({
   const renderListeningLeftPanel = () => {
     const playingSection = activeSections[currentAudioIndex] ?? currentSection
     return (
-      <div className="reading-pane reading-content h-full overflow-y-auto border-r border-red-100 bg-gradient-to-b from-white via-red-50/30 to-white p-4 font-sans sm:p-5 lg:p-6">
+      <div
+        className="word-lookup-scope reading-pane reading-content h-full overflow-y-auto border-r border-red-100 bg-gradient-to-b from-white via-red-50/30 to-white p-4 font-sans sm:p-5 lg:p-6"
+        data-word-lookup="listening"
+        data-word-origin={test.title}
+      >
         <div className="mb-4">
           <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-red-600 sm:text-sm">
             {currentSection?.partLabel ?? `PART ${currentSectionIndex + 1}`}
@@ -3047,7 +3073,11 @@ export default function IELTSReadingInterface({
   }
 
   const renderListeningRightPanel = () => (
-    <div className="reading-pane reading-content reading-question-typography h-full overflow-y-auto border-l border-red-100 bg-white p-4 sm:p-5 lg:p-6 font-sans scrollbar-thin scrollbar-thumb-red-200">
+    <div
+      className="word-lookup-scope reading-pane reading-content reading-question-typography h-full overflow-y-auto border-l border-red-100 bg-white p-4 sm:p-5 lg:p-6 font-sans scrollbar-thin scrollbar-thumb-red-200"
+      data-word-lookup="listening"
+      data-word-origin={test.title}
+    >
       <div className="sticky top-0 z-10 -mx-4 mb-5 flex items-center justify-between border-b border-red-100 bg-white/95 px-4 py-2.5 backdrop-blur-sm sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6">
         <div>
           <h3 className="text-lg font-black tracking-tight text-slate-900">Questions Workspace</h3>
@@ -5307,6 +5337,14 @@ export default function IELTSReadingInterface({
           <div className="flex-1 relative overflow-hidden" id="test-main-container">
             <SplitScreen left={renderLeftPanel()} right={renderRightPanel()} className="h-full" />
             <NotesPanel testId={test.id} isOpen={showNotes} onClose={() => setShowNotes(false)} />
+            <WordLookupModal
+              open={Boolean(aiLookup)}
+              word={aiLookup?.word ?? ''}
+              sentence={aiLookup?.sentence}
+              context={isListening ? 'listening' : 'reading'}
+              origin={test.title}
+              onClose={() => setAiLookup(null)}
+            />
           </div>
           <div className="reading-toolbar z-20 bg-white border-t border-red-100 relative shadow-[0_-1px_3px_rgba(220,38,38,0.08)]">
             <QuestionNavigation sections={sectionMeta} currentSectionIndex={currentSectionIndex} currentQuestionIndex={lastActiveQuestionIndex} answers={answers} onNavigate={handleNavigateQuestion} onSectionChange={handleSectionChange} onFlag={isReviewMode ? undefined : handleFlagQuestion} flagged={flaggedQuestions} />

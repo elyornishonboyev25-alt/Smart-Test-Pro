@@ -1,8 +1,10 @@
 ﻿import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { ArrowLeft, BookOpen, ChevronDown, Gem, Sparkles, Star } from 'lucide-react'
+import { ArrowLeft, BookOpen, BookOpenCheck, Bookmark, ChevronDown, Gem, Sparkles, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { vocabularyCollections, type VocabularyTrack } from '@/data/vocabularyCollections'
+import { articles } from '@/data/articles'
+import { countSavedWords } from '@/utils/myVocabularyStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { CountUp, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 
@@ -246,6 +248,54 @@ export default function Vocabulary() {
                     <span className="rounded-full bg-white px-3 py-1 text-slate-700">{satStats.words} words</span>
                   </div>
                   <p className="mt-6 text-sm font-semibold text-blue-700 transition group-hover:translate-x-1">Open SAT page -&gt;</p>
+                </button>
+              </Tilt3D>
+            </StaggerItem>
+
+            <StaggerItem className="h-full">
+              <Tilt3D className="h-full rounded-[1.8rem]" max={6}>
+                <button
+                  onClick={() => navigate('/vocabulary/articles')}
+                  className="interactive-lift group h-full w-full rounded-[1.8rem] border border-amber-200 bg-gradient-to-br from-white via-amber-50 to-orange-100/70 p-6 text-left shadow-[0_18px_36px_rgba(245,158,11,0.16)]"
+                >
+                  <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-semibold text-amber-700">
+                    <BookOpenCheck className="h-3.5 w-3.5" />
+                    Articles Track
+                  </div>
+                  <h2 className="mt-4 text-3xl font-black text-slate-900">Articles Vocabulary</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    The key words from every article in the Reading Library — study each set with the same flashcards, matching, quiz, and typing drills.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{articles.length} articles</span>
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">{articles.reduce((s, a) => s + a.vocabulary.length, 0)} terms</span>
+                  </div>
+                  <p className="mt-6 text-sm font-semibold text-amber-700 transition group-hover:translate-x-1">Open Articles page -&gt;</p>
+                </button>
+              </Tilt3D>
+            </StaggerItem>
+
+            <StaggerItem className="h-full">
+              <Tilt3D className="h-full rounded-[1.8rem]" max={6}>
+                <button
+                  onClick={() => navigate('/vocabulary/my-words')}
+                  className="interactive-lift group h-full w-full rounded-[1.8rem] border border-emerald-200 bg-gradient-to-br from-white via-emerald-50 to-teal-100/70 p-6 text-left shadow-[0_18px_36px_rgba(16,185,129,0.16)]"
+                >
+                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <Bookmark className="h-3.5 w-3.5" />
+                    Personal Track
+                  </div>
+                  <h2 className="mt-4 text-3xl font-black text-slate-900">My Words</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Words you asked the AI about while reading, listening, or reading articles — plus any you add yourself. Grouped and ready to study.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">Reading · Listening · Article</span>
+                    <span className="rounded-full bg-white px-3 py-1 text-slate-700">
+                      {countSavedWords('reading') + countSavedWords('listening') + countSavedWords('article')} saved
+                    </span>
+                  </div>
+                  <p className="mt-6 text-sm font-semibold text-emerald-700 transition group-hover:translate-x-1">Open My Words -&gt;</p>
                 </button>
               </Tilt3D>
             </StaggerItem>

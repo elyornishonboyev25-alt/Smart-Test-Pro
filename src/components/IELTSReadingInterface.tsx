@@ -2588,7 +2588,7 @@ export default function IELTSReadingInterface({
     </div>
   )
 
-  const renderLeftPanel = () => isListening ? renderListeningLeftPanel() : (
+  const renderLeftPanel = () => (
     <div className="relative h-full">
       <AnimatePresence>
         {selectionRect && (
@@ -2731,12 +2731,12 @@ export default function IELTSReadingInterface({
       const isWrong = meta?.status === 'incorrect' || meta?.status === 'skipped'
       const widthCls =
         width === 'sm'
-          ? 'min-w-[60px] max-w-[84px]'
+          ? 'min-w-[72px] max-w-[100px]'
           : width === 'lg'
-            ? 'min-w-[150px] max-w-[210px]'
+            ? 'min-w-[180px] max-w-[250px]'
             : width === 'xl'
-              ? 'min-w-[190px] max-w-[260px]'
-              : 'min-w-[104px] max-w-[176px]'
+              ? 'min-w-[230px] max-w-[320px]'
+              : 'min-w-[128px] max-w-[200px]'
       return (
         <span id={`question-card-${question.id}`} className="inline-flex align-middle">
           <input
@@ -2746,7 +2746,7 @@ export default function IELTSReadingInterface({
             onFocus={() => setLastActiveQuestionIndex(getCurrentSectionGlobalIndex(question.id))}
             disabled={isReviewMode}
             placeholder={String(number)}
-            className={`mx-1 inline-flex h-9 ${widthCls} rounded-lg border px-2 text-center text-sm font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
+            className={`mx-1.5 inline-flex h-11 ${widthCls} rounded-lg border-2 px-3 text-center text-base font-semibold text-slate-800 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100 disabled:cursor-not-allowed disabled:bg-slate-100 ${
               isReviewMode && reviewShowCorrectAnswers
                 ? isWrong
                   ? 'border-red-300 bg-red-50/70 text-red-700'
@@ -2775,7 +2775,7 @@ export default function IELTSReadingInterface({
     const renderGrid = (block: Extract<ListeningBlock, { kind: 'grid' }>) => (
       <div className="my-2">
         <div className="overflow-x-auto rounded-xl border border-slate-300">
-          <table className="w-full border-collapse text-left text-sm">
+          <table className="w-full border-collapse text-left text-base">
             <thead>
               <tr className="border-b border-slate-300 bg-slate-50">
                 <th className="px-2 py-2 text-base font-black text-slate-900">Item</th>
@@ -2803,7 +2803,7 @@ export default function IELTSReadingInterface({
                         >
                           <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
                         </button>
-                        <p className="text-[15px] leading-snug text-slate-900">
+                        <p className="text-base leading-snug text-slate-900">
                           <span className="mr-2 font-black">{row.blank}</span>
                           {row.label}
                         </p>
@@ -2841,12 +2841,12 @@ export default function IELTSReadingInterface({
                             type="button"
                             disabled={isReviewMode}
                             onClick={(event) => { event.stopPropagation(); handleAnswerChange(question.id, letter) }}
-                            className="inline-flex h-10 w-full items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 disabled:cursor-not-allowed"
+                            className="inline-flex h-12 w-full items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 disabled:cursor-not-allowed"
                             aria-label={`Question ${row.blank}, choose ${letter}`}
                           >
-                            <span className={`inline-flex h-4 w-4 items-center justify-center rounded-full border-2 transition ${dotTone}`}>
+                            <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border-2 transition ${dotTone}`}>
                               <span
-                                className={`h-2 w-2 rounded-full ${
+                                className={`h-2.5 w-2.5 rounded-full ${
                                   state === 'correct' || state === 'missed'
                                     ? 'bg-emerald-500'
                                     : state === 'wrong' || state === 'selected'
@@ -2866,8 +2866,8 @@ export default function IELTSReadingInterface({
           </table>
         </div>
         {block.options && block.options.length > 0 ? (
-          <div className="mt-3 inline-block rounded-xl border border-red-100 bg-red-50/40 p-3">
-            <ul className="space-y-1 text-sm font-semibold text-slate-700">
+          <div className="mt-4 inline-block rounded-xl border border-red-100 bg-red-50/40 p-4">
+            <ul className="space-y-1.5 text-base font-semibold text-slate-700">
               {block.options.map((option) => (
                 <li key={option.letter}>
                   <span className="mr-2 font-black text-slate-900">{option.letter}</span>
@@ -2886,8 +2886,8 @@ export default function IELTSReadingInterface({
       const globalIdx = getCurrentSectionGlobalIndex(question.id)
       const isFlagged = flaggedQuestions.includes(globalIdx)
       return (
-        <div id={`question-card-${question.id}`} className="mt-3 rounded-2xl border border-red-100 bg-white p-3">
-          <div className="mb-2 flex items-start gap-2.5">
+        <div id={`question-card-${question.id}`} className="mt-4 rounded-2xl border border-red-100 bg-white p-4">
+          <div className="mb-3 flex items-start gap-2.5">
             <button
               type="button"
               onClick={() => handleFlagQuestion(globalIdx)}
@@ -2895,7 +2895,7 @@ export default function IELTSReadingInterface({
             >
               <BookmarkIcon className={`h-4 w-4 ${isFlagged ? 'fill-current' : ''}`} />
             </button>
-            <p className="text-[15px] font-bold leading-relaxed text-slate-950">
+            <p className="text-[17px] font-bold leading-relaxed text-slate-950">
               <span className="mr-2 font-black">{block.blank}</span>
               {block.prompt}
             </p>
@@ -2921,12 +2921,12 @@ export default function IELTSReadingInterface({
                   key={letter}
                   disabled={isReviewMode}
                   onClick={() => { if (!isReviewMode) handleAnswerChange(question.id, letter) }}
-                  className={`flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 ${tone}`}
+                  className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-base font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 ${tone}`}
                 >
-                  <span className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black ${isSelected || state === 'correct' || state === 'wrong' ? 'border-current' : 'border-slate-300 text-slate-500'}`}>
+                  <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-sm font-black ${isSelected || state === 'correct' || state === 'wrong' ? 'border-current' : 'border-slate-300 text-slate-500'}`}>
                     {letter}
                   </span>
-                  <span className="text-[15px] text-slate-900">{opt}</span>
+                  <span className="text-[17px] text-slate-900">{opt}</span>
                 </button>
               )
             })}
@@ -2938,7 +2938,7 @@ export default function IELTSReadingInterface({
 
     const renderTable = (block: Extract<ListeningBlock, { kind: 'table' }>) => (
       <div className="my-2 overflow-x-auto rounded-xl border border-slate-300">
-        <table className="w-full border-collapse text-left text-sm">
+        <table className="w-full border-collapse text-left text-base">
           <thead>
             <tr className="border-b border-slate-300 bg-slate-50">
               {block.columns.map((col) => (
@@ -2966,14 +2966,14 @@ export default function IELTSReadingInterface({
     const renderBlock = (block: ListeningBlock, key: number) => {
       switch (block.kind) {
         case 'title':
-          return <p key={key} className="mt-1 mb-2 text-center text-2xl font-black tracking-tight text-slate-900">{block.text}</p>
+          return <p key={key} className="mt-2 mb-3 text-center text-3xl font-black tracking-tight text-slate-900">{block.text}</p>
         case 'subhead':
-          return <p key={key} className="mt-3 text-lg font-black text-slate-900">{block.text}</p>
+          return <p key={key} className="mt-4 text-xl font-black text-slate-900">{block.text}</p>
         case 'text':
-          return <p key={key} className="mt-2 text-[15px] text-slate-900">{block.text}</p>
+          return <p key={key} className="mt-2.5 text-[17px] text-slate-900">{block.text}</p>
         case 'example':
           return (
-            <p key={key} className="mt-1 text-[15px] italic text-slate-600">
+            <p key={key} className="mt-1.5 text-[17px] italic text-slate-600">
               <span className="mr-1 font-bold not-italic text-slate-500">Example:</span>
               {block.segments.map((segment, index) =>
                 typeof segment === 'string' ? (
@@ -2986,20 +2986,20 @@ export default function IELTSReadingInterface({
           )
         case 'note':
           return (
-            <p key={key} className={`text-[15px] leading-loose text-slate-900 ${block.bullet ? 'pl-6' : ''}`}>
+            <p key={key} className={`text-[17px] leading-[2.5] text-slate-900 ${block.bullet ? 'pl-7' : ''}`}>
               {block.bullet ? '• ' : ''}
               {segs(block.segments)}
             </p>
           )
         case 'flow':
           return (
-            <div key={key} className="my-2 flex flex-col items-center">
+            <div key={key} className="my-3 flex flex-col items-center">
               {block.boxes.map((box, boxIndex) => (
                 <Fragment key={boxIndex}>
-                  <div className="w-full rounded-xl border border-red-200 bg-red-50/30 px-4 py-3 text-center text-[15px] leading-relaxed text-slate-900">
+                  <div className="w-full rounded-xl border-2 border-red-200 bg-red-50/40 px-5 py-4 text-center text-[17px] leading-relaxed text-slate-900">
                     {segs(box.segments)}
                   </div>
-                  {boxIndex < block.boxes.length - 1 ? <span className="my-1 text-2xl leading-none text-red-400">↓</span> : null}
+                  {boxIndex < block.boxes.length - 1 ? <span className="my-1.5 text-3xl leading-none text-red-400">↓</span> : null}
                 </Fragment>
               ))}
             </div>
@@ -3018,80 +3018,66 @@ export default function IELTSReadingInterface({
     }
 
     return (
-      <section key={groupKey} className="rounded-2xl border border-red-100 bg-white p-3 shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
-        <h4 className="text-xl font-black text-slate-900">{group.range}</h4>
-        <p className="mt-1 text-sm text-slate-700">{group.instruction}</p>
-        <div className="mt-2 rounded-xl border border-red-100 bg-white px-3 py-3">
+      <section key={groupKey} className="rounded-2xl border border-red-100 bg-white p-4 shadow-[0_8px_20px_rgba(220,38,38,0.08)] sm:p-5">
+        <h4 className="text-2xl font-black text-slate-900">{group.range}</h4>
+        <p className="mt-1 text-base text-slate-700">{group.instruction}</p>
+        <div className="mt-3 rounded-xl border border-red-100 bg-white px-4 py-4 sm:px-5">
           {group.blocks.map((block, index) => renderBlock(block, index))}
         </div>
       </section>
     )
   }
 
-  const renderListeningLeftPanel = () => {
-    const playingSection = activeSections[currentAudioIndex] ?? currentSection
+  const renderListeningRightPanel = () => {
+    const sectionNumbers = sectionMeta[currentSectionIndex]?.questionNumbers ?? []
+    const firstNum = sectionNumbers[0]
+    const lastNum = sectionNumbers[sectionNumbers.length - 1]
+    const totalNum = sectionMeta.reduce((acc, s) => acc + s.questionCount, 0)
     return (
       <div
-        className="word-lookup-scope reading-pane reading-content h-full overflow-y-auto border-r border-red-100 bg-gradient-to-b from-white via-red-50/30 to-white p-4 font-sans sm:p-5 lg:p-6"
+        className="word-lookup-scope reading-pane reading-content reading-question-typography h-full overflow-y-auto bg-gradient-to-b from-white via-red-50/20 to-white font-sans scrollbar-thin scrollbar-thumb-red-200"
         data-word-lookup="listening"
         data-word-origin={test.title}
       >
-        <div className="mb-4">
-          <p className="mb-1 text-xs font-bold uppercase tracking-[0.18em] text-red-600 sm:text-sm">
-            {currentSection?.partLabel ?? `PART ${currentSectionIndex + 1}`}
-          </p>
-          <h2 className="mb-1.5 text-lg font-bold text-slate-900 sm:text-xl">IELTS LISTENING</h2>
-          <p className="text-xs italic text-slate-600 sm:text-sm">
-            {currentSection?.partInstruction ?? `Listen and answer the questions for ${currentSection?.title}.`}
-          </p>
-        </div>
-        <div className="mb-4 overflow-hidden rounded-2xl bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-4 py-2.5 text-white shadow-[0_14px_30px_rgba(220,38,38,0.24)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] opacity-90">Audio recording</p>
-          <p className="text-base font-bold sm:text-lg">{playingSection?.title}</p>
-        </div>
-        <div className="rounded-2xl border border-red-100 bg-white p-6 text-center shadow-[0_8px_20px_rgba(220,38,38,0.08)]">
-          <div className={`mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 to-slate-700 text-white ${isAudioPlaying ? 'animate-pulse' : ''}`}>
-            <SpeakerWaveIcon className="h-11 w-11" />
+        <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+          {/* Part header banner */}
+          <div className="mb-6 overflow-hidden rounded-3xl border border-red-100 bg-white shadow-[0_14px_34px_rgba(220,38,38,0.12)]">
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-red-600 via-red-500 to-rose-500 px-6 py-5 text-white">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/85">
+                  {currentSection?.partLabel ?? `Part ${currentSectionIndex + 1}`}
+                </p>
+                <h2 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">{currentSection?.title}</h2>
+              </div>
+              {isAudioPlaying ? (
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em] backdrop-blur-sm">
+                  <SpeakerWaveIcon className="h-4 w-4 animate-pulse" />
+                  Audio playing
+                </span>
+              ) : audioDone ? (
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.1em]">
+                  Audio finished
+                </span>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3.5">
+              <p className="text-[15px] font-medium text-slate-600">
+                {currentSection?.partInstruction ?? `Listen and answer the questions for ${currentSection?.title}.`}
+              </p>
+              <span className="shrink-0 rounded-xl border border-red-200 bg-red-50 px-3.5 py-1.5 text-sm font-bold text-red-700">
+                {firstNum}-{lastNum} of {totalNum}
+              </span>
+            </div>
           </div>
-          <p className="mt-4 text-sm font-bold text-slate-900">
-            {audioDone ? 'Audio finished — review your answers' : isAudioPlaying ? 'Audio is playing…' : 'Audio is loading…'}
-          </p>
-          <p className="mt-1.5 text-xs text-slate-500">You cannot pause, rewind or replay the recording.</p>
-          <div className="mt-4 flex items-center justify-center gap-2">
-            {activeSections.map((section, index) => (
-              <span
-                key={section.id}
-                className={`h-2.5 w-2.5 rounded-full transition ${
-                  index === currentAudioIndex ? 'bg-red-500' : index < currentAudioIndex ? 'bg-red-200' : 'bg-slate-200'
-                }`}
-              />
-            ))}
+
+          {/* Questions (single column, full width) */}
+          <div className="space-y-7 pb-28">
+            {(currentSection?.groups ?? []).map((group, groupIndex) => renderListeningGroup(group, groupIndex))}
           </div>
         </div>
       </div>
     )
   }
-
-  const renderListeningRightPanel = () => (
-    <div
-      className="word-lookup-scope reading-pane reading-content reading-question-typography h-full overflow-y-auto border-l border-red-100 bg-white p-4 sm:p-5 lg:p-6 font-sans scrollbar-thin scrollbar-thumb-red-200"
-      data-word-lookup="listening"
-      data-word-origin={test.title}
-    >
-      <div className="sticky top-0 z-10 -mx-4 mb-5 flex items-center justify-between border-b border-red-100 bg-white/95 px-4 py-2.5 backdrop-blur-sm sm:-mx-5 sm:px-5 lg:-mx-6 lg:px-6">
-        <div>
-          <h3 className="text-lg font-black tracking-tight text-slate-900">Questions Workspace</h3>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-red-500">Answer panel</p>
-        </div>
-        <span className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700">
-          {sectionMeta[currentSectionIndex]?.questionNumbers[0]}-{sectionMeta[currentSectionIndex]?.questionNumbers[sectionMeta[currentSectionIndex]?.questionNumbers.length - 1]} of {sectionMeta.reduce((acc, s) => acc + s.questionCount, 0)}
-        </span>
-      </div>
-      <div className="space-y-8 pb-20">
-        {(currentSection?.groups ?? []).map((group, groupIndex) => renderListeningGroup(group, groupIndex))}
-      </div>
-    </div>
-  )
 
   const renderRightPanel = () => isListening ? renderListeningRightPanel() : (
     <div
@@ -5335,7 +5321,11 @@ export default function IELTSReadingInterface({
             </div>
           </header>
           <div className="flex-1 relative overflow-hidden" id="test-main-container">
-            <SplitScreen left={renderLeftPanel()} right={renderRightPanel()} className="h-full" />
+            {isListening ? (
+              <div className="h-full overflow-hidden">{renderRightPanel()}</div>
+            ) : (
+              <SplitScreen left={renderLeftPanel()} right={renderRightPanel()} className="h-full" />
+            )}
             <NotesPanel testId={test.id} isOpen={showNotes} onClose={() => setShowNotes(false)} />
             <WordLookupModal
               open={Boolean(aiLookup)}

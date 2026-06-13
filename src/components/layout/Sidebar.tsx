@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AudioLines, BarChart3, BookMarked, BookOpen, Crown, FileText, GraduationCap, Headset, Home, Landmark, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
+import { AudioLines, BarChart3, BookMarked, BookOpen, Crown, FileText, GraduationCap, Headphones, Headset, Home, Landmark, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../ui/utils'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -25,6 +25,7 @@ export function Sidebar() {
     { id: 'ielts', label: 'IELTS Prep', icon: BookOpen, path: '/ielts' },
     { id: 'admission', label: 'Admission', icon: Landmark, path: '/admission' },
     { id: 'articles', label: 'Articles', icon: FileText, path: '/articles' },
+    { id: 'podcast', label: 'Podcast', icon: Headphones, path: '/podcast' },
   ]
 
   const labItems = [

@@ -58,6 +58,7 @@ const TestRunner = lazy(() => import('@/pages/TestRunner'))
 const Articles = lazy(() => import('@/pages/Articles'))
 const ArticleReader = lazy(() => import('@/pages/ArticleReader'))
 const ShadowingLab = lazy(() => import('@/pages/ShadowingLab'))
+const Podcast = lazy(() => import('@/pages/Podcast'))
 const Admission = lazy(() => import('@/pages/Admission'))
 const AdmissionLessons = lazy(() => import('@/pages/AdmissionLessons'))
 const AdmissionLesson = lazy(() => import('@/pages/AdmissionLesson'))
@@ -134,6 +135,7 @@ function App() {
     pathname === '/writing-lab' ||
     pathname === '/speaking-lab' ||
     pathname === '/shadowing-lab' ||
+    pathname === '/podcast' ||
     pathname === '/onboarding' ||
     pathname.startsWith('/articles') ||
     pathname.startsWith('/admission')
@@ -499,6 +501,7 @@ function App() {
                       <Route path="/articles" element={<AnimatedRoute><Articles /></AnimatedRoute>} />
                       <Route path="/articles/:slug" element={<AnimatedRoute><ArticleReader /></AnimatedRoute>} />
                       <Route path="/shadowing-lab" element={<AnimatedRoute><ShadowingLab /></AnimatedRoute>} />
+                      <Route path="/podcast" element={<AnimatedRoute><Podcast /></AnimatedRoute>} />
                       <Route path="/admission" element={<AnimatedRoute><Admission /></AnimatedRoute>} />
                       <Route path="/admission/lessons" element={<AnimatedRoute><AdmissionLessons /></AnimatedRoute>} />
                       <Route path="/admission/lessons/:slug" element={<AnimatedRoute><AdmissionLesson /></AnimatedRoute>} />

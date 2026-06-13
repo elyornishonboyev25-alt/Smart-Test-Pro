@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Activity,
+  ArrowDownRight,
   ArrowLeft,
   ArrowUpRight,
   Award,
@@ -273,9 +274,13 @@ export default function Profile() {
                       <span className="text-sm font-bold text-red-700">
                         Rank #<CountUp value={data.competitive.rank} />
                       </span>
-                      {data.competitive.rankTrend === 'up' ? (
+                      {data.competitive.rankTrend === 'up' && data.competitive.rankDelta !== 0 ? (
                         <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
                           <ArrowUpRight className="h-3 w-3" />+{Math.abs(data.competitive.rankDelta)}
+                        </span>
+                      ) : data.competitive.rankTrend === 'down' && data.competitive.rankDelta !== 0 ? (
+                        <span className="inline-flex items-center gap-0.5 rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">
+                          <ArrowDownRight className="h-3 w-3" />-{Math.abs(data.competitive.rankDelta)}
                         </span>
                       ) : null}
                     </div>
@@ -335,7 +340,8 @@ export default function Profile() {
                     <div className="flex items-center justify-between">
                       <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">{card.label}</p>
                       <span
-                        className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${card.accent} text-white shadow-[0_10px_22px_${card.ring}]`}
+                        className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${card.accent} text-white`}
+                        style={{ boxShadow: `0 10px 22px ${card.ring}` }}
                       >
                         <Icon className="h-5 w-5" />
                       </span>
@@ -587,7 +593,13 @@ export default function Profile() {
                 ))}
               </Stagger>
             ) : (
-              <p className="mt-4 text-sm text-slate-500">Complete tests to unlock achievements.</p>
+              <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed border-amber-200 bg-amber-50/40 px-4 py-8 text-center">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <p className="mt-3 text-sm font-bold text-slate-700">No achievements yet</p>
+                <p className="mt-1 text-xs text-slate-500">Complete tests to unlock badges and bonus XP.</p>
+              </div>
             )}
           </article>
         </Reveal>
@@ -652,7 +664,21 @@ export default function Profile() {
               ))}
             </Stagger>
           ) : (
-            <p className="mt-4 text-sm text-slate-500">No attempts yet. Complete a test to start earning XP.</p>
+            <div className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed border-red-200 bg-red-50/40 px-4 py-10 text-center">
+              <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                <Activity className="h-5 w-5" />
+              </span>
+              <p className="mt-3 text-sm font-bold text-slate-700">No attempts yet</p>
+              <p className="mt-1 text-xs text-slate-500">Complete a test to start earning XP and build your history.</p>
+              <button
+                type="button"
+                onClick={() => navigate('/tests')}
+                className="interactive-lift mt-4 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_22px_rgba(220,38,38,0.28)]"
+              >
+                Browse tests
+                <ArrowUpRight className="h-4 w-4" />
+              </button>
+            </div>
           )}
         </article>
       </Reveal>

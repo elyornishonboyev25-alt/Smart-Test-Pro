@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AudioLines, BarChart3, BookMarked, BookOpen, Crown, FileText, GraduationCap, Headset, Home, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
+import { AudioLines, BarChart3, BookMarked, BookOpen, Crown, FileText, GraduationCap, Headset, Home, Landmark, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../ui/utils'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -23,6 +23,7 @@ export function Sidebar() {
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, path: '/leaderboard' },
     { id: 'sat', label: 'SAT Prep', icon: GraduationCap, path: '/sat' },
     { id: 'ielts', label: 'IELTS Prep', icon: BookOpen, path: '/ielts' },
+    { id: 'admission', label: 'Admission', icon: Landmark, path: '/admission' },
     { id: 'articles', label: 'Articles', icon: FileText, path: '/articles' },
   ]
 

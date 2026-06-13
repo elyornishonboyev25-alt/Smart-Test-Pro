@@ -1,0 +1,80 @@
+import {
+  Award,
+  Briefcase,
+  CalendarClock,
+  Calculator,
+  Compass,
+  Coins,
+  CreditCard,
+  FileSpreadsheet,
+  FileText,
+  Globe,
+  Globe2,
+  GraduationCap,
+  Headphones,
+  LayoutList,
+  ListChecks,
+  Luggage,
+  Mail,
+  Map,
+  MessageSquare,
+  Mic,
+  PenLine,
+  PiggyBank,
+  Plane,
+  Rocket,
+  Search,
+  Smile,
+  Sparkles,
+  Stamp,
+  Target,
+  UserCheck,
+  Users,
+  Wallet,
+  type LucideIcon as LucideIconType,
+} from 'lucide-react'
+
+// Curated icon map for the Admission hub. Only the icons referenced by the lesson /
+// phase data are imported, so the bundle stays small and a bad data string can never
+// crash a page — it just falls back to the Sparkles glyph.
+const iconMap: Record<string, LucideIconType> = {
+  Award,
+  Briefcase,
+  CalendarClock,
+  Calculator,
+  Compass,
+  Coins,
+  CreditCard,
+  FileSpreadsheet,
+  FileText,
+  Globe,
+  Globe2,
+  GraduationCap,
+  Headphones,
+  LayoutList,
+  ListChecks,
+  Luggage,
+  Mail,
+  Map,
+  MessageSquare,
+  Mic,
+  PenLine,
+  PiggyBank,
+  Plane,
+  Rocket,
+  Search,
+  Smile,
+  Sparkles,
+  Stamp,
+  Target,
+  UserCheck,
+  Users,
+  Wallet,
+}
+
+export function LucideIcon({ name, className }: { name: string; className?: string }) {
+  const Icon = iconMap[name] ?? Sparkles
+  return <Icon className={className} />
+}
+
+export default LucideIcon

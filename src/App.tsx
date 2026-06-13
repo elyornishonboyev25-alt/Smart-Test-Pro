@@ -57,6 +57,11 @@ const TestRunner = lazy(() => import('@/pages/TestRunner'))
 const Articles = lazy(() => import('@/pages/Articles'))
 const ArticleReader = lazy(() => import('@/pages/ArticleReader'))
 const ShadowingLab = lazy(() => import('@/pages/ShadowingLab'))
+const Admission = lazy(() => import('@/pages/Admission'))
+const AdmissionLessons = lazy(() => import('@/pages/AdmissionLessons'))
+const AdmissionLesson = lazy(() => import('@/pages/AdmissionLesson'))
+const AdmissionUniversities = lazy(() => import('@/pages/AdmissionUniversities'))
+const AdmissionUniversity = lazy(() => import('@/pages/AdmissionUniversity'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 const prefetchHighTrafficRoutes = () =>
@@ -128,7 +133,8 @@ function App() {
     pathname === '/writing-lab' ||
     pathname === '/speaking-lab' ||
     pathname === '/shadowing-lab' ||
-    pathname.startsWith('/articles')
+    pathname.startsWith('/articles') ||
+    pathname.startsWith('/admission')
   const isCustomTestMode = /^\/tests\/[^/]+\/attempt$/.test(pathname)
   const isClassicTestMode = pathname.startsWith('/test/') || pathname.startsWith('/results/')
   const isTestMode = isCustomTestMode || isClassicTestMode
@@ -491,6 +497,11 @@ function App() {
                       <Route path="/articles" element={<AnimatedRoute><Articles /></AnimatedRoute>} />
                       <Route path="/articles/:slug" element={<AnimatedRoute><ArticleReader /></AnimatedRoute>} />
                       <Route path="/shadowing-lab" element={<AnimatedRoute><ShadowingLab /></AnimatedRoute>} />
+                      <Route path="/admission" element={<AnimatedRoute><Admission /></AnimatedRoute>} />
+                      <Route path="/admission/lessons" element={<AnimatedRoute><AdmissionLessons /></AnimatedRoute>} />
+                      <Route path="/admission/lessons/:slug" element={<AnimatedRoute><AdmissionLesson /></AnimatedRoute>} />
+                      <Route path="/admission/universities" element={<AnimatedRoute><AdmissionUniversities /></AnimatedRoute>} />
+                      <Route path="/admission/universities/:slug" element={<AnimatedRoute><AdmissionUniversity /></AnimatedRoute>} />
                       <Route path="/premium" element={<AnimatedRoute><Premium /></AnimatedRoute>} />
                       <Route path="/login" element={<AnimatedRoute><Login /></AnimatedRoute>} />
                       <Route path="/register" element={<AnimatedRoute><Register /></AnimatedRoute>} />

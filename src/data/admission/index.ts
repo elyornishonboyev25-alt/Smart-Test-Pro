@@ -1,0 +1,107 @@
+import type { University, QSIndicators, AdmissionLesson, LessonPhase } from './types'
+import { universities, QS_EDITION } from './universities'
+import { lessons, lessonPhases } from './lessons'
+
+export type {
+  University,
+  QSIndicators,
+  AdmissionRequirement,
+  CostOfLiving,
+  StudentBody,
+  Campus,
+  UniversityBrand,
+  AdmissionLesson,
+  LessonBlock,
+  LessonLevel,
+  LessonPhase,
+} from './types'
+
+export { universities, QS_EDITION } from './universities'
+export { lessons, lessonPhases } from './lessons'
+
+export const LESSON_COUNT = lessons.length
+export const UNIVERSITY_COUNT = universities.length
+
+/* ------------------------------------------------------------------ */
+/*  University access — the single seam the whole hub reads through.    */
+/*  Today it returns the local QS 2026 dataset. To wire a live backend  */
+/*  sync later, this is the only function that needs to change.         */
+/* ------------------------------------------------------------------ */
+
+export function getUniversities(): University[] {
+  return [...universities].sort((a, b) => a.rank - b.rank)
+}
+
+export function getUniversityBySlug(slug: string): University | undefined {
+  return universities.find((u) => u.slug === slug)
+}
+
+/* ------------------------------------------------------------------ */
+/*  Lessons                                                             */
+/* ------------------------------------------------------------------ */
+
+export function getLessons(): AdmissionLesson[] {
+  return [...lessons].sort((a, b) => a.order - b.order)
+}
+
+export function getLessonBySlug(slug: string): AdmissionLesson | undefined {
+  return lessons.find((l) => l.slug === slug)
+}
+
+export function getPhaseById(id: string): LessonPhase | undefined {
+  return lessonPhases.find((p) => p.id === id)
+}
+
+export function getLessonsByPhase(phaseId: string): AdmissionLesson[] {
+  return getLessons().filter((l) => l.phaseId === phaseId)
+}
+
+export function getAdjacentLessons(slug: string): {
+  prev?: AdmissionLesson
+  next?: AdmissionLesson
+} {
+  const ordered = getLessons()
+  const index = ordered.findIndex((l) => l.slug === slug)
+  if (index === -1) return {}
+  return {
+    prev: index > 0 ? ordered[index - 1] : undefined,
+    next: index < ordered.length - 1 ? ordered[index + 1] : undefined,
+  }
+}
+
+export const totalLessonMinutes = lessons.reduce((sum, l) => sum + l.durationMin, 0)
+
+/* ------------------------------------------------------------------ */
+/*  QS indicator presentation — one source of truth for labels + order  */
+/*  so the ranking row and the detail page always agree.                */
+/* ------------------------------------------------------------------ */
+
+export type IndicatorMeta = {
+  key: keyof QSIndicators
+  label: string
+  short: string
+}
+
+// Full QS indicator order, exactly as QS lists them on a university profile.
+export const indicatorOrder: IndicatorMeta[] = [
+  { key: 'academicReputation', label: 'Academic Reputation', short: 'Academic Rep.' },
+  { key: 'employerReputation', label: 'Employer Reputation', short: 'Employer Rep.' },
+  { key: 'facultyStudentRatio', label: 'Faculty Student Ratio', short: 'Faculty/Student' },
+  { key: 'citationsPerFaculty', label: 'Citations per Faculty', short: 'Citations' },
+  { key: 'internationalFacultyRatio', label: 'International Faculty Ratio', short: 'Int’l Faculty' },
+  { key: 'internationalStudentRatio', label: 'International Student Ratio', short: 'Int’l Students' },
+  { key: 'internationalResearchNetwork', label: 'International Research Network', short: 'Research Network' },
+  { key: 'employmentOutcomes', label: 'Employment Outcomes', short: 'Employment' },
+  { key: 'internationalStudentDiversity', label: 'International Student Diversity', short: 'Student Diversity' },
+  { key: 'sustainability', label: 'Sustainability', short: 'Sustainability' },
+]
+
+// Only the indicators a given university actually has a value for, in QS order.
+export function presentIndicators(indicators: QSIndicators): { meta: IndicatorMeta; value: number }[] {
+  return indicatorOrder
+    .filter((meta) => typeof indicators[meta.key] === 'number')
+    .map((meta) => ({ meta, value: indicators[meta.key] as number }))
+}
+
+// The two headline metrics QS prints under each ranking row.
+export const rowIndicators: (keyof QSIndicators)[] = ['citationsPerFaculty', 'academicReputation']

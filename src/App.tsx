@@ -301,21 +301,29 @@ function App() {
                       <Route
                         path="/vocabulary"
                         element={
-                          <PremiumRoute showGuestBanner>
-                            <AnimatedRoute>
+                          <AnimatedRoute>
+                            <PremiumOnly
+                              title="Vocabulary Arena is Premium"
+                              description="Grow your word power with the Articles and My-Words vocabulary tracks on ProfAI Premium."
+                              perks={['Articles & My-Words tracks', 'Spaced practice activities', 'AI vocabulary help']}
+                            >
                               <Vocabulary />
-                            </AnimatedRoute>
-                          </PremiumRoute>
+                            </PremiumOnly>
+                          </AnimatedRoute>
                         }
                       />
                       <Route
                         path="/vocabulary/:track"
                         element={
-                          <PremiumRoute showGuestBanner>
-                            <AnimatedRoute>
+                          <AnimatedRoute>
+                            <PremiumOnly
+                              title="Vocabulary Arena is Premium"
+                              description="Grow your word power with the Articles and My-Words vocabulary tracks on ProfAI Premium."
+                              perks={['Articles & My-Words tracks', 'Spaced practice activities', 'AI vocabulary help']}
+                            >
                               <Vocabulary />
-                            </AnimatedRoute>
-                          </PremiumRoute>
+                            </PremiumOnly>
+                          </AnimatedRoute>
                         }
                       />
                       <Route

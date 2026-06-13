@@ -6,16 +6,16 @@ const sections = [
   {
     id: 'math',
     title: 'SAT Math',
-    description: 'Algebra, advanced math, and problem solving modules with speed-pressure practice.',
+    description: '150 full-length, digital-SAT-style Math mocks — adaptive modules with speed-pressure pacing.',
     icon: Calculator,
-    chips: ['algebra', 'problem solving', 'timed sets'],
+    chips: ['150 full mocks', 'algebra', 'advanced math'],
   },
   {
     id: 'reading-writing',
-    title: 'SAT Reading/Writing',
-    description: 'Evidence pairing, grammar control, and text revision strategy with precision analytics.',
+    title: 'SAT English',
+    description: '150 full-length Reading & Writing mocks — evidence, grammar, transitions and rhetoric.',
     icon: BookOpen,
-    chips: ['verbal', 'grammar', 'critical reading'],
+    chips: ['150 full mocks', 'grammar', 'critical reading'],
   },
 ] as const
 
@@ -29,11 +29,9 @@ export default function SAT() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#eaf2ff] via-[#edf4ff] to-[#e5edff] px-4 py-8 sm:px-6 lg:px-10">
       <div className="pointer-events-none absolute inset-0">
-        <div className="ambient-mesh" />
-        <div className="ambient-grid" />
-        <div className="ambient-noise" />
         <div className="absolute -left-16 top-10 h-72 w-72 rounded-full bg-blue-200/45 blur-3xl" />
         <div className="absolute bottom-[-8rem] right-0 h-96 w-96 rounded-full bg-indigo-200/35 blur-3xl" />
+        <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-sky-200/30 blur-3xl" />
       </div>
 
       <div className="relative mx-auto w-full max-w-6xl space-y-6">
@@ -59,17 +57,17 @@ export default function SAT() {
                   Choose your <span className="arena-title-accent-blue">SAT Arena</span>
                 </h1>
                 <p className="premium-section-subtitle">
-                  SAT now opens in two premium sections. Each section has its own independent workspace and analytics flow.
+                  Two full-mock arenas — 150 Math and 150 English digital-SAT mocks, unlocking on a rolling roadmap.
                 </p>
               </div>
 
               <div className="grid gap-2 sm:grid-cols-3 xl:w-[31rem]">
                 <div className="premium-stat-blue p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-700">SAT Sections</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-700">Full Mocks</p>
                   <p className="mt-1 text-3xl font-black text-slate-900">
-                    <CountUp value={2} />
+                    <CountUp value={300} />
                   </p>
-                  <p className="mt-1 text-xs text-slate-600">Independent premium pages</p>
+                  <p className="mt-1 text-xs text-slate-600">150 Math · 150 English</p>
                 </div>
                 <div className="premium-stat-blue p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-blue-700">Workflow</p>

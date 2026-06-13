@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart3, MessagesSquare, Mic, Users, Wand2 } from 'lucide-react'
+import { ArrowLeft, BarChart3, MessagesSquare, Mic, Users, Wand2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { computeSummary, selectUserSessions, useSpeakingStore } from '@/store/speakingStore'
 import { Reveal } from '@/components/fx'
@@ -21,6 +22,7 @@ const SECTIONS: Array<{ id: Section; label: string; icon: typeof Wand2; tag: str
 ]
 
 export default function SpeakingCommunity() {
+  const navigate = useNavigate()
   const user = useAuthStore((state: AuthState) => state.user)
   const sessions = useSpeakingStore((s) => s.sessions)
   const [section, setSection] = useState<Section>('ai')
@@ -48,6 +50,13 @@ export default function SpeakingCommunity() {
           <section className="premium-hero p-6 sm:p-8">
             <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_26rem] xl:items-center">
               <div>
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="mb-4 inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white/85 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.1em] text-red-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-[0_8px_18px_rgba(220,38,38,0.18)]"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back
+                </button>
                 <span className="premium-top-chip">
                   <Mic className="h-3.5 w-3.5" /> Speaking Studio
                 </span>

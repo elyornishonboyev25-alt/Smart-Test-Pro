@@ -1,10 +1,11 @@
 import { Link } from 'react-router-dom'
-import { Mail, Phone, Send, MapPin } from 'lucide-react'
+import { Mail, Phone, Send, MapPin, Instagram } from 'lucide-react'
 import { Reveal } from '@/components/fx'
 
 const socials = [
   { label: 'Email', href: 'mailto:elyornishonboyev000@gmail.com', icon: Mail },
-  { label: 'Telegram', href: 'https://t.me/nishonboyv7', icon: Send },
+  { label: 'Telegram', href: 'https://t.me/Prof_AI', icon: Send },
+  { label: 'Instagram', href: 'https://instagram.com/proff_ai', icon: Instagram },
   { label: 'Phone', href: 'tel:+998774813060', icon: Phone },
 ]
 
@@ -51,7 +52,10 @@ export default function Footer() {
               <li><Link to="/mock" className="transition-colors hover:text-red-700">Mock Arena</Link></li>
               <li><Link to="/speaking-community" className="transition-colors hover:text-red-700">Speaking Community</Link></li>
               <li><Link to="/shadowing-lab" className="transition-colors hover:text-red-700">Shadowing Lab</Link></li>
+              <li><Link to="/vocabulary" className="transition-colors hover:text-red-700">Vocabulary Arena</Link></li>
               <li><Link to="/articles" className="transition-colors hover:text-red-700">Articles</Link></li>
+              <li><Link to="/admission" className="transition-colors hover:text-red-700">Study Abroad</Link></li>
+              <li><Link to="/leaderboard" className="transition-colors hover:text-red-700">Leaderboard</Link></li>
               <li><Link to="/profile" className="transition-colors hover:text-red-700">Performance</Link></li>
               <li><Link to="/ielts" className="transition-colors hover:text-red-700">IELTS Modules</Link></li>
             </ul>
@@ -76,6 +80,28 @@ export default function Footer() {
               <li className="inline-flex items-center gap-2">
                 <Phone className="h-3.5 w-3.5 text-red-500" />
                 +998 77 481 30 60
+              </li>
+              <li>
+                <a
+                  href="https://t.me/Prof_AI"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 transition-colors hover:text-red-700"
+                >
+                  <Send className="h-3.5 w-3.5 text-red-500" />
+                  t.me/Prof_AI
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://instagram.com/proff_ai"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 transition-colors hover:text-red-700"
+                >
+                  <Instagram className="h-3.5 w-3.5 text-red-500" />
+                  @proff_ai
+                </a>
               </li>
               <li className="inline-flex items-center gap-2">
                 <MapPin className="h-3.5 w-3.5 text-red-500" />

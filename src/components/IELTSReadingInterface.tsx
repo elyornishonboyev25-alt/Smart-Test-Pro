@@ -2606,8 +2606,8 @@ export default function IELTSReadingInterface({
     </div>
   )
 
-  const renderLeftPanel = () => (
-    <div className="relative h-full">
+  const renderMarkTools = () => (
+    <>
       <AnimatePresence>
         {selectionRect && (
           <motion.div
@@ -2695,6 +2695,12 @@ export default function IELTSReadingInterface({
           </motion.div>
         )}
       </AnimatePresence>
+    </>
+  )
+
+  const renderLeftPanel = () => (
+    <div className="relative h-full">
+      {renderMarkTools()}
       <div
         id="reading-passage-pane"
         data-reading-markable="1"
@@ -3087,8 +3093,12 @@ export default function IELTSReadingInterface({
             </div>
           </div>
 
-          {/* Questions (single column) */}
-          <div className="space-y-6 pb-28">
+          {/* Questions (single column) — highlight/note enabled like the Reading panel */}
+          <div
+            className="space-y-6 pb-28"
+            data-reading-markable="1"
+            onClick={handleMarkPaneClick}
+          >
             {(currentSection?.groups ?? []).map((group, groupIndex) => renderListeningGroup(group, groupIndex))}
           </div>
         </div>
@@ -5347,7 +5357,10 @@ export default function IELTSReadingInterface({
           </header>
           <div className="flex-1 relative overflow-hidden" id="test-main-container">
             {isListening ? (
-              <div className="h-full overflow-hidden">{renderRightPanel()}</div>
+              <div className="relative h-full overflow-hidden">
+                {renderMarkTools()}
+                {renderRightPanel()}
+              </div>
             ) : (
               <SplitScreen left={renderLeftPanel()} right={renderRightPanel()} className="h-full" />
             )}

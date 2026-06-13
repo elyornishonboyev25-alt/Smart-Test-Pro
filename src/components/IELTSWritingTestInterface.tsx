@@ -172,7 +172,11 @@ function formatTime(seconds: number): string {
 function countWords(text: string): number {
   const trimmed = text.trim()
   if (!trimmed) return 0
-  return trimmed.split(/\s+/).length
+  // IELTS-style counting: a token only counts as a word if it contains at least
+  // one letter or digit. This ignores stray punctuation ( — • , - ... ) that the
+  // naive whitespace split would otherwise count as extra words, while keeping
+  // hyphenated words, contractions and numbers (e.g. "well-known", "don't", "2,000") as one.
+  return trimmed.split(/\s+/).filter((token) => /[\p{L}\p{N}]/u.test(token)).length
 }
 
 function bandLabel(band: number): string {

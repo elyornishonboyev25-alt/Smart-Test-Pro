@@ -68,8 +68,8 @@ function buildReadingAttempt(entry: ReadingAnalysisHistoryEntry): UnifiedAttempt
 function buildWritingAttempt(entry: WritingAnalysisEntry): UnifiedAttempt {
   return {
     id: `writing-${entry.attemptKey}`,
-    title: entry.testTitle,
-    category: `IELTS Writing · ${entry.taskType === 'task1' ? 'Task 1' : 'Task 2'}`,
+    title: `IELTS Writing ${entry.testTitle}`,
+    category: entry.taskType === 'task1' ? 'Task 1' : 'Task 2',
     savedAt: entry.savedAt,
     source: 'writing-local',
     score: `Band ${entry.overallBand.toFixed(1)}`,

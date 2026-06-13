@@ -47,6 +47,7 @@ const AnalyzeMistakes = lazy(() => import('@/pages/AnalyzeMistakes'))
 const AccountProfile = lazy(() => import('@/pages/AccountProfile'))
 const Login = lazy(() => import('@/pages/Login'))
 const Register = lazy(() => import('@/pages/Register'))
+const Onboarding = lazy(() => import('@/pages/Onboarding'))
 const Premium = lazy(() => import('@/pages/Premium'))
 const Leaderboard = lazy(() => import('@/pages/Leaderboard'))
 const IELTSWritingTests = lazy(() => import('@/pages/IELTSWritingTests'))
@@ -133,6 +134,7 @@ function App() {
     pathname === '/writing-lab' ||
     pathname === '/speaking-lab' ||
     pathname === '/shadowing-lab' ||
+    pathname === '/onboarding' ||
     pathname.startsWith('/articles') ||
     pathname.startsWith('/admission')
   const isCustomTestMode = /^\/tests\/[^/]+\/attempt$/.test(pathname)
@@ -505,6 +507,16 @@ function App() {
                       <Route path="/premium" element={<AnimatedRoute><Premium /></AnimatedRoute>} />
                       <Route path="/login" element={<AnimatedRoute><Login /></AnimatedRoute>} />
                       <Route path="/register" element={<AnimatedRoute><Register /></AnimatedRoute>} />
+                      <Route
+                        path="/onboarding"
+                        element={
+                          <ProtectedRoute>
+                            <AnimatedRoute>
+                              <Onboarding />
+                            </AnimatedRoute>
+                          </ProtectedRoute>
+                        }
+                      />
                       <Route path="*" element={<AnimatedRoute><NotFound /></AnimatedRoute>} />
                     </Routes>
                   </AnimatePresence>

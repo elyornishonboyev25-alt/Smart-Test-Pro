@@ -6,9 +6,8 @@ import { LogOut, Menu, UserRound, Zap } from 'lucide-react'
 import Button from '../Button'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { apiClient } from '@/lib/apiClient'
-import { useToastStore, type ToastState } from '@/store/toastStore'
-import { useRegisterModalStore, type RegisterModalState } from '@/store/registerModalStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
+import { setFlashToast } from '@/utils/authFlash'
 import { BrandLockup } from '@/components/brand/BrandLogo'
 import { isPremiumUser } from '@/utils/premiumAccess'
 import { CrownBadge } from '@/components/fx'
@@ -24,8 +23,6 @@ export function TopNavigation({ withSidebar = false }: { withSidebar?: boolean }
   const user = useAuthStore((state: AuthState) => state.user)
   const refreshToken = useAuthStore((state: AuthState) => state.refreshToken)
   const clearSession = useAuthStore((state: AuthState) => state.clearSession)
-  const pushToast = useToastStore((state: ToastState) => state.pushToast)
-  const openRegisterModal = useRegisterModalStore((state: RegisterModalState) => state.openRegisterModal)
 
   const xpValue = useMemo(() => (user ? Math.max(0, user.xp) : 0), [user])
   const onLanding = location.pathname === '/' || location.pathname === '/dashboard' || location.pathname === '/about'
@@ -75,14 +72,18 @@ export function TopNavigation({ withSidebar = false }: { withSidebar?: boolean }
       // Ignore network errors during logout.
     } finally {
       clearSession()
-      pushToast({
+      // Stash the confirmation so it survives the hard reload below.
+      setFlashToast({
         type: 'success',
         title: 'Signed out successfully',
         message: 'Your session has been closed safely.',
       })
-      setSigningOut(false)
-      setShowSignOutConfirm(false)
-      navigate('/login', { replace: true })
+      // Hard redirect (not a soft navigate): wipes ALL in-memory state and
+      // guarantees the /login route renders fresh. A soft navigation here left
+      // the page blank until a manual refresh, because clearing the user mid
+      // route-transition stalled AnimatePresence mode="wait" so the incoming
+      // /login route never mounted.
+      window.location.replace('/login')
     }
   }
 
@@ -250,7 +251,7 @@ export function TopNavigation({ withSidebar = false }: { withSidebar?: boolean }
               <Button
                 variant="primary"
                 className="cta-sheen interactive-lift rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-4 py-2 text-white hover:opacity-95"
-                onClick={() => openRegisterModal()}
+                onClick={() => handleNavigate('/register')}
               >
                 Get Started
               </Button>
@@ -312,10 +313,7 @@ export function TopNavigation({ withSidebar = false }: { withSidebar?: boolean }
                     <button className="rounded-lg px-3 py-2 text-left text-slate-800 transition-colors hover:bg-red-50 hover:text-red-800" onClick={() => handleNavigate('/login')}>Sign In</button>
                     <button
                       className="rounded-lg px-3 py-2 text-left text-slate-800 transition-colors hover:bg-red-50 hover:text-red-800"
-                      onClick={() => {
-                        setMobileOpen(false)
-                        openRegisterModal()
-                      }}
+                      onClick={() => handleNavigate('/register')}
                     >
                       Get Started
                     </button>

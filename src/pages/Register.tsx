@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -44,9 +44,13 @@ type AuthSessionPayload = {
 
 export default function Register() {
   const navigate = useNavigate()
+  const location = useLocation()
   const setSession = useAuthStore((state: AuthState) => state.setSession)
   const pushToast = useToastStore((state: ToastState) => state.pushToast)
   const { minimalMotion } = useMotionPreferences()
+
+  // Pre-fill the email when arriving from the "Account not found" CTA on /login.
+  const prefillEmail = (location.state as { email?: string } | null)?.email ?? ''
 
   const {
     register,
@@ -55,7 +59,7 @@ export default function Register() {
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      email: '',
+      email: prefillEmail,
       password: '',
       confirmPassword: '',
     },
@@ -78,7 +82,8 @@ export default function Register() {
         title: 'Account created',
         message: 'Your ProfAI account is ready.',
       })
-      navigate('/dashboard', { replace: true })
+      // Brand-new accounts go straight to the guided study-plan setup.
+      navigate('/onboarding', { replace: true })
     } catch (error) {
       pushToast({
         type: 'error',

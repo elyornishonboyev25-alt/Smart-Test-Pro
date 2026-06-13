@@ -16,6 +16,20 @@ type AuthResponse = {
   refreshToken: string
 }
 
+/** Error thrown for non-OK API responses — carries the HTTP status and an
+ *  optional machine-readable `code` (e.g. 'ACCOUNT_NOT_FOUND') so callers can
+ *  branch on the exact failure without string-matching the message. */
+export class ApiError extends Error {
+  status: number
+  code?: string
+  constructor(message: string, status: number, code?: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+    this.code = code
+  }
+}
+
 let refreshInFlight: Promise<boolean> | null = null
 
 async function ensureRefreshed(refreshToken: string): Promise<boolean> {
@@ -67,7 +81,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({ message: 'Unexpected API error.' }))
-    throw new Error(payload.message ?? 'API request failed.')
+    throw new ApiError(payload.message ?? 'API request failed.', response.status, payload.code)
   }
 
   if (response.status === 204) {

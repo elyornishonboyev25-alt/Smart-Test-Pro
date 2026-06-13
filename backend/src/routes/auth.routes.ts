@@ -43,6 +43,10 @@ const logoutSchema = z.object({
 
 const googleAuthSchema = z.object({
   idToken: z.string().min(1),
+  // When false (sign-in page) we refuse to create a brand-new account — the
+  // user must register first. Defaults to true so the register page still
+  // creates an account on first Google sign-up.
+  allowCreate: z.boolean().optional().default(true),
 })
 
 const resolvedGoogleClientId = (env.GOOGLE_CLIENT_ID || env.VITE_GOOGLE_CLIENT_ID || '').trim()
@@ -217,12 +221,18 @@ router.post(
     })
 
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials.' })
+      return res.status(404).json({
+        message: 'No account found for this email. Create an account to get started.',
+        code: 'ACCOUNT_NOT_FOUND',
+      })
     }
 
     const passwordValid = await verifyPassword(password, user.passwordHash)
     if (!passwordValid) {
-      return res.status(401).json({ message: 'Invalid credentials.' })
+      return res.status(401).json({
+        message: 'Incorrect password. Please try again.',
+        code: 'INVALID_PASSWORD',
+      })
     }
 
     const tokens = await issueAuthTokens({
@@ -244,7 +254,7 @@ router.post(
   authRateLimit,
   validateBody(googleAuthSchema),
   asyncHandler(async (req, res) => {
-    const { idToken } = req.body
+    const { idToken, allowCreate } = req.body
 
     let identity: { email: string; fullName: string }
     try {
@@ -268,6 +278,13 @@ router.post(
         nickname: true,
       },
     })
+
+    if (!existingUser && !allowCreate) {
+      return res.status(404).json({
+        message: 'No account found for this Google email. Create an account to get started.',
+        code: 'ACCOUNT_NOT_FOUND',
+      })
+    }
 
     const user =
       existingUser ??

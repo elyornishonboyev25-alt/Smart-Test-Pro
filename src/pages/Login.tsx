@@ -1,16 +1,17 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
-import { Flame, Loader2, Lock, Mail, ShieldCheck, Sparkles, Star } from 'lucide-react'
-import { apiClient } from '@/lib/apiClient'
+import { Flame, Loader2, Lock, Mail, ShieldCheck, Sparkles, Star, UserPlus } from 'lucide-react'
+import { apiClient, ApiError } from '@/lib/apiClient'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useToastStore, type ToastState } from '@/store/toastStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { BrandMark } from '@/components/brand/BrandLogo'
 import GoogleAuthButton from '@/components/auth/GoogleAuthButton'
+import { takeFlashToast } from '@/utils/authFlash'
 
 const loginSchema = z.object({
   email: z
@@ -49,6 +50,16 @@ export default function Login() {
   const setSession = useAuthStore((state: AuthState) => state.setSession)
   const pushToast = useToastStore((state: ToastState) => state.pushToast)
   const { minimalMotion } = useMotionPreferences()
+  // Set when sign-in fails because the email isn't registered yet — drives the
+  // inline "create an account" call-to-action below. `email` is omitted for the
+  // Google path (we don't decode the token client-side).
+  const [notFound, setNotFound] = useState<{ email?: string } | null>(null)
+
+  // Show the one-shot toast stashed before a hard redirect (e.g. after logout).
+  useEffect(() => {
+    const flash = takeFlashToast()
+    if (flash) pushToast(flash)
+  }, [pushToast])
 
   const redirectPath = useMemo(() => {
     const state = location.state as { from?: { pathname?: string } } | null
@@ -68,16 +79,18 @@ export default function Login() {
   })
 
   const onSubmit = async (values: LoginFormValues) => {
+    const email = values.email.trim().toLowerCase()
     try {
       const payload = await apiClient.post<AuthSessionPayload>(
         '/auth/login',
         {
-          email: values.email.trim().toLowerCase(),
+          email,
           password: values.password,
         },
         { auth: false },
       )
 
+      setNotFound(null)
       setSession(payload)
       pushToast({
         type: 'success',
@@ -86,6 +99,12 @@ export default function Login() {
       })
       navigate(redirectPath, { replace: true })
     } catch (error) {
+      // Unregistered email → show an explicit "create account" call-to-action
+      // instead of a generic error toast.
+      if (error instanceof ApiError && error.code === 'ACCOUNT_NOT_FOUND') {
+        setNotFound({ email })
+        return
+      }
       pushToast({
         type: 'error',
         title: 'Sign in failed',
@@ -98,10 +117,11 @@ export default function Login() {
     try {
       const payload = await apiClient.post<AuthSessionPayload>(
         '/auth/google',
-        { idToken },
+        { idToken, allowCreate: false },
         { auth: false },
       )
 
+      setNotFound(null)
       setSession(payload)
       pushToast({
         type: 'success',
@@ -113,6 +133,12 @@ export default function Login() {
       // behaviour after the Google popup closes).
       window.location.assign(redirectPath)
     } catch (error) {
+      // No account yet for this Google email — guide them to register instead
+      // of silently creating one from the sign-in screen.
+      if (error instanceof ApiError && error.code === 'ACCOUNT_NOT_FOUND') {
+        setNotFound({})
+        return
+      }
       const message = error instanceof Error ? error.message : 'Google sign-in failed'
       pushToast({
         type: 'error',
@@ -180,6 +206,54 @@ export default function Login() {
               Continue your saved study plan, XP, and streak.
             </p>
           </div>
+
+          {/* Account-not-found call-to-action */}
+          {notFound ? (
+            <motion.div
+              initial={minimalMotion ? false : { opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: minimalMotion ? 0.12 : 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="mb-4 overflow-hidden rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/80 p-4 text-left shadow-[0_10px_24px_rgba(217,119,6,0.12)]"
+            >
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                  <UserPlus className="h-4 w-4" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-black text-slate-900">Account not found</p>
+                  <p className="mt-0.5 text-[13px] leading-5 text-slate-600">
+                    {notFound.email ? (
+                      <>
+                        We couldn&apos;t find an account for{' '}
+                        <span className="font-bold text-slate-800">{notFound.email}</span>. Create one to get started.
+                      </>
+                    ) : (
+                      <>We couldn&apos;t find an account for that Google email. Create one to get started.</>
+                    )}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate('/register', notFound.email ? { state: { email: notFound.email } } : undefined)
+                      }
+                      className="cta-sheen inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-4 py-2 text-sm font-bold text-white shadow-[0_10px_22px_rgba(220,38,38,0.28)] transition hover:opacity-95"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Create an account
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNotFound(null)}
+                      className="inline-flex items-center rounded-xl border border-amber-200 bg-white px-4 py-2 text-sm font-bold text-amber-700 transition hover:bg-amber-50"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5" aria-label="Login form">

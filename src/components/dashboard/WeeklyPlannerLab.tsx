@@ -183,9 +183,12 @@ export default function WeeklyPlannerLab() {
 
     const storedProfile = loadOnboardingProfile(user?.id)
     if (!storedProfile) {
+      // Plan setup now lives on the dedicated /onboarding page (a full
+      // multi-step quiz) instead of an inline modal — we surface a CTA in the
+      // render below rather than auto-opening a dialog over the dashboard.
       setProfile(null)
       setPlan(null)
-      setShowOnboarding(true)
+      setShowOnboarding(false)
       return
     }
     const storedPlan = loadWeeklyPlan(user?.id)
@@ -1111,8 +1114,28 @@ export default function WeeklyPlannerLab() {
           </div>
         </>
       ) : (
-        <div className="mt-4 rounded-2xl border border-red-100 bg-white p-4 text-sm text-slate-500">
-          Planner setup is required before using this section.
+        <div className="mt-4 overflow-hidden rounded-2xl border border-red-100 bg-gradient-to-br from-white to-red-50/60 p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-rose-600 text-white shadow-[0_12px_24px_rgba(220,38,38,0.3)]">
+                <Sparkles className="h-6 w-6" />
+              </span>
+              <div>
+                <p className="text-lg font-black text-slate-900">Create your personalized study plan</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  Answer a few quick questions and we&apos;ll build a rolling 7-day roadmap to your target score.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/onboarding')}
+              className="cta-sheen inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 px-5 py-3 text-sm font-black text-white shadow-[0_12px_24px_rgba(220,38,38,0.32)] transition hover:shadow-[0_16px_32px_rgba(220,38,38,0.42)]"
+            >
+              <Sparkles className="h-4 w-4" />
+              Start setup
+            </button>
+          </div>
         </div>
       )}
 

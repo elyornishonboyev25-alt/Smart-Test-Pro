@@ -8,6 +8,7 @@ import { AnimatedBackground } from '@/components/AnimatedBackground'
 import Footer from '@/components/Footer'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import PremiumRoute from '@/components/auth/PremiumRoute'
+import PremiumOnly from '@/components/premium/PremiumOnly'
 import { ToastViewport } from '@/components/common/ToastViewport'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import RegisterModal from '@/components/auth/RegisterModal'
@@ -498,11 +499,76 @@ function App() {
                           </ProtectedRoute>
                         }
                       />
-                      <Route path="/articles" element={<AnimatedRoute><Articles /></AnimatedRoute>} />
-                      <Route path="/articles/:slug" element={<AnimatedRoute><ArticleReader /></AnimatedRoute>} />
-                      <Route path="/shadowing-lab" element={<AnimatedRoute><ShadowingLab /></AnimatedRoute>} />
-                      <Route path="/podcast" element={<AnimatedRoute><Podcast /></AnimatedRoute>} />
-                      <Route path="/admission" element={<AnimatedRoute><Admission /></AnimatedRoute>} />
+                      <Route
+                        path="/articles"
+                        element={
+                          <AnimatedRoute>
+                            <PremiumOnly
+                              title="Reading Library is Premium"
+                              description="A curated library of articles with a professional reader and AI vocabulary help is part of ProfAI Premium."
+                              perks={['Curated reading library', 'Highlight, notes & contrast modes', 'Ask-AI vocabulary help']}
+                            >
+                              <Articles />
+                            </PremiumOnly>
+                          </AnimatedRoute>
+                        }
+                      />
+                      <Route
+                        path="/articles/:slug"
+                        element={
+                          <AnimatedRoute>
+                            <PremiumOnly
+                              title="Reading Library is Premium"
+                              description="Open the full professional reader with AI vocabulary help on ProfAI Premium."
+                              perks={['Professional reader', 'Highlight & notes', 'Ask-AI vocabulary help']}
+                            >
+                              <ArticleReader />
+                            </PremiumOnly>
+                          </AnimatedRoute>
+                        }
+                      />
+                      <Route
+                        path="/shadowing-lab"
+                        element={
+                          <AnimatedRoute>
+                            <PremiumOnly
+                              title="Shadowing Lab is Premium"
+                              description="Train pronunciation and fluency with guided shadowing drills on ProfAI Premium."
+                              perks={['Guided 4-step shadowing', 'Native-speed clips', 'Pronunciation & rhythm focus']}
+                            >
+                              <ShadowingLab />
+                            </PremiumOnly>
+                          </AnimatedRoute>
+                        }
+                      />
+                      <Route
+                        path="/podcast"
+                        element={
+                          <AnimatedRoute>
+                            <PremiumOnly
+                              title="English Podcasts are Premium"
+                              description="Build listening with subtitled English podcasts, speed control and A-B repeat on ProfAI Premium."
+                              perks={['English captions', 'Adjustable playback speed', 'A-B loop repeat']}
+                            >
+                              <Podcast />
+                            </PremiumOnly>
+                          </AnimatedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admission"
+                        element={
+                          <AnimatedRoute>
+                            <PremiumOnly
+                              title="Admission Hub is Premium"
+                              description="Study-abroad lessons and the QS university explorer are part of ProfAI Premium."
+                              perks={['30+ study-abroad lessons', 'QS university rankings explorer', 'Scholarship & application guidance']}
+                            >
+                              <Admission />
+                            </PremiumOnly>
+                          </AnimatedRoute>
+                        }
+                      />
                       <Route path="/admission/lessons" element={<AnimatedRoute><AdmissionLessons /></AnimatedRoute>} />
                       <Route path="/admission/lessons/:slug" element={<AnimatedRoute><AdmissionLesson /></AnimatedRoute>} />
                       <Route path="/admission/universities" element={<AnimatedRoute><AdmissionUniversities /></AnimatedRoute>} />

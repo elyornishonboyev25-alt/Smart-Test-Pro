@@ -1,5 +1,6 @@
 const PREMIUM_EMAIL_ALLOWLIST = new Set<string>([
   'elyornishonboyev000@gmail.com',
+  'nishonboyv7@gmail.com',
 ])
 
 export function isPremiumUser(input: { role: 'USER' | 'ADMIN'; email: string }) {

@@ -10,12 +10,26 @@
  */
 export const ENFORCE_PREMIUM = false
 
+/**
+ * Gate the premium-only content sections (Admission, Shadowing, Podcast,
+ * Articles, Vocabulary, …) behind the PremiumGate teaser for non-premium
+ * accounts. Independent of ENFORCE_PREMIUM (which drives the older
+ * attempt-based gate). Flip to `false` to instantly reopen every section.
+ */
+export const ENFORCE_CONTENT_PREMIUM = true
+
 /** Free users get this many test attempts before the upgrade prompt appears. */
 export const FREE_ATTEMPT_LIMIT = 4
 
 export type PremiumTier = 'FREE' | 'BASIC' | 'STANDARD' | 'PRO' | 'UNLIMITED'
 
-const PREMIUM_EMAIL_ALLOWLIST = new Set<string>(['elyornishonboyev000@gmail.com'])
+// Accounts treated as genuine premium owners. The owner activates a paying
+// learner by adding their Gmail here, OR by setting their DB role to ADMIN
+// (no redeploy needed).
+const PREMIUM_EMAIL_ALLOWLIST = new Set<string>([
+  'elyornishonboyev000@gmail.com',
+  'nishonboyv7@gmail.com',
+])
 
 type PremiumInput = { email?: string | null; premium?: boolean | null; role?: string | null } | null | undefined
 

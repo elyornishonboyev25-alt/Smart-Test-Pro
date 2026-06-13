@@ -12,6 +12,8 @@ type PremiumGateProps = {
   eyebrow?: string
   /** Small bullet list of what premium unlocks here. */
   perks?: string[]
+  /** Full-page teaser (no rounded card frame); overlay card sits near the top. */
+  fullBleed?: boolean
   children: ReactNode
   className?: string
 }
@@ -28,6 +30,7 @@ export default function PremiumGate({
   description = 'This section is part of ProfAI Premium. Subscribe to unlock full access.',
   eyebrow = 'Premium only',
   perks,
+  fullBleed = false,
   children,
   className = '',
 }: PremiumGateProps) {
@@ -37,14 +40,18 @@ export default function PremiumGate({
   if (!locked) return <>{children}</>
 
   return (
-    <div className={`relative isolate overflow-hidden rounded-[1.6rem] ${className}`}>
+    <div className={`${fullBleed ? 'relative' : 'relative isolate overflow-hidden rounded-[1.6rem]'} ${className}`}>
       {/* Real feature, teased behind a blur */}
       <div className="pointer-events-none select-none blur-[7px] saturate-[0.85] [filter:blur(7px)_brightness(0.98)]" aria-hidden>
         {children}
       </div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 z-10 flex items-center justify-center bg-[linear-gradient(160deg,rgba(255,255,255,0.62),rgba(255,244,245,0.74))] p-4 backdrop-blur-[2px]">
+      <div
+        className={`absolute inset-0 z-10 flex justify-center bg-[linear-gradient(160deg,rgba(255,255,255,0.62),rgba(255,244,245,0.74))] p-4 backdrop-blur-[2px] ${
+          fullBleed ? 'items-start pt-20 sm:pt-28' : 'items-center'
+        }`}
+      >
         <motion.div
           initial={minimalMotion ? false : { opacity: 0, y: 16, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}

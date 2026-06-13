@@ -7,15 +7,20 @@ import {
   CircleDollarSign,
   ExternalLink,
   GraduationCap,
+  Globe2,
+  Landmark,
   Leaf,
   MapPin,
+  Radar as RadarIcon,
   Sparkles,
   Star,
+  TrendingUp,
   Trophy,
   Users,
 } from 'lucide-react'
 import { AmbientBackdrop, CountUp, Reveal } from '@/components/fx'
 import UniversityLogo from '@/components/admission/UniversityLogo'
+import UniversityRadar from '@/components/admission/UniversityRadar'
 import { getUniversityBySlug, presentIndicators, QS_EDITION } from '@/data/admission'
 import type { CostOfLiving } from '@/data/admission'
 
@@ -59,6 +64,15 @@ export default function AdmissionUniversity() {
   const totalCost = cost ? cost.accommodation + cost.food + cost.transport + cost.utilities : 0
   const hasDetailedStudents = students && typeof students.undergraduate === 'number'
 
+  const keyFacts: { icon: typeof Landmark; label: string; value: string }[] = [
+    { icon: CalendarDays, label: 'Founded', value: String(u.founded) },
+    { icon: Landmark, label: 'Institution', value: u.type },
+    ...(students ? [{ icon: Users, label: 'Students', value: `${hasDetailedStudents ? '' : '≈ '}${students.total.toLocaleString()}` }] : []),
+    ...(students && typeof students.international === 'number'
+      ? [{ icon: Globe2, label: 'International', value: `${hasDetailedStudents ? '' : '≈ '}${students.international.toLocaleString()}` }]
+      : []),
+  ]
+
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-8 sm:px-6 lg:px-10">
       <AmbientBackdrop variant="red" />
@@ -84,17 +98,19 @@ export default function AdmissionUniversity() {
               </button>
 
               <div className="mt-6 flex flex-col gap-5 sm:flex-row sm:items-center">
-                <UniversityLogo brand={u.brand} size={96} rounded="1.5rem" className="ring-1 ring-white/20" />
+                <UniversityLogo id={u.id} brand={u.brand} size={104} rounded="1.5rem" />
                 <div className="min-w-0">
+                  <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[12px] font-bold backdrop-blur">
+                    <Trophy className="h-3.5 w-3.5" />
+                    #{u.rank} · {QS_EDITION}
+                  </div>
                   <h1 className="text-3xl font-black leading-tight tracking-tight sm:text-4xl">{u.name}</h1>
                   <p className="mt-2 inline-flex items-center gap-1.5 text-sm font-medium text-white/80">
                     <MapPin className="h-4 w-4" />
                     {u.countryEmoji} {u.city}, {u.country}
                   </p>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-white/15 px-3 py-1 text-[12px] font-semibold text-white/90">
-                      {u.type}
-                    </span>
+                    <span className="rounded-full bg-white/15 px-3 py-1 text-[12px] font-semibold text-white/90">{u.type}</span>
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-[12px] font-semibold text-white/90">
                       <CalendarDays className="h-3.5 w-3.5" />
                       Founded {u.founded}
@@ -103,7 +119,6 @@ export default function AdmissionUniversity() {
                       href={u.website}
                       target="_blank"
                       rel="noreferrer noopener"
-                      onClick={(e) => e.stopPropagation()}
                       className="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1 text-[12px] font-bold text-slate-900 transition hover:bg-white/90"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
@@ -123,23 +138,21 @@ export default function AdmissionUniversity() {
                 <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">Overall Score</p>
                   <p className="mt-1 text-3xl font-black">
-                    <CountUp value={u.overallScore} />
+                    <CountUp value={u.overallScore} decimals={Number.isInteger(u.overallScore) ? 0 : 1} />
                   </p>
                   <p className="text-[12px] font-medium text-white/70">out of 100</p>
                 </div>
                 <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
-                    {typeof u.subjectRank === 'number' ? 'Subject Ranking' : 'Students'}
+                    {typeof u.subjectRank === 'number' ? 'Subject Ranking' : 'Citations / Faculty'}
                   </p>
                   <p className="mt-1 text-3xl font-black">
                     {typeof u.subjectRank === 'number'
                       ? `#${u.subjectRank}`
-                      : students
-                        ? `${(students.total / 1000).toFixed(students.total >= 10000 ? 0 : 1)}k`
-                        : '—'}
+                      : (u.indicators.citationsPerFaculty ?? '—')}
                   </p>
                   <p className="text-[12px] font-medium text-white/70">
-                    {typeof u.subjectRank === 'number' ? 'QS WUR by Subject' : 'Enrolled'}
+                    {typeof u.subjectRank === 'number' ? 'QS WUR by Subject' : 'QS indicator'}
                   </p>
                 </div>
               </div>
@@ -147,19 +160,47 @@ export default function AdmissionUniversity() {
           </section>
         </Reveal>
 
-        {/* ----------------------------- About ----------------------------- */}
-        <Reveal delay={0.04}>
-          <section className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] sm:p-8">
-            <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: accent }}>
-                <GraduationCap className="h-4 w-4" />
-              </span>
-              About {u.shortName}
-            </h2>
-            <p className="mt-4 text-[15px] leading-7 text-slate-600">{u.about}</p>
-            <p className="mt-3 text-[14px] font-semibold italic text-slate-500">{u.tagline}</p>
-          </section>
-        </Reveal>
+        {/* ----------------------- About + Radar ----------------------- */}
+        <div className="grid gap-6 lg:grid-cols-[1.25fr_1fr]">
+          <Reveal delay={0.04} className="h-full">
+            <section className="flex h-full flex-col rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] sm:p-8">
+              <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: accent }}>
+                  <GraduationCap className="h-4 w-4" />
+                </span>
+                About {u.shortName}
+              </h2>
+              <p className="mt-4 flex-1 text-[15px] leading-7 text-slate-600">{u.about}</p>
+              <p className="mt-3 text-[14px] font-semibold italic text-slate-500">{u.tagline}</p>
+
+              {/* Key facts */}
+              <div className="mt-5 grid grid-cols-2 gap-3 border-t border-slate-100 pt-5 sm:grid-cols-4">
+                {keyFacts.map((fact) => (
+                  <div key={fact.label} className="rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                    <fact.icon className="h-4 w-4" style={{ color: accent }} />
+                    <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">{fact.label}</p>
+                    <p className="mt-0.5 text-[13px] font-black leading-snug text-slate-900">{fact.value}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </Reveal>
+
+          <Reveal delay={0.06} className="h-full">
+            <section className="flex h-full flex-col rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)]">
+              <h2 className="flex items-center gap-2 text-base font-black tracking-tight text-slate-900">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-white" style={{ background: accent }}>
+                  <RadarIcon className="h-3.5 w-3.5" />
+                </span>
+                QS Performance
+              </h2>
+              <div className="mt-2 h-64 w-full sm:h-72">
+                <UniversityRadar indicators={u.indicators} accent={accent} />
+              </div>
+              <p className="text-center text-[11px] font-medium text-slate-400">All indicators scored out of 100</p>
+            </section>
+          </Reveal>
+        </div>
 
         {/* ----------------------- Rankings & Ratings ----------------------- */}
         <Reveal delay={0.04}>
@@ -175,10 +216,14 @@ export default function AdmissionUniversity() {
               <RankCard icon={Trophy} label="QS World University Rankings" value={`#${u.rank}`} accent={accent} />
               {typeof u.subjectRank === 'number' ? (
                 <RankCard icon={Star} label="QS WUR Ranking by Subject" value={`#${u.subjectRank}`} accent={accent} />
-              ) : null}
+              ) : (
+                <RankCard icon={Award} label="Overall Score" value={String(u.overallScore)} accent={accent} />
+              )}
               {typeof u.sustainabilityRank === 'number' ? (
                 <RankCard icon={Leaf} label="QS Sustainability Ranking" value={`#${u.sustainabilityRank}`} accent={accent} />
-              ) : null}
+              ) : (
+                <RankCard icon={Globe2} label="Location" value={`${u.countryEmoji} ${u.city}`} accent={accent} />
+              )}
             </div>
 
             {/* Indicator breakdown */}
@@ -197,15 +242,18 @@ export default function AdmissionUniversity() {
               ))}
             </div>
 
-            {/* Rank history timeline */}
+            {/* Rank over time */}
             {u.rankHistory && u.rankHistory.length > 1 ? (
               <div className="mt-8">
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-slate-400">Rank over time</h3>
-                <div className="mt-4 flex flex-wrap items-end gap-x-3 gap-y-4">
+                <h3 className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-[0.12em] text-slate-400">
+                  <TrendingUp className="h-4 w-4" style={{ color: accent }} />
+                  QS rank over time
+                </h3>
+                <div className="mt-4 flex flex-wrap gap-x-2.5 gap-y-3">
                   {u.rankHistory.map((point) => (
                     <div key={point.year} className="flex flex-col items-center gap-1.5">
                       <span
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[13px] font-black text-white"
+                        className="inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg px-1 text-[13px] font-black text-white"
                         style={{ background: accent }}
                       >
                         {point.rank}
@@ -214,6 +262,10 @@ export default function AdmissionUniversity() {
                     </div>
                   ))}
                 </div>
+                <p className="mt-3 text-[12px] font-medium text-slate-500">
+                  A decade-plus at <span className="font-bold" style={{ color: accent }}>#{u.rank}</span> — among the most
+                  stable records in global higher education.
+                </p>
               </div>
             ) : null}
           </section>
@@ -230,12 +282,9 @@ export default function AdmissionUniversity() {
                 Admission · Bachelor
               </h2>
               <p className="mt-2 text-[13px] text-slate-500">{u.admission.note}</p>
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {u.admission.bachelor.map((req) => (
-                  <div
-                    key={req.label}
-                    className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-center"
-                  >
+                  <div key={req.label} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-center">
                     <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">{req.label}</p>
                     <p className="mt-1.5 text-xl font-black text-slate-900">{req.value}</p>
                   </div>
@@ -245,8 +294,68 @@ export default function AdmissionUniversity() {
           </Reveal>
         ) : null}
 
-        {/* ----------------------- Students & Staff ----------------------- */}
-        {students ? (
+        {/* ----------------------- Cost of Living + Campus ----------------------- */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {cost ? (
+            <Reveal delay={0.04} className="h-full">
+              <section className="flex h-full flex-col rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] sm:p-8">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: accent }}>
+                      <CircleDollarSign className="h-4 w-4" />
+                    </span>
+                    Cost of Living
+                  </h2>
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[12px] font-bold text-slate-700">
+                    ≈ {money(totalCost, cost.currency)} / yr
+                  </span>
+                </div>
+                <div className="mt-5 grid flex-1 grid-cols-2 gap-3">
+                  {COST_LABELS.map(({ key, label, icon: Icon }) => (
+                    <div key={key} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                      <Icon className="h-5 w-5" style={{ color: accent }} />
+                      <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">{label}</p>
+                      <p className="mt-0.5 text-lg font-black text-slate-900">{money(cost[key], cost.currency)}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-[12px] text-slate-400">Approximate annual amounts (USD) for an international student.</p>
+              </section>
+            </Reveal>
+          ) : null}
+
+          {u.campus ? (
+            <Reveal delay={0.06} className="h-full">
+              <section className="flex h-full flex-col rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] sm:p-8">
+                <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: accent }}>
+                    <Building2 className="h-4 w-4" />
+                  </span>
+                  Campus location
+                </h2>
+                <div className="mt-5 flex flex-1 flex-col justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                  <div>
+                    <p className="text-base font-black text-slate-900">{u.campus.name}</p>
+                    <p className="mt-1 text-[13px] text-slate-500">{u.campus.address}</p>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(u.campus.mapsQuery)}`}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex w-fit items-center gap-1.5 rounded-full px-4 py-2 text-[13px] font-bold text-white"
+                    style={{ background: accent }}
+                  >
+                    <MapPin className="h-4 w-4" />
+                    Open in Maps
+                  </a>
+                </div>
+              </section>
+            </Reveal>
+          ) : null}
+        </div>
+
+        {/* ----------------------- Students & Staff (detailed) ----------------------- */}
+        {hasDetailedStudents && students ? (
           <Reveal delay={0.04}>
             <section className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] sm:p-8">
               <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
@@ -255,109 +364,31 @@ export default function AdmissionUniversity() {
                 </span>
                 Students &amp; Staff
               </h2>
-
-              {hasDetailedStudents ? (
-                <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                  <StudentStat
-                    label="Total students"
-                    total={students.total}
-                    parts={[
-                      { label: 'Undergraduate', value: students.undergraduate ?? 0, color: accent },
-                      { label: 'Postgraduate', value: students.postgraduate ?? 0, color: '#94a3b8' },
-                    ]}
-                  />
-                  <StudentStat
-                    label="International students"
-                    total={students.international ?? 0}
-                    parts={[
-                      { label: 'Undergraduate', value: students.internationalUndergraduate ?? 0, color: accent },
-                      { label: 'Postgraduate', value: students.internationalPostgraduate ?? 0, color: '#94a3b8' },
-                    ]}
-                  />
-                  <StudentStat
-                    label="Total faculty staff"
-                    total={students.facultyStaff ?? 0}
-                    parts={[
-                      {
-                        label: 'Domestic',
-                        value: students.domesticStaffPct ?? 0,
-                        color: accent,
-                        isPct: true,
-                      },
-                      {
-                        label: 'International',
-                        value: students.internationalStaffPct ?? 0,
-                        color: '#94a3b8',
-                        isPct: true,
-                      },
-                    ]}
-                  />
-                </div>
-              ) : (
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Total students</p>
-                  <p className="mt-1 text-3xl font-black text-slate-900">≈ {students.total.toLocaleString()}</p>
-                  <p className="mt-1 text-[12px] text-slate-500">Approximate enrolment across all levels.</p>
-                </div>
-              )}
-            </section>
-          </Reveal>
-        ) : null}
-
-        {/* ----------------------- Cost of Living ----------------------- */}
-        {cost ? (
-          <Reveal delay={0.04}>
-            <section className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] sm:p-8">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: accent }}>
-                    <CircleDollarSign className="h-4 w-4" />
-                  </span>
-                  Cost of Living
-                </h2>
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-[12px] font-bold text-slate-700">
-                  ≈ {money(totalCost, cost.currency)} / year
-                </span>
-              </div>
-              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {COST_LABELS.map(({ key, label, icon: Icon }) => (
-                  <div key={key} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
-                    <Icon className="h-5 w-5" style={{ color: accent }} />
-                    <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">{label}</p>
-                    <p className="mt-0.5 text-lg font-black text-slate-900">{money(cost[key], cost.currency)}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-3 text-[12px] text-slate-400">Approximate annual amounts for an international student.</p>
-            </section>
-          </Reveal>
-        ) : null}
-
-        {/* ----------------------- Campus ----------------------- */}
-        {u.campus ? (
-          <Reveal delay={0.04}>
-            <section className="rounded-[1.6rem] border border-slate-200 bg-white p-6 shadow-[0_14px_36px_rgba(15,23,42,0.05)] sm:p-8">
-              <h2 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-900">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-white" style={{ background: accent }}>
-                  <Building2 className="h-4 w-4" />
-                </span>
-                Campus location
-              </h2>
-              <div className="mt-5 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-base font-black text-slate-900">{u.campus.name}</p>
-                  <p className="mt-1 text-[13px] text-slate-500">{u.campus.address}</p>
-                </div>
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(u.campus.mapsQuery)}`}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="inline-flex items-center gap-1.5 self-start rounded-full px-4 py-2 text-[13px] font-bold text-white sm:self-center"
-                  style={{ background: accent }}
-                >
-                  <MapPin className="h-4 w-4" />
-                  Open in Maps
-                </a>
+              <div className="mt-5 grid gap-4 sm:grid-cols-3">
+                <StudentStat
+                  label="Total students"
+                  total={students.total}
+                  parts={[
+                    { label: 'Undergraduate', value: students.undergraduate ?? 0, color: accent },
+                    { label: 'Postgraduate', value: students.postgraduate ?? 0, color: '#94a3b8' },
+                  ]}
+                />
+                <StudentStat
+                  label="International students"
+                  total={students.international ?? 0}
+                  parts={[
+                    { label: 'Undergraduate', value: students.internationalUndergraduate ?? 0, color: accent },
+                    { label: 'Postgraduate', value: students.internationalPostgraduate ?? 0, color: '#94a3b8' },
+                  ]}
+                />
+                <StudentStat
+                  label="Total faculty staff"
+                  total={students.facultyStaff ?? 0}
+                  parts={[
+                    { label: 'Domestic', value: students.domesticStaffPct ?? 0, color: accent, isPct: true },
+                    { label: 'International', value: students.internationalStaffPct ?? 0, color: '#94a3b8', isPct: true },
+                  ]}
+                />
               </div>
             </section>
           </Reveal>

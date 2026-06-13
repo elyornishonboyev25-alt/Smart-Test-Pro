@@ -131,7 +131,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 100,
       internationalStudentRatio: 100,
     },
-    students: { total: 22000 },
+    students: { total: 22000, international: 11000 },
+    admission: {
+      bachelor: [
+        { label: 'A-Level', value: 'A*A*A' },
+        { label: 'IB', value: '38+' },
+        { label: 'IELTS', value: '6.5+' },
+        { label: 'TOEFL iBT', value: '92+' },
+      ],
+      note: 'Indicative entry standard for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 16800, food: 4200, transport: 1600, utilities: 2400, currency: 'USD' },
+    campus: {
+      name: 'Imperial College London — South Kensington Campus',
+      address: 'Exhibition Road, South Kensington, London SW7 2AZ, UK',
+      mapsQuery: 'Imperial College London, Exhibition Road, South Kensington, London SW7 2AZ',
+    },
   },
   {
     id: 'stanford-university',
@@ -163,7 +178,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 94.2,
       internationalStudentRatio: 73.5,
     },
-    students: { total: 17500 },
+    students: { total: 17500, international: 3900 },
+    admission: {
+      bachelor: [
+        { label: 'SAT', value: '1500+' },
+        { label: 'TOEFL iBT', value: '100+' },
+        { label: 'IELTS', value: '7.0+' },
+        { label: 'Duolingo', value: '120+' },
+      ],
+      note: 'Indicative entry scores for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 18000, food: 4500, transport: 1200, utilities: 2600, currency: 'USD' },
+    campus: {
+      name: 'Stanford University — Main Campus',
+      address: '450 Jane Stanford Way, Stanford, CA 94305, USA',
+      mapsQuery: 'Stanford University, 450 Jane Stanford Way, Stanford, CA 94305',
+    },
   },
   {
     id: 'university-of-oxford',
@@ -195,7 +225,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 98.8,
       internationalStudentRatio: 98.6,
     },
-    students: { total: 26000 },
+    students: { total: 26000, international: 12000 },
+    admission: {
+      bachelor: [
+        { label: 'A-Level', value: 'A*A*A' },
+        { label: 'IB', value: '38+' },
+        { label: 'IELTS', value: '7.0+' },
+        { label: 'TOEFL iBT', value: '100+' },
+      ],
+      note: 'Indicative entry standard for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 12000, food: 3800, transport: 900, utilities: 2200, currency: 'USD' },
+    campus: {
+      name: 'University of Oxford — University Offices',
+      address: 'Wellington Square, Oxford OX1 2JD, UK',
+      mapsQuery: 'University of Oxford, Wellington Square, Oxford OX1 2JD',
+    },
   },
   {
     id: 'harvard-university',
@@ -227,7 +272,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 79.1,
       internationalStudentRatio: 81.4,
     },
-    students: { total: 21600 },
+    students: { total: 21600, international: 5800 },
+    admission: {
+      bachelor: [
+        { label: 'SAT', value: '1500+' },
+        { label: 'TOEFL iBT', value: '100+' },
+        { label: 'IELTS', value: '7.0+' },
+        { label: 'Duolingo', value: '120+' },
+      ],
+      note: 'Indicative entry scores for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 16000, food: 4200, transport: 1100, utilities: 2800, currency: 'USD' },
+    campus: {
+      name: 'Harvard University — Massachusetts Hall',
+      address: 'Massachusetts Hall, Cambridge, MA 02138, USA',
+      mapsQuery: 'Harvard University, Massachusetts Hall, Cambridge, MA 02138',
+    },
   },
   {
     id: 'university-of-cambridge',
@@ -259,7 +319,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 100,
       internationalStudentRatio: 93.1,
     },
-    students: { total: 24500 },
+    students: { total: 24500, international: 9500 },
+    admission: {
+      bachelor: [
+        { label: 'A-Level', value: 'A*AA' },
+        { label: 'IB', value: '40+' },
+        { label: 'IELTS', value: '7.5+' },
+        { label: 'TOEFL iBT', value: '110+' },
+      ],
+      note: 'Indicative entry standard for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 11500, food: 3700, transport: 850, utilities: 2100, currency: 'USD' },
+    campus: {
+      name: 'University of Cambridge — The Old Schools',
+      address: 'Trinity Lane, Cambridge CB2 1TN, UK',
+      mapsQuery: 'University of Cambridge, The Old Schools, Trinity Lane, Cambridge CB2 1TN',
+    },
   },
   {
     id: 'eth-zurich',
@@ -291,7 +366,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 100,
       internationalStudentRatio: 99.3,
     },
-    students: { total: 25000 },
+    students: { total: 25000, international: 10000 },
+    admission: {
+      bachelor: [
+        { label: 'Matura / IB', value: 'Required' },
+        { label: 'German', value: 'C1' },
+        { label: 'IELTS', value: '7.0+' },
+        { label: 'TOEFL iBT', value: '100+' },
+      ],
+      note: 'Bachelor teaching is mainly in German; English tests apply to English-taught master’s programmes.',
+    },
+    costOfLiving: { accommodation: 14000, food: 5000, transport: 1400, utilities: 2200, currency: 'USD' },
+    campus: {
+      name: 'ETH Zürich — Main Building (Zentrum)',
+      address: 'Rämistrasse 101, 8092 Zürich, Switzerland',
+      mapsQuery: 'ETH Zürich, Rämistrasse 101, 8092 Zürich',
+    },
   },
   {
     id: 'national-university-of-singapore',
@@ -323,7 +413,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 100,
       internationalStudentRatio: 96.9,
     },
-    students: { total: 38000 },
+    students: { total: 38000, international: 10000 },
+    admission: {
+      bachelor: [
+        { label: 'SAT', value: '1350+' },
+        { label: 'A-Level', value: 'AAA' },
+        { label: 'IELTS', value: '6.5+' },
+        { label: 'TOEFL iBT', value: '92+' },
+      ],
+      note: 'Indicative entry scores for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 9000, food: 3500, transport: 800, utilities: 1500, currency: 'USD' },
+    campus: {
+      name: 'National University of Singapore — Kent Ridge Campus',
+      address: '21 Lower Kent Ridge Road, Singapore 119077',
+      mapsQuery: 'National University of Singapore, 21 Lower Kent Ridge Road, Singapore 119077',
+    },
   },
   {
     id: 'ucl',
@@ -355,7 +460,22 @@ export const universities: University[] = [
       internationalFacultyRatio: 99.6,
       internationalStudentRatio: 100,
     },
-    students: { total: 46000 },
+    students: { total: 46000, international: 22000 },
+    admission: {
+      bachelor: [
+        { label: 'A-Level', value: 'A*AA' },
+        { label: 'IB', value: '36+' },
+        { label: 'IELTS', value: '6.5+' },
+        { label: 'TOEFL iBT', value: '92+' },
+      ],
+      note: 'Indicative entry standard for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 16800, food: 4200, transport: 1600, utilities: 2400, currency: 'USD' },
+    campus: {
+      name: 'University College London — Main Campus',
+      address: 'Gower Street, London WC1E 6BT, UK',
+      mapsQuery: 'University College London, Gower Street, London WC1E 6BT',
+    },
   },
   {
     id: 'caltech',
@@ -387,6 +507,21 @@ export const universities: University[] = [
       internationalFacultyRatio: 100,
       internationalStudentRatio: 90.7,
     },
-    students: { total: 2400 },
+    students: { total: 2400, international: 700 },
+    admission: {
+      bachelor: [
+        { label: 'SAT', value: '1530+' },
+        { label: 'TOEFL iBT', value: '100+' },
+        { label: 'IELTS', value: '7.0+' },
+        { label: 'Duolingo', value: '120+' },
+      ],
+      note: 'Indicative entry scores for international undergraduate applicants.',
+    },
+    costOfLiving: { accommodation: 15000, food: 4300, transport: 1200, utilities: 2600, currency: 'USD' },
+    campus: {
+      name: 'California Institute of Technology — Main Campus',
+      address: '1200 E California Blvd, Pasadena, CA 91125, USA',
+      mapsQuery: 'California Institute of Technology, 1200 E California Blvd, Pasadena, CA 91125',
+    },
   },
 ]

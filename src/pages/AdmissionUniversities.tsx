@@ -99,10 +99,10 @@ export default function AdmissionUniversities() {
 
                     {/* Body */}
                     <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5">
-                      <UniversityLogo brand={u.brand} size={62} className="hidden sm:inline-flex" />
+                      <UniversityLogo id={u.id} brand={u.brand} size={64} className="hidden sm:inline-flex" />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-3 sm:hidden">
-                          <UniversityLogo brand={u.brand} size={44} />
+                          <UniversityLogo id={u.id} brand={u.brand} size={46} />
                           <div className="min-w-0">
                             <h2 className="truncate text-base font-black tracking-tight text-slate-900">{u.name}</h2>
                             <p className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-medium text-slate-500">

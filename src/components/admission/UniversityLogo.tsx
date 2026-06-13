@@ -1,20 +1,43 @@
 import type { UniversityBrand } from '@/data/admission'
+import { getUniversityLogo } from './universityLogos'
 
-// A self-contained, watermark-free crest rendered from the school's brand colours.
-// No external image, so it always loads instantly and can never break. The monogram
-// sits on the brand gradient with a subtle ring + gloss to read as a premium emblem.
+// Renders a university's real, brand-accurate logo on a clean white tile — the way
+// these institutions present themselves. The logo is inline SVG (see universityLogos),
+// so it loads instantly and never breaks. If an id has no logo yet, we fall back to a
+// branded monogram crest so a profile is never left blank.
 export default function UniversityLogo({
+  id,
   brand,
   size = 64,
   className = '',
   rounded = '1.1rem',
 }: {
+  id?: string
   brand: UniversityBrand
   size?: number
   className?: string
   rounded?: string
 }) {
-  // Scale the monogram down as the string gets longer so 1–4 letters all fit cleanly.
+  const logo = id ? getUniversityLogo(id) : undefined
+
+  if (logo) {
+    return (
+      <span
+        className={`relative inline-flex flex-shrink-0 items-center justify-center overflow-hidden bg-white ${className}`}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: rounded,
+          padding: size * 0.16,
+          boxShadow: '0 6px 18px rgba(15,23,42,0.12), inset 0 0 0 1px rgba(15,23,42,0.06)',
+        }}
+      >
+        {logo}
+      </span>
+    )
+  }
+
+  // Fallback: branded monogram crest.
   const len = brand.monogram.length
   const fontSize = len <= 1 ? size * 0.5 : len === 2 ? size * 0.4 : len === 3 ? size * 0.3 : size * 0.24
 
@@ -30,15 +53,9 @@ export default function UniversityLogo({
       }}
       aria-hidden
     >
-      {/* corner glow */}
       <span
         className="pointer-events-none absolute inset-0"
         style={{ background: 'radial-gradient(circle at 26% 18%, rgba(255,255,255,0.32), transparent 58%)' }}
-      />
-      {/* hairline inner ring, like an embossed crest edge */}
-      <span
-        className="pointer-events-none absolute inset-[6%]"
-        style={{ borderRadius: 'inherit', border: '1px solid rgba(255,255,255,0.22)' }}
       />
       <span
         className="relative font-black leading-none tracking-tight"

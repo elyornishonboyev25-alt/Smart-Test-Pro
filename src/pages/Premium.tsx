@@ -321,34 +321,92 @@ export default function Premium() {
             {PAYMENT_STEPS.map((step, index) => {
               const Icon = step.icon
               return (
-                <div
-                  key={step.title}
-                  className="relative rounded-2xl border border-red-100 bg-gradient-to-b from-white to-red-50/40 p-5"
-                >
-                  <span className="absolute right-4 top-4 text-3xl font-black text-red-100">{index + 1}</span>
-                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#EF4444] to-[#B91C1C] text-white shadow-[0_10px_22px_rgba(220,38,38,0.3)]">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <h3 className="mt-3 text-sm font-black text-[#1F2937]">{step.title}</h3>
-                  <p className="mt-1 text-xs leading-5 text-[#6B7280]">{step.description}</p>
+                <div key={step.title} className="relative">
+                  <div className="relative h-full overflow-hidden rounded-2xl border border-red-100 bg-gradient-to-b from-white to-red-50/40 p-5 shadow-[0_12px_28px_rgba(127,29,29,0.08)]">
+                    <span className="pointer-events-none absolute -right-3 -top-4 text-6xl font-black text-red-50">{index + 1}</span>
+                    <div className="relative flex items-center justify-between">
+                      <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#EF4444] to-[#B91C1C] text-white shadow-[0_10px_22px_rgba(220,38,38,0.3)]">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full border border-red-200 bg-white text-xs font-black text-red-600">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <h3 className="relative mt-3 text-sm font-black text-[#1F2937]">{step.title}</h3>
+                    <p className="relative mt-1 text-xs leading-5 text-[#6B7280]">{step.description}</p>
+                  </div>
+                  {index < PAYMENT_STEPS.length - 1 ? (
+                    <span className="absolute -right-3 top-1/2 z-10 hidden -translate-y-1/2 md:flex">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full border border-red-100 bg-white text-red-400 shadow-sm">
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </span>
+                    </span>
+                  ) : null}
                 </div>
               )
             })}
           </div>
 
           {/* Card + Telegram */}
-          <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            {/* Payment card */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#B91C1C] via-[#DC2626] to-[#7F1D1D] p-6 text-white shadow-[0_22px_48px_rgba(127,29,29,0.4)]">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.22),transparent_38%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.14),transparent_40%)]" />
-              <div className="relative">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/70">Payment card</span>
-                  <BrandMark size={34} />
-                </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+            {/* Premium payment card */}
+            <motion.div
+              whileHover={minimalMotion ? undefined : { y: -5 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 18 }}
+              className="group relative flex aspect-[1.74/1] flex-col justify-between overflow-hidden rounded-[1.6rem] bg-[linear-gradient(135deg,#7F1D1D_0%,#B91C1C_40%,#DC2626_68%,#991B1B_100%)] p-6 text-white shadow-[0_30px_60px_rgba(127,29,29,0.5)]"
+            >
+              {/* depth + sheen */}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_14%_12%,rgba(255,255,255,0.3),transparent_42%),radial-gradient(circle_at_88%_90%,rgba(0,0,0,0.28),transparent_48%)]" />
+              <div className="pointer-events-none absolute inset-0 opacity-[0.1] bg-[repeating-linear-gradient(115deg,#fff_0_1px,transparent_1px_8px)]" />
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute -inset-y-12 -left-1/4 w-1/4 rotate-[18deg] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent)]"
+                animate={minimalMotion ? undefined : { x: ['0%', '560%'] }}
+                transition={minimalMotion ? undefined : { duration: 6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.6 }}
+              />
 
-                <div className="mt-6 flex items-center justify-between gap-3">
-                  <p className="font-mono text-xl font-bold tracking-[0.14em] sm:text-2xl">{CARD_NUMBER}</p>
+              <div className="relative flex items-start justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">Payment card</p>
+                  <p className="mt-1 inline-flex items-center gap-1.5 text-sm font-black tracking-wide">
+                    <Crown className="h-4 w-4 text-amber-300" />
+                    SmarTest Premium
+                  </p>
+                </div>
+                <BrandMark size={38} />
+              </div>
+
+              {/* Chip + contactless */}
+              <div className="relative flex items-center gap-3">
+                <svg viewBox="0 0 48 36" className="h-9 w-12 drop-shadow">
+                  <defs>
+                    <linearGradient id="chip-gold" x1="0" y1="0" x2="48" y2="36" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#FDE68A" />
+                      <stop offset="55%" stopColor="#F59E0B" />
+                      <stop offset="100%" stopColor="#B45309" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="1" y="1" width="46" height="34" rx="6" fill="url(#chip-gold)" />
+                  <g stroke="rgba(120,53,15,0.55)" strokeWidth="1.4" fill="none">
+                    <line x1="16" y1="1" x2="16" y2="35" />
+                    <line x1="32" y1="1" x2="32" y2="35" />
+                    <line x1="1" y1="12" x2="47" y2="12" />
+                    <line x1="1" y1="24" x2="47" y2="24" />
+                    <rect x="16" y="12" width="16" height="12" />
+                  </g>
+                </svg>
+                <svg viewBox="0 0 24 24" className="h-7 w-7 text-white/65" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M9 8a7 7 0 0 1 0 8" />
+                  <path d="M12.5 5.5a11 11 0 0 1 0 13" />
+                  <path d="M16 3a15 15 0 0 1 0 18" />
+                </svg>
+              </div>
+
+              <div className="relative">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-mono text-lg font-bold tracking-[0.18em] [text-shadow:0_1px_2px_rgba(0,0,0,0.4)] sm:text-2xl">
+                    {CARD_NUMBER}
+                  </p>
                   <button
                     onClick={handleCopyCard}
                     className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/30 bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm transition hover:bg-white/25"
@@ -358,30 +416,54 @@ export default function Premium() {
                   </button>
                 </div>
 
-                <p className="mt-5 text-[11px] uppercase tracking-[0.16em] text-white/60">Card holder</p>
-                <p className="text-sm font-bold tracking-wide text-white/95">SMARTEST PREMIUM</p>
+                <div className="mt-3.5 flex items-end justify-between">
+                  <div>
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/55">Card holder</p>
+                    <p className="text-sm font-bold tracking-wide text-white/95">PREMIUM ACCESS</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/55">Status</p>
+                    <p className="inline-flex items-center gap-1 text-sm font-black tracking-wide text-amber-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                      ACTIVE
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Telegram */}
-            <div className="flex flex-col justify-between rounded-2xl border border-red-100 bg-white p-6">
-              <div>
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-[0_10px_22px_rgba(37,99,235,0.3)]">
+            {/* Telegram receipt */}
+            <div className="relative flex flex-col justify-between overflow-hidden rounded-[1.6rem] border border-red-100 bg-gradient-to-br from-white to-sky-50/40 p-6 shadow-[0_18px_44px_rgba(15,23,42,0.07)]">
+              <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-sky-200/35 blur-2xl" />
+              <div className="relative">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white shadow-[0_12px_24px_rgba(37,99,235,0.32)]">
                   <Send className="h-5 w-5" />
                 </span>
-                <h3 className="mt-3 text-base font-black text-[#1F2937]">Send your receipt</h3>
-                <p className="mt-1 text-sm leading-6 text-[#6B7280]">
-                  After paying, send a screenshot of the receipt to{' '}
-                  <span className="font-bold text-red-600">@{TELEGRAM_USERNAME}</span> on Telegram. Your premium is
-                  usually activated within a few hours.
+                <h3 className="mt-3.5 text-lg font-black text-[#1F2937]">Send your receipt</h3>
+                <p className="mt-1.5 text-sm leading-6 text-[#6B7280]">
+                  After paying, send the receipt screenshot to{' '}
+                  <span className="font-bold text-red-600">@{TELEGRAM_USERNAME}</span> on Telegram. Premium is usually
+                  activated within a few hours.
                 </p>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {['Manual review', 'No card details stored', 'Fast activation'].map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600"
+                    >
+                      <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <a
                 href={TELEGRAM_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="interactive-lift mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(37,99,235,0.32)] transition hover:shadow-[0_18px_36px_rgba(37,99,235,0.42)]"
+                className="interactive-lift mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-3 text-sm font-bold text-white shadow-[0_14px_28px_rgba(37,99,235,0.32)] transition hover:shadow-[0_18px_36px_rgba(37,99,235,0.42)]"
               >
                 <Send className="h-4 w-4" />
                 Message @{TELEGRAM_USERNAME}

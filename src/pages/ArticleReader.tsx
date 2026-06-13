@@ -61,9 +61,11 @@ const THEME_SURFACE: Record<ReaderTheme, string> = {
   dark: 'bg-[#0f141c] text-slate-200',
 }
 
+type SelectionSegment = { blockIndex: number; text: string }
+
 type SelectionState = {
-  text: string
-  blockIndex: number
+  segments: SelectionSegment[]
+  fullText: string
   sentence: string
   x: number
   y: number
@@ -73,7 +75,7 @@ type SelectionState = {
 function renderHighlighted(
   text: string,
   highlights: Highlight[],
-  onRemove: (id: string) => void,
+  onMarkClick: (id: string, el: HTMLElement) => void,
 ) {
   if (highlights.length === 0) return text
   // Build a list of [start,end,highlight] matches, earliest first, non-overlapping.
@@ -97,8 +99,11 @@ function renderHighlighted(
     out.push(
       <mark
         key={`hl-${m.h.id}-${key++}`}
-        onClick={() => onRemove(m.h.id)}
-        title="Click to remove highlight"
+        onClick={(e) => {
+          e.stopPropagation()
+          onMarkClick(m.h.id, e.currentTarget)
+        }}
+        title="Highlightni boshqarish"
         style={{ backgroundColor: HIGHLIGHT_BG[m.h.color], color: 'inherit' }}
         className="cursor-pointer rounded px-0.5 [box-decoration-break:clone]"
       >
@@ -124,6 +129,8 @@ export default function ArticleReader() {
   const [noteQuote, setNoteQuote] = useState<string | null>(null)
   const [lookup, setLookup] = useState<{ word: string; sentence: string } | null>(null)
   const [progress, setProgress] = useState(0)
+  // Popover shown when a saved highlight is tapped — removal only happens from here.
+  const [hlMenu, setHlMenu] = useState<{ id: string; x: number; y: number } | null>(null)
 
   const bodyRef = useRef<HTMLDivElement>(null)
 
@@ -160,29 +167,47 @@ export default function ArticleReader() {
       setSelection(null)
       return
     }
-    const text = sel.toString().replace(/\s+/g, ' ').trim()
-    if (!text || text.length < 2) {
+    const fullText = sel.toString().replace(/\s+/g, ' ').trim()
+    if (!fullText || fullText.length < 2) {
       setSelection(null)
       return
     }
     const range = sel.getRangeAt(0)
-    const anchor =
-      range.commonAncestorContainer instanceof Element
-        ? range.commonAncestorContainer
-        : range.commonAncestorContainer.parentElement
-    const blockEl = anchor?.closest<HTMLElement>('[data-block-index]')
-    if (!blockEl || !bodyRef.current?.contains(blockEl)) {
+    const root = bodyRef.current
+    if (!root || !root.contains(range.commonAncestorContainer)) {
       setSelection(null)
       return
     }
-    const blockIndex = Number(blockEl.dataset.blockIndex)
-    const sentence = (blockEl.textContent ?? text).replace(/\s+/g, ' ').trim()
+
+    // Walk every block the selection touches and clip the exact text inside each one.
+    // This makes multi-paragraph selections highlightable (previously they were dropped
+    // because the common ancestor was the <article>, not a single block).
+    const blockEls = Array.from(root.querySelectorAll<HTMLElement>('[data-block-index]'))
+    const segments: SelectionSegment[] = []
+    let sentence = ''
+    for (const el of blockEls) {
+      if (!range.intersectsNode(el)) continue
+      const isStart = el.contains(range.startContainer)
+      const isEnd = el.contains(range.endContainer)
+      const clip = range.cloneRange()
+      if (!isStart) clip.setStart(el, 0)
+      if (!isEnd) clip.setEnd(el, el.childNodes.length)
+      const text = clip.toString().replace(/\s+/g, ' ').trim()
+      if (text.length < 1) continue
+      segments.push({ blockIndex: Number(el.dataset.blockIndex), text })
+      if (!sentence) sentence = (el.textContent ?? '').replace(/\s+/g, ' ').trim()
+    }
+    if (segments.length === 0) {
+      setSelection(null)
+      return
+    }
+
     const rect = range.getBoundingClientRect()
     setSelection({
-      text,
-      blockIndex,
-      sentence,
-      x: Math.min(window.innerWidth - 130, Math.max(130, rect.left + rect.width / 2)),
+      segments,
+      fullText,
+      sentence: sentence || fullText,
+      x: Math.min(window.innerWidth - 140, Math.max(140, rect.left + rect.width / 2)),
       y: Math.max(64, rect.top - 8),
     })
   }, [])
@@ -191,6 +216,8 @@ export default function ArticleReader() {
     const onUp = () => window.setTimeout(captureSelection, 10)
     const onDown = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement | null
+      // Keep the remove-popover open while it (or a highlight mark) is being interacted with.
+      if (!target?.closest('[data-hl-menu]') && !target?.closest('mark')) setHlMenu(null)
       if (target?.closest('[data-selection-toolbar]')) return
       setSelection(null)
     }
@@ -215,14 +242,15 @@ export default function ArticleReader() {
 
   const onHighlight = (color: HighlightColor) => {
     if (!selection) return
-    addHighlight(slug, selection.blockIndex, selection.text, color)
+    // One highlight per touched block so multi-paragraph selections persist correctly.
+    selection.segments.forEach((seg) => addHighlight(slug, seg.blockIndex, seg.text, color))
     setSelection(null)
     window.getSelection()?.removeAllRanges()
   }
 
   const onStartNote = () => {
     if (!selection) return
-    setNoteQuote(selection.text)
+    setNoteQuote(selection.fullText)
     setNoteDraft('')
     setNotesOpen(true)
     setSelection(null)
@@ -231,9 +259,19 @@ export default function ArticleReader() {
 
   const onAskAI = () => {
     if (!selection) return
-    setLookup({ word: selection.text, sentence: selection.sentence })
+    setLookup({ word: selection.fullText, sentence: selection.sentence })
     setSelection(null)
     window.getSelection()?.removeAllRanges()
+  }
+
+  const onMarkClick = (id: string, el: HTMLElement) => {
+    const r = el.getBoundingClientRect()
+    setSelection(null)
+    setHlMenu({
+      id,
+      x: Math.min(window.innerWidth - 120, Math.max(120, r.left + r.width / 2)),
+      y: r.bottom + 8,
+    })
   }
 
   const saveNote = () => {
@@ -383,7 +421,7 @@ export default function ArticleReader() {
               block={block}
               fontScale={prefs.fontScale}
               theme={prefs.theme}
-              content={renderHighlighted(block.text, blockHighlights(index), (id) => removeHighlight(slug, id))}
+              content={renderHighlighted(block.text, blockHighlights(index), onMarkClick)}
               index={index}
             />
           ))}
@@ -466,6 +504,32 @@ export default function ArticleReader() {
             >
               <Sparkles className="h-3.5 w-3.5" />
               Ask AI
+            </button>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* tap-a-highlight → remove popover */}
+      <AnimatePresence>
+        {hlMenu ? (
+          <motion.div
+            data-hl-menu
+            initial={{ opacity: 0, y: -4, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ duration: 0.14 }}
+            style={{ position: 'fixed', left: hlMenu.x, top: hlMenu.y, transform: 'translateX(-50%)' }}
+            className="z-[115] rounded-2xl border border-red-200 bg-white p-1.5 shadow-[0_18px_40px_rgba(220,38,38,0.22)]"
+          >
+            <button
+              onClick={() => {
+                removeHighlight(slug, hlMenu.id)
+                setHlMenu(null)
+              }}
+              className="inline-flex items-center gap-2 rounded-xl border border-red-100 bg-gradient-to-r from-white via-red-50/70 to-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+            >
+              <Trash2 className="h-4 w-4" />
+              Highlightni o'chirish
             </button>
           </motion.div>
         ) : null}

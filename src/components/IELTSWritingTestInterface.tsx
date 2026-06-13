@@ -30,6 +30,7 @@ import { evaluateWriting, type WritingEvaluation, type WritingError } from '@/se
 import { saveWritingAnalysis, getWritingXP } from '@/utils/writingAnalysisStorage'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import type { WritingTask, LineChartData, ChartSeries } from '@/data/writingTestData'
+import TestLaunchOverlay from '@/components/common/TestLaunchOverlay'
 
 type Props = {
   task: WritingTask
@@ -296,6 +297,8 @@ export default function IELTSWritingTestInterface({
   const [copiedCorrected, setCopiedCorrected] = useState(false)
   const autoStartHandled = useRef(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [isLaunching, setIsLaunching] = useState(false)
+  const launchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const user = useAuthStore((state: AuthState) => state.user)
   const wordCount = countWords(answer)
@@ -322,14 +325,25 @@ export default function IELTSWritingTestInterface({
 
   const handleStart = useCallback(
     (withTimer: boolean) => {
-      setTimerEnabled(withTimer)
-      setTimeRemaining(effectiveDuration * 60)
-      setIsTimerRunning(withTimer)
-      setPhase('writing')
-      setTimeout(() => textareaRef.current?.focus(), 100)
+      // Brief "your test will begin shortly" loader before the writing workspace.
+      setIsLaunching(true)
+      if (launchTimerRef.current) clearTimeout(launchTimerRef.current)
+      launchTimerRef.current = setTimeout(() => {
+        setTimerEnabled(withTimer)
+        setTimeRemaining(effectiveDuration * 60)
+        setIsTimerRunning(withTimer)
+        setPhase('writing')
+        setIsLaunching(false)
+        launchTimerRef.current = null
+        setTimeout(() => textareaRef.current?.focus(), 100)
+      }, 2000)
     },
     [effectiveDuration],
   )
+
+  useEffect(() => () => {
+    if (launchTimerRef.current) clearTimeout(launchTimerRef.current)
+  }, [])
 
   // Auto-start when the AI assistant opens a test with specific settings.
   useEffect(() => {
@@ -388,6 +402,11 @@ export default function IELTSWritingTestInterface({
   if (phase === 'landing') {
     return (
       <div className="min-h-screen bg-[linear-gradient(160deg,#fff7f7_0%,#fee2e2_52%,#fff_100%)] flex items-center justify-center p-6 relative overflow-hidden">
+        <AnimatePresence>
+          {isLaunching ? (
+            <TestLaunchOverlay title="Your test will begin shortly" subtitle="Preparing your Writing task" />
+          ) : null}
+        </AnimatePresence>
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-rose-200/40 blur-3xl" />
           <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-orange-200/30 blur-3xl" />

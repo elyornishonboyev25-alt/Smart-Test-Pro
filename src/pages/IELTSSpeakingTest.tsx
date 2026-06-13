@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
@@ -31,6 +31,7 @@ import { analyzeSpeakingResponse, type SpeakingResponseAnalysis } from '@/servic
 import ExaminerSession from '@/components/speaking/ExaminerSession'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useSpeakingStore } from '@/store/speakingStore'
+import TestLaunchOverlay from '@/components/common/TestLaunchOverlay'
 
 // Single test runner. There are 3 launch modes (Part 1, Part 2 cue card, Part 3)
 // for the daily roadmap, and a 4th "full mock" that delegates to the live
@@ -102,8 +103,20 @@ export default function IELTSSpeakingTest() {
     return null
   }, [id])
 
+  // Brief "your test will begin shortly" loader when entering a Speaking test.
+  const [booting, setBooting] = useState(true)
+  useEffect(() => {
+    if (!mode) {
+      setBooting(false)
+      return
+    }
+    const t = setTimeout(() => setBooting(false), 1900)
+    return () => clearTimeout(t)
+  }, [mode])
+
+  let content: ReactNode
   if (!mode) {
-    return (
+    content = (
       <div className="mx-auto max-w-2xl px-4 py-10">
         <button onClick={() => navigate('/ielts/speaking/tests')} className="premium-back-btn mb-4">
           <ArrowLeft className="h-3.5 w-3.5" /> Back
@@ -111,10 +124,8 @@ export default function IELTSSpeakingTest() {
         <p className="text-sm text-slate-600">Speaking test not found.</p>
       </div>
     )
-  }
-
-  if (mode.kind === 'mock') {
-    return (
+  } else if (mode.kind === 'mock') {
+    content = (
       <FullMockRunner
         mock={mode.mock}
         onExit={() => navigate('/ielts/speaking/tests')}
@@ -136,9 +147,20 @@ export default function IELTSSpeakingTest() {
         }}
       />
     )
+  } else {
+    content = <DayRunner day={mode.day} onExit={() => navigate('/ielts/speaking/tests')} />
   }
 
-  return <DayRunner day={mode.day} onExit={() => navigate('/ielts/speaking/tests')} />
+  return (
+    <>
+      <AnimatePresence>
+        {booting && mode ? (
+          <TestLaunchOverlay title="Your test will begin shortly" subtitle="Preparing your Speaking test" />
+        ) : null}
+      </AnimatePresence>
+      {content}
+    </>
+  )
 }
 
 // ── Day runner (one Part with N questions; AI analysis per question) ────────

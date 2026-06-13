@@ -12,6 +12,7 @@ import { ToastViewport } from '@/components/common/ToastViewport'
 import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import RegisterModal from '@/components/auth/RegisterModal'
 import FloatingAIAssistant from '@/components/ai/FloatingAIAssistant'
+import FullscreenToggle from '@/components/common/FullscreenToggle'
 import WordLookupLayer from '@/components/vocab/WordLookupLayer'
 import NicknameGate from '@/components/speaking/NicknameGate'
 import { sendHeartbeat } from '@/lib/speakingApi'
@@ -194,6 +195,7 @@ function App() {
       <RegisterModal />
       <NicknameGate />
       <FloatingAIAssistant />
+      <FullscreenToggle />
       <WordLookupLayer />
 
       <div className="relative z-10 flex min-h-screen flex-col">

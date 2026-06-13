@@ -30,6 +30,7 @@ import Timer from './Timer'
 import QuestionNavigation from './QuestionNavigation'
 import NotesPanel from './NotesPanel'
 import WordLookupModal from './vocab/WordLookupModal'
+import TestLaunchOverlay from './common/TestLaunchOverlay'
 
 // Utils
 import {
@@ -236,9 +237,12 @@ export default function IELTSReadingInterface({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [showReviewModal, setShowReviewModal] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isLaunching, setIsLaunching] = useState(false)
+  const launchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [showOptionsModal, setShowOptionsModal] = useState(false)
-  const [contrastMode, setContrastMode] = useState<'normal' | 'high' | 'yellow-black'>('normal')
+  const [contrastMode, setContrastMode] = useState<'normal' | 'high' | 'yellow-black' | 'sepia'>('normal')
   const [textSizeMode, setTextSizeMode] = useState<'regular' | 'large' | 'xlarge'>('regular')
+  const [readingFont, setReadingFont] = useState<'sans' | 'serif'>('sans')
   const [highlightPopover, setHighlightPopover] = useState<{
     top: number
     left: number
@@ -255,7 +259,7 @@ export default function IELTSReadingInterface({
   } | null>(null)
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false)
   const [reviewShowCorrectAnswers, setReviewShowCorrectAnswers] = useState(Boolean(reviewPayload?.showCorrectAnswers))
-  const [optionsPage, setOptionsPage] = useState<'menu' | 'contrast' | 'text-size'>('menu')
+  const [optionsPage, setOptionsPage] = useState<'menu' | 'contrast' | 'text-size' | 'font'>('menu')
   const [activeDragSlots, setActiveDragSlots] = useState<Record<string, number | null>>({})
   const [activeDragOption, setActiveDragOption] = useState<Record<string, string | null>>({})
   const [noteComposer, setNoteComposer] = useState<{
@@ -284,7 +288,9 @@ export default function IELTSReadingInterface({
       ? 'reading-contrast-high'
       : contrastMode === 'yellow-black'
         ? 'reading-contrast-yellow'
-        : 'reading-contrast-default'
+        : contrastMode === 'sepia'
+          ? 'reading-contrast-sepia'
+          : 'reading-contrast-default'
 
   // --- Session Persistence ---
   const sessionKey = `ielts_test_session_${test.id}`
@@ -1067,12 +1073,24 @@ export default function IELTSReadingInterface({
     } else {
       setTimeRemaining(test.duration * 60)
     }
-    startedAtRef.current = Date.now()
     setCurrentSectionIndex(0)
     setLastActiveQuestionIndex(0)
-    setIsTestActive(true)
     setShowModeModal(false)
+
+    // Brief "your test will begin shortly" loader before dropping into the exam.
+    setIsLaunching(true)
+    if (launchTimerRef.current) clearTimeout(launchTimerRef.current)
+    launchTimerRef.current = setTimeout(() => {
+      startedAtRef.current = Date.now()
+      setIsTestActive(true)
+      setIsLaunching(false)
+      launchTimerRef.current = null
+    }, 2200)
   }
+
+  useEffect(() => () => {
+    if (launchTimerRef.current) clearTimeout(launchTimerRef.current)
+  }, [])
 
   useEffect(() => {
     if (isReviewMode || isTestActive || launchPresetAppliedRef.current || !launchPreset) return
@@ -5230,8 +5248,16 @@ export default function IELTSReadingInterface({
   return (
     <div
       ref={testShellRef}
-      className={`reading-shell reading-scale-120 ${contrastClass} reading-size-${textSizeMode} flex flex-col h-screen overflow-hidden relative z-50 bg-[linear-gradient(160deg,#ffffff_0%,#fff5f5_52%,#fffaf8_100%)] text-slate-900 transition-colors duration-300 font-sans`}
+      className={`reading-shell reading-scale-120 ${contrastClass} reading-size-${textSizeMode} reading-font-${readingFont} flex flex-col h-screen overflow-hidden relative z-50 bg-[linear-gradient(160deg,#ffffff_0%,#fff5f5_52%,#fffaf8_100%)] text-slate-900 transition-colors duration-300 font-sans`}
     >
+      <AnimatePresence>
+        {isLaunching ? (
+          <TestLaunchOverlay
+            title="Your test will begin shortly"
+            subtitle={isListening ? 'Preparing your Listening test' : 'Preparing your Reading test'}
+          />
+        ) : null}
+      </AnimatePresence>
       {!isTestActive ? renderStartScreen() : (
         <>
           <header className="reading-toolbar bg-white/95 border-b border-red-100 h-16 flex items-center justify-between px-4 z-20 relative shadow-[0_10px_24px_rgba(220,38,38,0.09)] backdrop-blur-md">
@@ -5601,7 +5627,7 @@ export default function IELTSReadingInterface({
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-red-600">Reading menu</p>
                     <h3 className="text-xl font-black text-slate-900">
-                      {optionsPage === 'contrast' ? 'Contrast' : optionsPage === 'text-size' ? 'Text size' : 'Display settings'}
+                      {optionsPage === 'contrast' ? 'Contrast' : optionsPage === 'text-size' ? 'Text size' : optionsPage === 'font' ? 'Reading font' : 'Display settings'}
                     </h3>
                   </div>
                 </div>
@@ -5639,6 +5665,17 @@ export default function IELTSReadingInterface({
                       </div>
                       <ChevronDownIcon className="-rotate-90 h-5 w-5 text-slate-500" />
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setOptionsPage('font')}
+                      className="flex w-full items-center justify-between rounded-2xl border border-red-100 bg-white px-4 py-4 text-left shadow-[0_12px_24px_rgba(220,38,38,0.08)] hover:border-red-300"
+                    >
+                      <div>
+                        <p className="text-lg font-black text-slate-900">Reading font</p>
+                        <p className="mt-1 text-sm text-slate-600">Switch the passage between Sans and a book-like Serif.</p>
+                      </div>
+                      <ChevronDownIcon className="-rotate-90 h-5 w-5 text-slate-500" />
+                    </button>
                   </div>
                 ) : null}
 
@@ -5646,6 +5683,7 @@ export default function IELTSReadingInterface({
                   <div className="overflow-hidden rounded-2xl border border-red-100 bg-white">
                     {[
                       { id: 'normal', label: 'Black on white', value: 'normal' as const },
+                      { id: 'sepia', label: 'Sepia (warm paper)', value: 'sepia' as const },
                       { id: 'high', label: 'White on black', value: 'high' as const },
                       { id: 'yellow-black', label: 'Yellow on black', value: 'yellow-black' as const },
                     ].map((item) => (
@@ -5677,6 +5715,25 @@ export default function IELTSReadingInterface({
                       >
                         <span className="text-base font-semibold text-slate-900">{item.label}</span>
                         {textSizeMode === item.value ? <CheckIcon className="h-5 w-5 text-red-600" /> : null}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+
+                {optionsPage === 'font' ? (
+                  <div className="overflow-hidden rounded-2xl border border-red-100 bg-white">
+                    {[
+                      { id: 'sans', label: 'Sans (modern)', value: 'sans' as const },
+                      { id: 'serif', label: 'Serif (book-like)', value: 'serif' as const },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => setReadingFont(item.value)}
+                        className={`flex w-full items-center justify-between border-b border-red-100 px-4 py-3 text-left last:border-b-0 hover:bg-red-50/40 ${item.value === 'serif' ? "[font-family:Georgia,'Times_New_Roman',serif]" : ''}`}
+                      >
+                        <span className="text-base font-semibold text-slate-900">{item.label}</span>
+                        {readingFont === item.value ? <CheckIcon className="h-5 w-5 text-red-600" /> : null}
                       </button>
                     ))}
                   </div>

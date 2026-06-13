@@ -9,27 +9,34 @@
       <stop offset="0%" stop-color="rgba(255,255,255,0.92)" />
       <stop offset="100%" stop-color="rgba(255,255,255,0.14)" />
     </linearGradient>
-    <linearGradient id="brand-accent" x1="74" y1="70" x2="86" y2="82" gradientUnits="userSpaceOnUse">
+    <linearGradient id="brand-accent" x1="64" y1="60" x2="82" y2="82" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#93C5FD" />
       <stop offset="100%" stop-color="#2563EB" />
     </linearGradient>
-    <linearGradient id="brand-spark" x1="80" y1="20" x2="104" y2="44" gradientUnits="userSpaceOnUse">
+    <linearGradient id="brand-spark" x1="84" y1="6" x2="105" y2="30" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#FFFFFF" />
       <stop offset="100%" stop-color="#BFDBFE" />
     </linearGradient>
   </defs>
 
+  <!-- Badge -->
   <rect x="5" y="5" width="110" height="110" rx="30" fill="url(#brand-bg)" />
   <rect x="6.2" y="6.2" width="107.6" height="107.6" rx="28.8" stroke="url(#brand-shine)" stroke-opacity="0.72" />
-  <circle cx="60" cy="60" r="32.8" fill="white" fill-opacity="0.14" stroke="white" stroke-opacity="0.28" />
 
-  <path d="M40.2 55.8 60 43.6l19.8 12.2L60 68 40.2 55.8Z" fill="white" fill-opacity="0.96" />
-  <path d="M48.6 62.4v10c0 5.3 6.2 10 11.4 10s11.4-4.7 11.4-10v-10" stroke="white" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" />
-  <path d="M79.2 56.6v14.8" stroke="white" stroke-width="3.8" stroke-linecap="round" />
-  <circle cx="79.2" cy="75.8" r="4.4" fill="url(#brand-accent)" />
-  <path d="M38 84.4c6.3 5.8 13.5 8.8 22 8.8 8.5 0 15.8-3 22-8.8" stroke="white" stroke-opacity="0.82" stroke-width="3.8" stroke-linecap="round" />
+  <!-- Globe (study abroad) -->
+  <circle cx="60" cy="75" r="23.6" fill="white" fill-opacity="0.16" stroke="white" stroke-width="4.4" />
+  <ellipse cx="60" cy="75" rx="23.6" ry="8.8" fill="none" stroke="white" stroke-width="3.1" stroke-opacity="0.9" />
+  <ellipse cx="60" cy="75" rx="8.8" ry="23.6" fill="none" stroke="white" stroke-width="3.1" stroke-opacity="0.9" />
+  <!-- Destination marker abroad -->
+  <circle cx="69.4" cy="66.9" r="4.5" fill="url(#brand-accent)" stroke="white" stroke-width="1.9" />
 
-  <!-- AI spark -->
-  <path d="M90 22.5 92.6 30.4 100.5 33 92.6 35.6 90 43.5 87.4 35.6 79.5 33 87.4 30.4Z" fill="url(#brand-spark)" />
-  <path d="M101 41 102.3 45 106.3 46.3 102.3 47.6 101 51.6 99.7 47.6 95.7 46.3 99.7 45Z" fill="url(#brand-spark)" fill-opacity="0.9" />
+  <!-- Graduation cap (education) -->
+  <path d="M60 20.1 90 33 60 45.9 30 33Z" fill="white" />
+  <circle cx="60" cy="33" r="3.1" fill="url(#brand-accent)" />
+  <path d="M90 33c3.6 1.9 4.5 6.4 3.2 11.4" stroke="white" stroke-width="3" stroke-linecap="round" />
+  <circle cx="93.2" cy="47.1" r="3.6" fill="url(#brand-accent)" />
+
+  <!-- AI sparks -->
+  <path d="M94.3 7.3 97.3 14.1 104.1 17.1 97.3 20.1 94.3 27 91.3 20.1 84.4 17.1 91.3 14.1Z" fill="url(#brand-spark)" />
+  <path d="M105.9 26.6 107.1 30 110.6 31.3 107.1 32.6 105.9 36 104.6 32.6 101.1 31.3 104.6 30Z" fill="url(#brand-spark)" fill-opacity="0.9" />
 </svg>

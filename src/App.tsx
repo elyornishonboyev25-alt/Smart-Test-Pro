@@ -541,8 +541,8 @@ function App() {
                           <AnimatedRoute>
                             <PremiumOnly
                               title="Shadowing Lab is Premium"
-                              description="Train pronunciation and fluency with guided shadowing drills on ProfAI Premium."
-                              perks={['Guided 4-step shadowing', 'Native-speed clips', 'Pronunciation & rhythm focus']}
+                              description="Turn any English YouTube video into line-by-line shadowing practice on ProfAI Premium."
+                              perks={['Paste any English YouTube link', 'AI splits it into shadowing lines', 'Loop, slow down, record & compare']}
                             >
                               <ShadowingLab />
                             </PremiumOnly>

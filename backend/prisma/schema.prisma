@@ -103,6 +103,7 @@ model User {
   vocabularyNotebooks VocabularyNotebook[]
   speakingEvaluations SpeakingEvaluation[]
   speakingSessions SpeakingSession[]
+  shadowingVideos ShadowingVideo[]   @relation("ShadowingSubmitter")
   createdTests   Test[]             @relation("TestAuthor")
 
   @@index([xp, level])
@@ -534,4 +535,48 @@ model LeaderboardState {
 
   @@unique([userId, period, categoryKey])
   @@index([period, categoryKey, rank])
+}
+
+// A shadowing-practice video added by any user from a YouTube link. Once a video
+// is accepted (English captions + appropriate) it is saved here ONCE and becomes
+// part of the shared library every user sees. `youtubeId` is unique so the same
+// clip can never be added twice — the second submitter just reuses the saved copy.
+model ShadowingVideo {
+  id            String             @id @default(cuid())
+  youtubeId     String             @unique
+  title         String
+  author        String?
+  thumbnailUrl  String?
+  durationSec   Int                @default(0)
+  level         String             @default("Intermediate") // Beginner | Intermediate | Advanced (speech-rate heuristic)
+  accent        String?
+  topic         String?
+  captionKind   String             @default("auto")          // manual | auto
+  language      String             @default("en")
+  segmentCount  Int                @default(0)
+  wordCount     Int                @default(0)
+  playCount     Int                @default(0)
+  submittedById String?
+  submittedBy   User?              @relation("ShadowingSubmitter", fields: [submittedById], references: [id], onDelete: SetNull)
+  segments      ShadowingSegment[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([createdAt])
+  @@index([level])
+}
+
+// One shadowing chunk: a sentence-sized line with the exact start/end timestamps
+// in the source video, so the player can loop just that line for repetition.
+model ShadowingSegment {
+  id         String         @id @default(cuid())
+  videoId    String
+  orderIndex Int
+  startSec   Float
+  endSec     Float
+  text       String
+  video      ShadowingVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([videoId, orderIndex])
+  @@index([videoId, orderIndex])
 }

@@ -31,6 +31,7 @@ import { analyzeSpeakingResponse, type SpeakingResponseAnalysis } from '@/servic
 import ExaminerSession from '@/components/speaking/ExaminerSession'
 import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useSpeakingStore } from '@/store/speakingStore'
+import { useBadgeStore } from '@/store/badgeStore'
 import TestLaunchOverlay from '@/components/common/TestLaunchOverlay'
 
 // Single test runner. There are 3 launch modes (Part 1, Part 2 cue card, Part 3)
@@ -93,6 +94,7 @@ export default function IELTSSpeakingTest() {
   const { id } = useParams<{ id: string }>()
   const user = useAuthStore((state: AuthState) => state.user)
   const addSession = useSpeakingStore((s) => s.addSession)
+  const awardBadge = useBadgeStore((s) => s.awardIfEligible)
 
   const mode = useMemo<Mode>(() => {
     if (!id) return null
@@ -143,6 +145,15 @@ export default function IELTSSpeakingTest() {
             wordCount: analysis.stats.wordCount,
             fillerCount: analysis.stats.fillerCount,
             summary: analysis.summary,
+          })
+          // Full mock → award a Speaking band badge (with celebration). Daily
+          // practice in DayRunner intentionally does not award badges.
+          awardBadge({
+            userId: user?.id ?? null,
+            track: 'IELTS_SPEAKING',
+            band: analysis.overallBand,
+            mode: 'full_mock',
+            source: 'ielts-speaking-mock',
           })
         }}
       />

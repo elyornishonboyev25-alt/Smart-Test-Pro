@@ -16,6 +16,7 @@ import FloatingAIAssistant from '@/components/ai/FloatingAIAssistant'
 import FullscreenToggle from '@/components/common/FullscreenToggle'
 import WordLookupLayer from '@/components/vocab/WordLookupLayer'
 import NicknameGate from '@/components/speaking/NicknameGate'
+import AchievementCelebration from '@/components/achievements/AchievementCelebration'
 import { sendHeartbeat } from '@/lib/speakingApi'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { useAuthStore, type AuthState } from '@/store/authStore'
@@ -37,6 +38,8 @@ const WritingLab = lazy(() => import('@/pages/WritingLab'))
 const SpeakingLab = lazy(() => import('@/pages/SpeakingLab'))
 const SpeakingCommunity = lazy(() => import('@/pages/SpeakingCommunity'))
 const SpeakerProfile = lazy(() => import('@/pages/SpeakerProfile'))
+const Community = lazy(() => import('@/pages/Community'))
+const PublicProfile = lazy(() => import('@/pages/PublicProfile'))
 const Mock = lazy(() => import('@/pages/Mock'))
 const MockIELTS = lazy(() => import('@/pages/MockIELTS'))
 const MockSAT = lazy(() => import('@/pages/MockSAT'))
@@ -131,6 +134,8 @@ function App() {
     pathname.startsWith('/mock') ||
     pathname === '/speaking-community' ||
     pathname.startsWith('/speaker/') ||
+    pathname === '/community' ||
+    pathname.startsWith('/u/') ||
     pathname.startsWith('/sat') ||
     pathname.startsWith('/ielts') ||
     pathname === '/writing-lab' ||
@@ -205,6 +210,7 @@ function App() {
       <ToastViewport />
       <RegisterModal />
       <NicknameGate />
+      <AchievementCelebration />
       <FloatingAIAssistant />
       <FullscreenToggle />
       <WordLookupLayer />
@@ -444,6 +450,26 @@ function App() {
                           <AnimatedRoute>
                             <SpeakerProfile />
                           </AnimatedRoute>
+                        }
+                      />
+                      <Route
+                        path="/community"
+                        element={
+                          <ProtectedRoute>
+                            <AnimatedRoute>
+                              <Community />
+                            </AnimatedRoute>
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/u/:nickname"
+                        element={
+                          <ProtectedRoute>
+                            <AnimatedRoute>
+                              <PublicProfile />
+                            </AnimatedRoute>
+                          </ProtectedRoute>
                         }
                       />
                       <Route

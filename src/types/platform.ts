@@ -11,6 +11,8 @@ export type AuthUser = {
   currentStreak: number
   /** Public unique handle shown to other users instead of the email-derived name. */
   nickname?: string | null
+  /** Profile photo as a (compressed) data URL or external URL. */
+  avatarUrl?: string | null
 }
 
 export type Difficulty = 'EASY' | 'MEDIUM' | 'HARD' | 'OLYMPIAD'

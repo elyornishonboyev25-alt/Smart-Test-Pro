@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, BookOpen, Compass, GraduationCap, Globe2, Sparkles, Trophy } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Compass, GraduationCap, Globe2, Sparkles, Target, Trophy } from 'lucide-react'
 import { AmbientBackdrop, CountUp, Reveal, Stagger, StaggerItem, Tilt3D } from '@/components/fx'
 import UniversityLogo from '@/components/admission/UniversityLogo'
+import UniversityMatcher from '@/components/admission/UniversityMatcher'
 import LucideIcon from '@/components/admission/LucideIcon'
 import {
   getUniversities,
@@ -14,6 +16,7 @@ import {
 
 export default function Admission() {
   const navigate = useNavigate()
+  const [matcherOpen, setMatcherOpen] = useState(false)
   const universities = getUniversities()
   const topFour = universities.slice(0, 4)
   const studyHours = Math.round(totalLessonMinutes / 60)
@@ -21,6 +24,7 @@ export default function Admission() {
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-8 sm:px-6 lg:px-10">
       <AmbientBackdrop variant="red" />
+      <UniversityMatcher open={matcherOpen} onClose={() => setMatcherOpen(false)} />
 
       <div className="relative mx-auto w-full max-w-6xl space-y-7">
         {/* ----------------------------- Hero ----------------------------- */}
@@ -88,6 +92,27 @@ export default function Admission() {
               </div>
             </div>
           </section>
+        </Reveal>
+
+        {/* ----------------------- Find-my-university banner ----------------------- */}
+        <Reveal delay={0.03}>
+          <button
+            onClick={() => setMatcherOpen(true)}
+            className="cta-sheen group relative flex w-full items-center gap-4 overflow-hidden rounded-[1.6rem] border border-red-300/60 bg-gradient-to-r from-[#7f1d1d] via-[#dc2626] to-[#b91c1c] p-6 text-left shadow-[0_22px_55px_rgba(220,38,38,0.3)]"
+          >
+            <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white backdrop-blur-sm">
+              <Target className="h-7 w-7" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-lg font-black text-white">Find my best-fit university</p>
+              <p className="mt-0.5 text-sm font-medium text-red-50/90">
+                Answer a few questions about your SAT, IELTS, GPA and goals — we’ll rank the QS universities by how well they fit you.
+              </p>
+            </div>
+            <span className="hidden shrink-0 items-center gap-1 rounded-xl bg-white px-4 py-2.5 text-sm font-black text-red-700 transition group-hover:gap-2 sm:inline-flex">
+              Start <ArrowRight className="h-4 w-4" />
+            </span>
+          </button>
         </Reveal>
 
         {/* ----------------------- Two destination cards ----------------------- */}

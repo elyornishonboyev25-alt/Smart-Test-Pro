@@ -1489,5 +1489,360 @@ router.get(
   }),
 )
 
+// ── Extended profile: account fields, avatar, badges, search, public profile ───
+// Permanently stored so a learner's identity, exam targets and earned skill badges
+// survive across devices and can power their public profile. The email is NEVER
+// returned to anyone but the owner.
+
+const EXAM_TARGETS = ['IELTS', 'SAT', 'BOTH'] as const
+const SKILL_TRACKS = [
+  'IELTS_LISTENING',
+  'IELTS_READING',
+  'IELTS_WRITING',
+  'IELTS_SPEAKING',
+  'SAT_MATH',
+  'SAT_ENGLISH',
+] as const
+
+const accountUpdateSchema = z.object({
+  phone: z.string().trim().max(40).nullable().optional(),
+  country: z.string().trim().max(80).nullable().optional(),
+  timezone: z.string().trim().max(80).nullable().optional(),
+  targetExam: z.enum(EXAM_TARGETS).nullable().optional(),
+  targetScore: z.string().trim().max(40).nullable().optional(),
+  examDate: z.string().trim().max(40).nullable().optional(),
+  bio: z.string().trim().max(600).nullable().optional(),
+  fieldOfStudy: z.string().trim().max(120).nullable().optional(),
+  gpa: z.string().trim().max(20).nullable().optional(),
+  degreeLevel: z.string().trim().max(40).nullable().optional(),
+  budgetUsd: z.coerce.number().int().min(0).max(2_000_000).nullable().optional(),
+  targetUniversitySlug: z.string().trim().max(120).nullable().optional(),
+  isPublic: z.boolean().optional(),
+  showResults: z.boolean().optional(),
+  showLeaderboard: z.boolean().optional(),
+  showUniversity: z.boolean().optional(),
+  showBadges: z.boolean().optional(),
+})
+
+const PROFILE_DEFAULTS = {
+  phone: null,
+  country: null,
+  timezone: null,
+  targetExam: null,
+  targetScore: null,
+  examDate: null,
+  bio: null,
+  fieldOfStudy: null,
+  gpa: null,
+  degreeLevel: null,
+  budgetUsd: null,
+  targetUniversitySlug: null,
+  isPublic: true,
+  showResults: true,
+  showLeaderboard: true,
+  showUniversity: true,
+  showBadges: true,
+}
+
+function serializeProfile(profile: Record<string, any> | null) {
+  if (!profile) return { ...PROFILE_DEFAULTS }
+  return {
+    phone: profile.phone ?? null,
+    country: profile.country ?? null,
+    timezone: profile.timezone ?? null,
+    targetExam: profile.targetExam ?? null,
+    targetScore: profile.targetScore ?? null,
+    examDate: profile.examDate ?? null,
+    bio: profile.bio ?? null,
+    fieldOfStudy: profile.fieldOfStudy ?? null,
+    gpa: profile.gpa ?? null,
+    degreeLevel: profile.degreeLevel ?? null,
+    budgetUsd: profile.budgetUsd ?? null,
+    targetUniversitySlug: profile.targetUniversitySlug ?? null,
+    isPublic: profile.isPublic ?? true,
+    showResults: profile.showResults ?? true,
+    showLeaderboard: profile.showLeaderboard ?? true,
+    showUniversity: profile.showUniversity ?? true,
+    showBadges: profile.showBadges ?? true,
+  }
+}
+
+function tierForBand(band: number) {
+  return Math.max(6, Math.min(9, Math.floor(band)))
+}
+
+router.get(
+  '/account',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const userId = req.user!.id
+    const [user, profile] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { fullName: true, email: true, nickname: true, avatarUrl: true, level: true, xp: true, createdAt: true },
+      }),
+      prisma.userProfile.findUnique({ where: { userId } }),
+    ])
+    if (!user) return res.status(404).json({ message: 'User not found.' })
+    return res.json({
+      fullName: user.fullName,
+      email: user.email,
+      nickname: user.nickname ?? null,
+      avatarUrl: user.avatarUrl ?? null,
+      level: user.level,
+      xp: user.xp,
+      memberSince: user.createdAt,
+      profile: serializeProfile(profile),
+    })
+  }),
+)
+
+router.put(
+  '/account',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const userId = req.user!.id
+    const data = accountUpdateSchema.parse(req.body ?? {})
+    const profile = await prisma.userProfile.upsert({
+      where: { userId },
+      update: data,
+      create: { userId, ...data },
+    })
+    return res.json({ profile: serializeProfile(profile) })
+  }),
+)
+
+const avatarSchema = z.object({
+  dataUrl: z.string().min(1).max(700_000),
+})
+
+router.post(
+  '/avatar',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { dataUrl } = avatarSchema.parse(req.body ?? {})
+    if (!/^data:image\/(png|jpe?g|webp|gif);base64,/.test(dataUrl)) {
+      return res.status(400).json({ message: 'Avatar must be a PNG, JPEG, WEBP or GIF data URL.' })
+    }
+    const updated = await prisma.user.update({
+      where: { id: req.user!.id },
+      data: { avatarUrl: dataUrl },
+      select: { avatarUrl: true },
+    })
+    return res.json(updated)
+  }),
+)
+
+router.delete(
+  '/avatar',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    await prisma.user.update({ where: { id: req.user!.id }, data: { avatarUrl: null } })
+    return res.status(204).send()
+  }),
+)
+
+const badgeUpsertSchema = z.object({
+  track: z.enum(SKILL_TRACKS),
+  band: z.coerce.number().min(0).max(9),
+  source: z.string().max(40).optional(),
+})
+const badgePinSchema = z.object({
+  id: z.string().min(1).max(191),
+  pinned: z.boolean(),
+})
+
+router.get(
+  '/badges',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const badges = await prisma.skillBadge.findMany({
+      where: { userId: req.user!.id },
+      orderBy: [{ track: 'asc' }, { tier: 'desc' }],
+    })
+    return res.json({ badges })
+  }),
+)
+
+router.post(
+  '/badges',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { track, band, source } = badgeUpsertSchema.parse(req.body ?? {})
+    if (band < 6) {
+      return res.status(400).json({ message: 'Badges are awarded for band 6.0 and above only.' })
+    }
+    const tier = tierForBand(band)
+    const existing = await prisma.skillBadge.findUnique({
+      where: { userId_track_tier: { userId: req.user!.id, track, tier } },
+    })
+    let badge = existing
+    let isNew = false
+    if (existing) {
+      if (band > existing.band) {
+        badge = await prisma.skillBadge.update({
+          where: { id: existing.id },
+          data: { band, source: source ?? existing.source },
+        })
+      }
+    } else {
+      isNew = true
+      badge = await prisma.skillBadge.create({
+        data: { userId: req.user!.id, track, tier, band, source: source ?? null, pinned: false },
+      })
+    }
+    return res.status(isNew ? 201 : 200).json({ badge, isNew })
+  }),
+)
+
+router.patch(
+  '/badges/pin',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { id, pinned } = badgePinSchema.parse(req.body ?? {})
+    const owned = await prisma.skillBadge.findFirst({ where: { id, userId: req.user!.id }, select: { id: true } })
+    if (!owned) return res.status(404).json({ message: 'Badge not found.' })
+    const badge = await prisma.skillBadge.update({ where: { id: owned.id }, data: { pinned } })
+    return res.json({ badge })
+  }),
+)
+
+router.delete(
+  '/badges/:id',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const owned = await prisma.skillBadge.findFirst({
+      where: { id: String(req.params.id), userId: req.user!.id },
+      select: { id: true },
+    })
+    if (!owned) return res.status(404).json({ message: 'Badge not found.' })
+    await prisma.skillBadge.delete({ where: { id: owned.id } })
+    return res.status(204).send()
+  }),
+)
+
+const searchQuerySchema = z.object({ q: z.string().trim().min(1).max(40) })
+
+router.get(
+  '/search',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const { q } = searchQuerySchema.parse(req.query ?? {})
+    const users = await prisma.user.findMany({
+      where: {
+        nickname: { contains: q, mode: 'insensitive' },
+        OR: [{ profile: { is: null } }, { profile: { isPublic: true } }],
+      },
+      select: {
+        nickname: true,
+        avatarUrl: true,
+        level: true,
+        xp: true,
+        currentStreak: true,
+        _count: { select: { skillBadges: true } },
+      },
+      take: 24,
+      orderBy: { xp: 'desc' },
+    })
+    return res.json({
+      results: users.map((u) => ({
+        nickname: u.nickname,
+        avatarUrl: u.avatarUrl ?? null,
+        level: u.level,
+        xp: u.xp,
+        streak: u.currentStreak,
+        badgeCount: u._count.skillBadges,
+      })),
+    })
+  }),
+)
+
+// Public profile by nickname — respects per-section privacy flags, never the email.
+router.get(
+  '/public/:nickname',
+  requireAuth,
+  asyncHandler(async (req, res) => {
+    const nickname = String(req.params.nickname ?? '').trim()
+    const user = await prisma.user.findFirst({
+      where: { nickname: { equals: nickname, mode: 'insensitive' } },
+      select: {
+        id: true,
+        nickname: true,
+        avatarUrl: true,
+        level: true,
+        xp: true,
+        currentStreak: true,
+        longestStreak: true,
+        lastActiveDate: true,
+        createdAt: true,
+        profile: true,
+      },
+    })
+    if (!user) return res.status(404).json({ message: 'Profile not found.' })
+
+    const profile = serializeProfile(user.profile as Record<string, any> | null)
+    const isSelf = user.id === req.user!.id
+    if (!profile.isPublic && !isSelf) {
+      return res.status(403).json({ message: 'This profile is private.' })
+    }
+
+    // Heavy analytics are best-effort: a failure must not break the profile page.
+    const [skillAnalytics, leaderboard, attemptsAgg, attemptsCount, badges] = await Promise.all([
+      generateSkillAnalytics(user.id).catch(() => null),
+      generateLeaderboard({ period: 'all', currentUserId: user.id }).catch(() => null),
+      prisma.testAttempt
+        .aggregate({ where: { userId: user.id }, _avg: { finalScore: true, percentage: true } })
+        .catch(() => null),
+      prisma.testAttempt.count({ where: { userId: user.id } }).catch(() => 0),
+      prisma.skillBadge.findMany({ where: { userId: user.id }, orderBy: [{ tier: 'desc' }] }).catch(() => []),
+    ])
+    const rankRow = leaderboard?.rows.find((row) => row.userId === user.id) ?? null
+
+    return res.json({
+      profile: {
+        nickname: user.nickname,
+        displayName: user.nickname ?? 'Learner',
+        avatarUrl: user.avatarUrl ?? null,
+        level: user.level,
+        xp: user.xp,
+        streak: user.currentStreak,
+        longestStreak: user.longestStreak,
+        memberSince: user.createdAt,
+        online: isOnline(user.lastActiveDate),
+        lastSeen: user.lastActiveDate,
+        isSelf,
+        bio: profile.bio,
+        country: profile.country,
+        fieldOfStudy: profile.fieldOfStudy,
+      },
+      visibility: {
+        showResults: profile.showResults,
+        showLeaderboard: profile.showLeaderboard,
+        showUniversity: profile.showUniversity,
+        showBadges: profile.showBadges,
+      },
+      stats: profile.showResults
+        ? {
+            totalAttempts: attemptsCount ?? 0,
+            averageScore: Number((attemptsAgg?._avg.finalScore ?? 0).toFixed(1)),
+            averageAccuracy: Number((attemptsAgg?._avg.percentage ?? 0).toFixed(1)),
+          }
+        : null,
+      skillAnalytics: profile.showResults ? skillAnalytics : null,
+      competitive:
+        profile.showLeaderboard && rankRow
+          ? {
+              rank: rankRow.rank,
+              division: rankRow.division,
+              divisionLabel: rankRow.divisionLabel,
+              rankingScore: rankRow.rankingScore,
+            }
+          : null,
+      university: profile.showUniversity ? { slug: profile.targetUniversitySlug } : null,
+      badges: profile.showBadges ? badges : [],
+    })
+  }),
+)
+
 export default router
 

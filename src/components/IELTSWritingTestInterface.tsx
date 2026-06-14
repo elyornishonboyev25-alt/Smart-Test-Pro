@@ -31,6 +31,7 @@ import {
 import { evaluateWriting, type WritingEvaluation, type WritingError } from '@/services/geminiAI'
 import { saveWritingAnalysis, getWritingXP } from '@/utils/writingAnalysisStorage'
 import { useAuthStore, type AuthState } from '@/store/authStore'
+import { useBadgeStore } from '@/store/badgeStore'
 import { useFeatureTrial } from '@/hooks/useFeatureTrial'
 import type { WritingTask, LineChartData, ChartSeries } from '@/data/writingTestData'
 import TestLaunchOverlay from '@/components/common/TestLaunchOverlay'
@@ -308,6 +309,7 @@ export default function IELTSWritingTestInterface({
   const launchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const user = useAuthStore((state: AuthState) => state.user)
+  const awardBadge = useBadgeStore((s) => s.awardIfEligible)
   const writingTrial = useFeatureTrial('writing')
   const [showWritingGate, setShowWritingGate] = useState(false)
   const wordCount = countWords(answer)
@@ -385,6 +387,16 @@ export default function IELTSWritingTestInterface({
     try {
       const result = await evaluateWriting(task.taskType, task.prompt, answer, wordCount)
       setAiEvaluation(result)
+
+      // Timed (exam) writing → award an IELTS Writing band badge with celebration.
+      // Untimed practice passes mode 'practice', which never awards a badge.
+      awardBadge({
+        userId: user?.id ?? null,
+        track: 'IELTS_WRITING',
+        band: result.overallBand,
+        mode: timerEnabled ? 'exam' : 'practice',
+        source: 'ielts-writing',
+      })
 
       const timeSpent = timerEnabled ? effectiveDuration * 60 - timeRemaining : 0
       saveWritingAnalysis(

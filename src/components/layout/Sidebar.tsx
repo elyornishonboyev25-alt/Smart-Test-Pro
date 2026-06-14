@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AudioLines, BarChart3, BookMarked, BookOpen, Crown, FileText, GraduationCap, Headphones, Headset, Home, Landmark, ShieldCheck, Sparkles, Trophy, TriangleAlert } from 'lucide-react'
+import { AudioLines, BarChart3, BookMarked, BookOpen, Crown, FileText, GraduationCap, Headphones, Headset, Home, Landmark, ShieldCheck, Sparkles, Trophy, TriangleAlert, UserRound, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '../ui/utils'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
@@ -17,10 +17,12 @@ export function Sidebar() {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home, path: '/dashboard' },
+    { id: 'account', label: 'My Profile', icon: UserRound, path: '/account' },
     { id: 'tests', label: 'Test Library', icon: BookOpen, path: '/tests' },
     { id: 'analyze-mistakes', label: 'Analyze Mistakes', icon: TriangleAlert, path: '/analyze-mistakes' },
     { id: 'profile', label: 'Performance', icon: BarChart3, path: '/profile', aliases: [] },
     { id: 'leaderboard', label: 'Leaderboard', icon: Trophy, path: '/leaderboard' },
+    { id: 'community', label: 'Community', icon: Users, path: '/community' },
     { id: 'sat', label: 'SAT Prep', icon: GraduationCap, path: '/sat' },
     { id: 'ielts', label: 'IELTS Prep', icon: BookOpen, path: '/ielts' },
     { id: 'admission', label: 'Admission', icon: Landmark, path: '/admission' },

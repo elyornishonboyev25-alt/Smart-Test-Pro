@@ -1,4 +1,4 @@
-﻿import { useState, useMemo, useEffect, useRef, Fragment, type MouseEvent as ReactMouseEvent } from 'react'
+﻿import { useState, useMemo, useEffect, useRef, useCallback, Fragment, type MouseEvent as ReactMouseEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeftIcon,
@@ -39,6 +39,8 @@ import {
   formatQuestionNumberRange,
 } from '../utils/ieltsUtils'
 import { AnimatedBackground } from './AnimatedBackground'
+import { useBadgeStore } from '@/store/badgeStore'
+import { useAuthStore, type AuthState } from '@/store/authStore'
 
 interface IELTSReadingInterfaceProps {
   test: IELTSTest
@@ -212,12 +214,17 @@ export default function IELTSReadingInterface({
 }: IELTSReadingInterfaceProps) {
   const isReviewMode = Boolean(reviewPayload?.result)
   const isListening = test.module === 'Listening'
+  const awardBadge = useBadgeStore((s) => s.awardIfEligible)
+  const badgeUserId = useAuthStore((s: AuthState) => s.user?.id ?? null)
   // Listening audio state (continuous, non-controllable playlist)
   const [audioStarted, setAudioStarted] = useState(false)
   const [currentAudioIndex, setCurrentAudioIndex] = useState(0)
   const [isAudioPlaying, setIsAudioPlaying] = useState(false)
   const [audioDone, setAudioDone] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  // True while a clip is meant to be playing. Lets us block external pauses
+  // (media keys / OS controls) and avoid fighting an intentional stop.
+  const shouldPlayRef = useRef(false)
   // State
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({})
@@ -447,23 +454,65 @@ export default function IELTSReadingInterface({
   }, [isListening, test.sections])
 
   useEffect(() => {
-    if (!isListening || !audioStarted) return
+    if (!isListening || !audioStarted || audioDone) return
     const audio = audioRef.current
     if (!audio) return
+    shouldPlayRef.current = true
     audio.play().then(() => setIsAudioPlaying(true)).catch(() => setIsAudioPlaying(false))
-  }, [isListening, audioStarted, currentAudioIndex])
+  }, [isListening, audioStarted, currentAudioIndex, audioDone])
 
-  useEffect(() => () => { audioRef.current?.pause() }, [])
+  // Fully stop the listening audio and prevent any auto-resume.
+  const stopListeningAudio = useCallback(() => {
+    shouldPlayRef.current = false
+    const audio = audioRef.current
+    if (audio) {
+      audio.pause()
+      try { audio.currentTime = 0 } catch { /* ignore */ }
+    }
+    setIsAudioPlaying(false)
+  }, [])
 
-  const startListeningAudio = () => setAudioStarted(true)
+  // Stop for good once the test is no longer running (exit / submit).
+  useEffect(() => {
+    if (isListening && !isTestActive) stopListeningAudio()
+  }, [isListening, isTestActive, stopListeningAudio])
+
+  // Release the element on unmount so nothing keeps playing after you leave.
+  useEffect(() => () => {
+    shouldPlayRef.current = false
+    const audio = audioRef.current
+    if (audio) {
+      audio.pause()
+      audio.removeAttribute('src')
+      audio.load()
+    }
+  }, [])
+
+  const startListeningAudio = () => {
+    shouldPlayRef.current = true
+    setAudioStarted(true)
+  }
+
+  // IELTS listening is continuous and may not be paused. If the audio is paused
+  // from outside the app (media keys, OS / browser media controls) while a clip
+  // should still be playing, resume it right away.
+  const handleAudioPause = () => {
+    const audio = audioRef.current
+    if (shouldPlayRef.current && audio && !audio.ended) {
+      audio.play().catch(() => { /* ignore */ })
+      return
+    }
+    setIsAudioPlaying(false)
+  }
 
   const handleListeningAudioEnded = () => {
-    setIsAudioPlaying(false)
     const next = currentAudioIndex + 1
     if (next < listeningAudioSources.length && listeningAudioSources[next]) {
       setCurrentAudioIndex(next)
     } else {
+      shouldPlayRef.current = false
       setAudioDone(true)
+      setIsAudioPlaying(false)
     }
   }
 
@@ -1143,11 +1192,23 @@ export default function IELTSReadingInterface({
       leaderboardEligible,
     }
     onComplete(result)
+    // Full simulation (not partial-part practice) → award an IELTS Reading/Listening
+    // band badge with celebration. Practice mode never awards a badge.
+    if (testMode === 'simulation' && !isPartial) {
+      awardBadge({
+        userId: badgeUserId,
+        track: isListening ? 'IELTS_LISTENING' : 'IELTS_READING',
+        band: score,
+        mode: 'simulation',
+        source: isListening ? 'ielts-listening-sim' : 'ielts-reading-sim',
+      })
+    }
     clearSession()
   }
 
   const beginSubmitLoading = (leaderboardEligible = true) => {
     if (showSubmitLoading) return
+    stopListeningAudio()
     setShowSubmitLoading(true)
     window.setTimeout(() => {
       setShowSubmitLoading(false)
@@ -1255,6 +1316,7 @@ export default function IELTSReadingInterface({
   }
 
   const proceedExitTest = () => {
+    stopListeningAudio()
     clearSession()
     setIsTestActive(false)
     setShowExitConfirmModal(false)
@@ -3059,9 +3121,7 @@ export default function IELTSReadingInterface({
     const totalNum = sectionMeta.reduce((acc, s) => acc + s.questionCount, 0)
     return (
       <div
-        className="word-lookup-scope reading-pane reading-content reading-question-typography h-full overflow-y-auto bg-gradient-to-b from-white via-red-50/20 to-white font-sans scrollbar-thin scrollbar-thumb-red-200"
-        data-word-lookup="listening"
-        data-word-origin={test.title}
+        className="reading-pane reading-content reading-question-typography h-full overflow-y-auto bg-gradient-to-b from-white via-red-50/20 to-white font-sans scrollbar-thin scrollbar-thumb-red-200"
       >
         <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-10">
           {/* Compact part header bar */}
@@ -5381,14 +5441,14 @@ export default function IELTSReadingInterface({
       )}
 
       {/* LISTENING AUDIO (continuous, no user controls) */}
-      {isListening ? (
+      {isListening && isTestActive ? (
         <audio
           ref={audioRef}
           src={listeningAudioSources[currentAudioIndex] || undefined}
           preload="auto"
           onEnded={handleListeningAudioEnded}
           onPlay={() => setIsAudioPlaying(true)}
-          onPause={() => setIsAudioPlaying(false)}
+          onPause={handleAudioPause}
         />
       ) : null}
 

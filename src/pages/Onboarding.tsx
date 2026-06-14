@@ -20,6 +20,7 @@ import { useAuthStore, type AuthState } from '@/store/authStore'
 import { useMotionPreferences } from '@/hooks/useMotionPreferences'
 import { BrandMark } from '@/components/brand/BrandLogo'
 import { setFlashToast } from '@/utils/authFlash'
+import { updateAccount } from '@/lib/profileApi'
 import {
   generateWeeklyPlan,
   loadOnboardingProfile,
@@ -201,6 +202,9 @@ export default function Onboarding() {
       saveOnboardingProfile(profile, user?.id)
       saveWeeklyPlan(plan, user?.id)
       saveToAccountProfile(profile.firstName, profile.lastName, targetExam)
+      // Persist the exam target to the permanent backend profile so it pre-fills
+      // the profile page and survives across devices (best-effort).
+      void updateAccount({ targetExam }).catch(() => {})
 
       setStage('success')
       window.setTimeout(() => {

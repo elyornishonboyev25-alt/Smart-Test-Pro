@@ -61,6 +61,7 @@ function sanitizeUser(user: {
   level: number
   currentStreak: number
   nickname?: string | null
+  avatarUrl?: string | null
 }) {
   const premium = isPremiumUser({
     role: user.role,
@@ -77,6 +78,7 @@ function sanitizeUser(user: {
     level: user.level,
     currentStreak: user.currentStreak,
     nickname: user.nickname ?? null,
+    avatarUrl: user.avatarUrl ?? null,
   }
 }
 
@@ -181,6 +183,7 @@ router.post(
         level: true,
         currentStreak: true,
         nickname: true,
+        avatarUrl: true,
       },
     })
 
@@ -216,6 +219,7 @@ router.post(
         level: true,
         currentStreak: true,
         nickname: true,
+        avatarUrl: true,
         passwordHash: true,
       },
     })
@@ -276,6 +280,7 @@ router.post(
         level: true,
         currentStreak: true,
         nickname: true,
+        avatarUrl: true,
       },
     })
 
@@ -304,6 +309,7 @@ router.post(
           level: true,
           currentStreak: true,
           nickname: true,
+        avatarUrl: true,
         },
       }))
 
@@ -361,6 +367,7 @@ router.post(
             level: true,
             currentStreak: true,
             nickname: true,
+        avatarUrl: true,
           },
         },
       },
@@ -426,6 +433,7 @@ router.get(
         level: true,
         currentStreak: true,
         nickname: true,
+        avatarUrl: true,
       },
     })
 

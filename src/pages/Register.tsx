@@ -158,19 +158,19 @@ export default function Register() {
               <BrandMark size={58} className="shadow-[0_18px_34px_rgba(127,29,29,0.35)]" />
               <p className="mt-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white/90 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5" />
-                AI-powered prep
+                Study abroad with AI
               </p>
               <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight">
-                Where studying levels up like a game.
+                Your journey to a university abroad starts here.
               </h1>
               <p className="mt-4 text-sm leading-7 text-red-50/90">
-                Join ProfAI and turn IELTS &amp; SAT prep into a daily streak. Earn XP, unlock
-                achievements, and let your AI coach build the roadmap to your target score.
+                Join ProfAI and turn your study-abroad prep into a daily streak. Earn XP, unlock
+                achievements, and let your AI coach build the roadmap from SAT &amp; IELTS to your dream university.
               </p>
             </div>
 
             <div className="space-y-3">
-              {['AI study coach & instant feedback', 'Daily challenges, streaks & XP', 'Day-by-day roadmap to IELTS 6.5+ / SAT 1200+'].map((item) => (
+              {['AI study coach & instant feedback', 'Daily challenges, streaks & XP', 'Day-by-day roadmap to your dream university'].map((item) => (
                 <div key={item} className="flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-md">
                   <CheckCircle2 className="h-5 w-5 text-white" />
                   <span className="text-sm font-semibold text-white/90">{item}</span>

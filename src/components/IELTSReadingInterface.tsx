@@ -2601,7 +2601,7 @@ export default function IELTSReadingInterface({
             {isListening ? 'Academic Listening Test' : 'Academic Reading Test'}
           </h1>
           <p className="text-slate-600 text-lg font-light max-w-2xl mx-auto italic">
-            Experience the authentic IELTS Computer-Delivered environment with SmartTest Pro precision.
+            Experience the authentic IELTS Computer-Delivered environment with ProfAI precision.
           </p>
         </motion.div>
 
@@ -2661,7 +2661,7 @@ export default function IELTSReadingInterface({
 
         <motion.div className="mt-16 text-center" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           <button type="button" onClick={onExit} className="text-sm text-slate-500 hover:text-red-600 transition-colors flex items-center gap-2 mx-auto px-6 py-2 rounded-full border border-white/5 hover:bg-white/5">
-            <ArrowLeftIcon className="w-4 h-4" /> Return to SmartTest Dashboard
+            <ArrowLeftIcon className="w-4 h-4" /> Return to ProfAI Dashboard
           </button>
         </motion.div>
       </div>

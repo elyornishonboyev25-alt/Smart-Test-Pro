@@ -211,7 +211,7 @@ export default function Dashboard() {
   const location = useLocation()
   const user = useAuthStore((state: AuthState) => state.user)
   const { reducedMotion, minimalMotion } = useMotionPreferences()
-  const accentFullText = 'Exam Environment for SAT and IELTS'
+  const accentFullText = 'Top Universities Abroad'
 
   const { data, loading, error, refetch } = useAsyncData<DashboardOverview>(
     async () => {
@@ -252,7 +252,7 @@ export default function Dashboard() {
           <div>
             <span className="premium-top-chip inline-flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" />
-              ProfAI Competitive Arena
+              Study Abroad, Powered by AI
             </span>
             <h1 className="mt-4 text-3xl font-black tracking-tight text-[#111827] sm:text-5xl">
               <motion.span
@@ -261,7 +261,7 @@ export default function Dashboard() {
                 animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                 transition={reducedMotion ? { duration: 0.01 } : { duration: 0.78, ease: [0.22, 1, 0.36, 1] }}
               >
-                Experience Real Computer-Delivered
+                Your Launchpad to
               </motion.span>
               <motion.span
                 initial={reducedMotion ? false : { clipPath: 'inset(0 100% 0 0)', opacity: 0 }}
@@ -273,7 +273,7 @@ export default function Dashboard() {
               </motion.span>
             </h1>
             <p className="mt-3 max-w-2xl text-base leading-7 text-[#475569]">
-              ProfAI combines SAT and IELTS preparation in one premium environment with realistic exam flow, live analytics, and competitive ranking.
+              Everything you need to study abroad in one place — SAT &amp; IELTS prep, English skills, university research and step-by-step admission guidance, with an AI coach that builds your personal roadmap.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-3">
@@ -627,8 +627,9 @@ export default function Dashboard() {
             </span>
             <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-900">About ProfAI</h2>
             <p className="mt-2 max-w-4xl text-sm leading-7 text-slate-600 sm:text-base">
-              ProfAI turns IELTS &amp; SAT prep into a game-level experience. AI coaching, daily streaks, XP
-              progression, and a structured roadmap to real results — all in one ecosystem.
+              ProfAI is your all-in-one path to studying abroad. SAT &amp; IELTS prep, English skills,
+              university research and admission guidance — with AI coaching, daily streaks and a structured
+              roadmap that carries you from first practice to acceptance letter.
             </p>
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-bold text-red-700 shadow-[0_8px_18px_rgba(220,38,38,0.12)]">

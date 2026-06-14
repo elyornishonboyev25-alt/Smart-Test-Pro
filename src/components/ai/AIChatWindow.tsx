@@ -268,7 +268,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
               <Sparkles className={`h-3 w-3 ${isAnalysis ? 'text-rose-300' : 'text-red-500'}`} />
             </p>
             <p className={`text-[11px] font-medium ${isAnalysis ? 'text-slate-300' : 'text-red-500/80'}`}>
-              {reportUpdatedAt ? 'Synced · ready to help' : 'IELTS & SAT companion'}
+              {reportUpdatedAt ? 'Synced · ready to help' : 'Study-abroad companion'}
             </p>
           </div>
         </div>
@@ -421,7 +421,7 @@ export function AIChatWindow({ variant = 'panel', onClose }: AIChatWindowProps) 
 
         {isAnalysis ? (
           <p className="mt-2 px-1 text-[11px] text-slate-400">
-            Study-first buddy: I stay focused on your IELTS & SAT prep.
+            Study-first buddy: I stay focused on your study-abroad prep.
           </p>
         ) : null}
 

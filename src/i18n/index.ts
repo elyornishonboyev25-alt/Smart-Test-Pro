@@ -17,8 +17,8 @@ const translation = {
   },
   home: {
     title: 'ProfAI',
-    subtitle: 'Your Personal AI Tutor for SAT & IELTS',
-    description: 'Professional test preparation for grades 1-11, SAT, IELTS, and Olympiad exams with AI-powered personalized learning.',
+    subtitle: 'Your Path to Top Universities Abroad',
+    description: 'One AI-powered platform to study abroad — SAT & IELTS prep, English skills, university research and step-by-step admission guidance, all in one place.',
     getStarted: 'Get Started',
     exploreTests: 'Explore Tests',
     features: {

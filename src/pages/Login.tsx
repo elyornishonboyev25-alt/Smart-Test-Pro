@@ -196,7 +196,7 @@ export default function Login() {
 
             <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-red-100 bg-red-50/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-red-700">
               <Sparkles className="h-3 w-3" />
-              AI-powered IELTS &amp; SAT prep
+              Your path to universities abroad
             </span>
 
             <h1 className="mt-3 text-[1.65rem] font-black leading-tight tracking-tight text-[#1F2937]">

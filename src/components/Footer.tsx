@@ -24,7 +24,7 @@ export default function Footer() {
               Prof<span className="text-gradient-red">AI</span>
             </h3>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              Advanced testing platform for SAT and IELTS students with measurable, competitive progress.
+              Your all-in-one platform to study abroad — exam prep, English skills and admission guidance that take you to top universities worldwide.
             </p>
             <div className="mt-4 flex items-center gap-2">
               {socials.map((social) => {

@@ -11,6 +11,8 @@
 // All network calls go YouTube -> our server (never the browser), so there is
 // no CORS problem and no API key is required.
 
+import { fetchViaInnertube } from './youtubeInnertube.js'
+
 /** A typed error whose HTTP status + message are safe to show the user. */
 export class ShadowingError extends Error {
   statusCode: number
@@ -543,43 +545,51 @@ const MIN_VIDEO_SECONDS = 15
 const MAX_VIDEO_SECONDS = 30 * 60
 
 export async function buildShadowingDraft(youtubeId: string): Promise<ShadowingVideoDraft> {
-  // Metadata (reliable) and the player response (captions) are fetched together.
-  const [oembed, player] = await Promise.all([fetchOEmbed(youtubeId), gatherPlayer(youtubeId)])
+  // Run the reliable metadata sources together: oEmbed (always works) and the
+  // bot-token InnerTube path (defeats YouTube's bot wall; also brings captions
+  // where allowed).
+  const [oembed, innertube] = await Promise.all([
+    fetchOEmbed(youtubeId),
+    fetchViaInnertube(youtubeId).catch(() => null),
+  ])
 
-  if (!oembed && !player) {
-    throw new ShadowingError(
-      "We couldn't reach this video on YouTube. Check the link, or it may be private or region-locked.",
-      502,
-    )
-  }
-
-  if (player?.durationSec && player.durationSec > MAX_VIDEO_SECONDS) {
-    throw new ShadowingError('This video is too long for shadowing. Pick a clip under 30 minutes.')
-  }
-  if (player?.durationSec && player.durationSec < MIN_VIDEO_SECONDS) {
-    throw new ShadowingError('This clip is too short to shadow. Pick a video of at least 15 seconds.')
-  }
-
-  // 1) Reliable transcript provider, if configured. 2) Otherwise the free path:
-  // read the video's own English caption track.
   let cues: Cue[] = []
   let captionKind: 'manual' | 'auto' = 'auto'
   let language = 'en'
-  let englishTrackFound = false
+  let englishTrackFound = innertube?.hasEnglishCaptions ?? false
+  let durationSec = innertube?.durationSec ?? 0
 
+  // 1) Reliable transcript provider, if an admin configured one.
   const apiCues = await fetchViaTranscriptApi(youtubeId)
   if (apiCues && apiCues.length > 0) {
     cues = apiCues
     captionKind = 'manual'
   }
 
-  if (cues.length === 0 && player) {
-    const english = pickEnglishTrack(player.captionTracks)
-    if (english) {
-      englishTrackFound = true
-      captionKind = english.kind
-      language = english.track.languageCode || 'en'
-      cues = await fetchCues(english.track.baseUrl)
+  // 2) Bot-token InnerTube captions (best free path).
+  if (cues.length === 0 && innertube && innertube.cues.length > 0) {
+    cues = innertube.cues.map((c) => ({ start: c.start, end: c.end, text: c.text }))
+    captionKind = innertube.captionKind
+    language = innertube.language
+  }
+
+  // 3) Legacy free fallback: anonymous multi-client + watch-page caption fetch.
+  if (cues.length === 0) {
+    const player = await gatherPlayer(youtubeId)
+    if (player) {
+      if (!durationSec) durationSec = player.durationSec
+      const english = pickEnglishTrack(player.captionTracks)
+      if (english) {
+        englishTrackFound = true
+        captionKind = english.kind
+        language = english.track.languageCode || 'en'
+        cues = await fetchCues(english.track.baseUrl)
+      }
+    } else if (!innertube && !oembed) {
+      throw new ShadowingError(
+        "We couldn't reach this video on YouTube. Check the link, or it may be private or region-locked.",
+        502,
+      )
     }
   }
 
@@ -588,7 +598,7 @@ export async function buildShadowingDraft(youtubeId: string): Promise<ShadowingV
       // The video HAS English captions but YouTube refused to hand the text to
       // this server (anti-bot / proof-of-origin wall).
       throw new ShadowingError(
-        'YouTube is currently blocking caption downloads from this server. An admin can set TRANSCRIPT_API_URL or YOUTUBE_COOKIE to enable it, or try again later.',
+        'YouTube is blocking caption downloads from this server right now. Setting TRANSCRIPT_API_URL + TRANSCRIPT_API_KEY makes it 100% reliable, or try again shortly.',
         502,
       )
     }
@@ -598,7 +608,16 @@ export async function buildShadowingDraft(youtubeId: string): Promise<ShadowingV
   }
 
   const lastEnd = cues[cues.length - 1]?.end ?? 0
-  const title = player?.title || oembed?.title || 'Untitled clip'
+  if (!durationSec) durationSec = Math.round(lastEnd)
+
+  if (durationSec && durationSec > MAX_VIDEO_SECONDS) {
+    throw new ShadowingError('This video is too long for shadowing. Pick a clip under 30 minutes.')
+  }
+  if (durationSec && durationSec < MIN_VIDEO_SECONDS) {
+    throw new ShadowingError('This clip is too short to shadow. Pick a video of at least 15 seconds.')
+  }
+
+  const title = innertube?.title || oembed?.title || 'Untitled clip'
   const fullText = cues.map((c) => c.text).join(' ')
   screenContent(title, fullText)
 
@@ -608,15 +627,15 @@ export async function buildShadowingDraft(youtubeId: string): Promise<ShadowingV
   }
 
   const wordCount = countWords(segments.map((s) => s.text).join(' '))
-  const durationSec = Math.round(player?.durationSec || segments[segments.length - 1].endSec || lastEnd)
+  const finalDuration = Math.round(durationSec || segments[segments.length - 1].endSec || lastEnd)
 
   return {
     youtubeId,
     title,
-    author: player?.author || oembed?.author || null,
-    thumbnailUrl: player?.thumbnailUrl || oembed?.thumbnailUrl || `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
-    durationSec,
-    level: estimateLevel(wordCount, durationSec),
+    author: innertube?.author || oembed?.author || null,
+    thumbnailUrl: innertube?.thumbnailUrl || oembed?.thumbnailUrl || `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`,
+    durationSec: finalDuration,
+    level: estimateLevel(wordCount, finalDuration),
     accent: null,
     topic: null,
     captionKind,

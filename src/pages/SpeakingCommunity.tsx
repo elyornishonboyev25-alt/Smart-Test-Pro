@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, BarChart3, MessagesSquare, Mic, Users, Wand2 } from 'lucide-react'
+import { ArrowLeft, BarChart3, Clock3, Crown, MessagesSquare, Mic, Sparkles, Users, Wand2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore, type AuthState } from '@/store/authStore'
+import { useCommunityTrial } from '@/hooks/useFeatureTrial'
 import { computeSummary, selectUserSessions, useSpeakingStore } from '@/store/speakingStore'
 import { Reveal } from '@/components/fx'
 import AiCoach from '@/components/speaking/sections/AiCoach'
@@ -27,6 +28,18 @@ export default function SpeakingCommunity() {
   const sessions = useSpeakingStore((s) => s.sessions)
   const [section, setSection] = useState<Section>('ai')
   const [partnerKey, setPartnerKey] = useState(0)
+  const communityTrial = useCommunityTrial()
+  const inLiveSection = section === 'debate' || section === 'partner'
+
+  // Burn the shared 1-hour debate+partner budget while the learner is on those
+  // tabs and the tab is visible. Premium owners are unlimited.
+  useEffect(() => {
+    if (communityTrial.isPremium || !inLiveSection || communityTrial.locked) return
+    const id = window.setInterval(() => {
+      if (!document.hidden) communityTrial.addSeconds(1)
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [inLiveSection, communityTrial.isPremium, communityTrial.locked, communityTrial.addSeconds])
 
   const summary = useMemo(
     () => computeSummary(selectUserSessions(sessions, user?.id ?? null)),
@@ -108,13 +121,77 @@ export default function SpeakingCommunity() {
           <p className="mb-3 inline-flex items-center gap-2 text-lg font-black text-slate-900">
             <active.icon className="h-5 w-5 text-red-600" /> {active.label}
           </p>
+          {inLiveSection && !communityTrial.isPremium ? (
+            <div
+              className={`mb-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-4 py-2.5 text-sm font-bold ${
+                communityTrial.locked ? 'border-red-200 bg-red-50 text-red-700' : 'border-amber-200 bg-amber-50 text-amber-700'
+              }`}
+            >
+              <span className="inline-flex items-center gap-1.5">
+                <Clock3 className="h-4 w-4" />
+                {communityTrial.locked
+                  ? 'Free debate & partner time used up'
+                  : `Free community time left: ${formatRemaining(communityTrial.secondsRemaining)}`}
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate('/premium')}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm"
+              >
+                <Crown className="h-3.5 w-3.5" /> Go Premium
+              </button>
+            </div>
+          ) : null}
           {section === 'ai' ? <AiCoach /> : null}
-          {section === 'debate' ? <Debate /> : null}
-          {section === 'partner' ? <Partner key={partnerKey} onExit={() => setPartnerKey((k) => k + 1)} /> : null}
+          {section === 'debate'
+            ? communityTrial.locked
+              ? <CommunityLockedCard onUpgrade={() => navigate('/premium')} />
+              : <Debate />
+            : null}
+          {section === 'partner'
+            ? communityTrial.locked
+              ? <CommunityLockedCard onUpgrade={() => navigate('/premium')} />
+              : <Partner key={partnerKey} onExit={() => setPartnerKey((k) => k + 1)} />
+            : null}
           {section === 'progress' ? <Progress onStart={() => setSection('ai')} /> : null}
           {section === 'community' ? <Community /> : null}
         </div>
       </div>
+    </div>
+  )
+}
+
+function formatRemaining(seconds: number) {
+  if (!Number.isFinite(seconds)) return '—'
+  const total = Math.max(0, Math.floor(seconds))
+  const mm = Math.floor(total / 60)
+  const ss = total % 60
+  return `${mm}:${ss.toString().padStart(2, '0')}`
+}
+
+function CommunityLockedCard({ onUpgrade }: { onUpgrade: () => void }) {
+  return (
+    <div className="rounded-[1.6rem] border border-amber-200 bg-white p-8 text-center shadow-[0_18px_44px_rgba(127,29,29,0.12)]">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 text-white shadow-[0_16px_32px_rgba(245,158,11,0.4)]">
+        <Crown className="h-8 w-8" />
+      </div>
+      <span className="premium-top-chip mt-5 inline-flex items-center gap-1.5">
+        <Sparkles className="h-3.5 w-3.5" />
+        Premium only
+      </span>
+      <h3 className="mt-3 text-2xl font-black text-slate-900">Free community time used up</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+        You&apos;ve used your free hour of debate &amp; partner sessions. Subscribe to Premium for unlimited live
+        speaking practice with the community.
+      </p>
+      <button
+        type="button"
+        onClick={onUpgrade}
+        className="cta-sheen mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#DC2626] via-[#EF4444] to-[#B91C1C] px-5 py-2.5 text-sm font-bold text-white shadow-[0_12px_28px_rgba(220,38,38,0.34)]"
+      >
+        <Crown className="h-4 w-4" />
+        Subscribe to Premium
+      </button>
     </div>
   )
 }

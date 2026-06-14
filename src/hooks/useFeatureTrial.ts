@@ -54,8 +54,8 @@ export type CommunityTrial = {
   secondsLimit: number
   secondsRemaining: number
   locked: boolean
-  /** Record elapsed community seconds; returns the new total used. */
-  addSeconds: (seconds: number) => number
+  /** Record elapsed community seconds. */
+  addSeconds: (seconds: number) => void
 }
 
 /** Access state for the Speaking-community time budget (debate + partner). */
@@ -68,14 +68,15 @@ export function useCommunityTrial(): CommunityTrial {
   const secondsRemaining = isPremium ? Number.POSITIVE_INFINITY : Math.max(0, secondsLimit - secondsUsed)
   const locked = !isPremium && secondsUsed >= secondsLimit
 
+  // Stable identity (no secondsUsed dep) so a 1-second interval doesn't tear
+  // down and rebuild every tick. addCommunitySeconds reads the latest stored
+  // value, so the running total stays correct.
   const addSeconds = useCallback(
     (seconds: number) => {
-      if (isPremium) return secondsUsed
-      const next = addCommunitySeconds(seconds, user?.id)
-      setSecondsUsed(next)
-      return next
+      if (isPremium) return
+      setSecondsUsed(addCommunitySeconds(seconds, user?.id))
     },
-    [isPremium, secondsUsed, user?.id],
+    [isPremium, user?.id],
   )
 
   return { isPremium, secondsUsed, secondsLimit, secondsRemaining, locked, addSeconds }
